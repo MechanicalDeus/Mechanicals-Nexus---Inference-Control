@@ -1,0 +1,48 @@
+# Bytecode / environment
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+.env
+.env.*
+
+# Tests / tools
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Build
+dist/
+build/
+*.egg-info/
+*.egg
+
+# --- Nexus: sensitive inference data (do not commit) ---
+# Graph exports and similar artefacts mirror structure + paths of scanned code.
+*.nexus.json
+*.inference.json
+*.inference-map.json
+*.graph.json
+
+# Legacy / common naming patterns
+*-inference.json
+*-inferenz.json
+inferenz.json
+nexus-inference*.json
+nexus_export.json
+
+# Internal analysis outputs
+nexus_output/
+.cache/nexus/
+.nexus-cache/
+
+# Optional: full export directories
+exports/
+
+# Local briefing / query dumps (often contain absolute paths)
+nexus-package-brief.txt
+*-package-brief.txt
