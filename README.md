@@ -115,7 +115,9 @@ Agent-oriented checklist: [`AGENTS.md`](AGENTS.md). Executive summary: [`NEXUS-R
 
 ## Security: inference maps
 
-Generated maps (JSON graphs, large briefings) can expose **architecture, paths, and sensitive flows**. **Do not commit them.** Read [`SECURITY.md`](SECURITY.md) and use the `.gitignore` patterns in this repo as a template for your projects.
+Generated maps (JSON graphs, large briefings) can expose **architecture, paths, and sensitive flows**. **Do not commit them.** Read [`SECURITY.md`](SECURITY.md) (including **`.nexusdeny` / `.nexusignore`**) and use the `.gitignore` patterns in this repo as a template for your projects.
+
+**Take:** better targeting for LLMs also raises the stakes for *what* gets opened — see the short **“Take: agents and governance (small oops)”** section in [`SECURITY.md`](SECURITY.md#take-agents-and-governance-small-oops) and the screenshot there.
 
 ## Positioning
 

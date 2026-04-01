@@ -15,6 +15,8 @@ from nexus.core.graph import InferenceGraph
 from nexus.core.models import Edge, FileRecord, SymbolRecord
 from nexus.parsing.ast_analyze import FileAnalysis, analyze_file
 from nexus.parsing.loader import discover_py_files, path_to_module_hint
+from nexus.parsing.nexus_deny import NexusDeny
+from nexus.parsing.nexus_ignore import NexusIgnore
 from nexus.resolution.imports import qualify_call_name
 
 
@@ -281,12 +283,19 @@ def _scan_impl(
     repo_root = str(root if root.is_dir() else root.parent)
 
     if root.is_file() and root.suffix == ".py":
-        files = [root]
-        repo_root = str(root.parent)
+        parent = root.parent.resolve()
+        deny = NexusDeny(parent)
+        rel_one = root.name
+        if deny.matches(rel_one, is_dir=False):
+            files = []
+        else:
+            files = [root]
+        repo_root = str(parent)
     else:
         files = discover_py_files(root, include_tests=include_tests)
 
     root_for_module = Path(repo_root).resolve()
+    nexus_ignore = NexusIgnore(root_for_module)
     file_records: list[FileRecord] = []
     analyses_by_path: dict[str, FileAnalysis] = {}
     symbols: dict[str, SymbolRecord] = {}
@@ -296,6 +305,15 @@ def _scan_impl(
     for fp in files:
         rel = fp.resolve().relative_to(root_for_module)
         rel_s = rel.as_posix()
+        if nexus_ignore.covers_file(rel_s):
+            file_records.append(
+                FileRecord(
+                    path=rel_s,
+                    module_hint="<redacted>",
+                    redacted=True,
+                )
+            )
+            continue
         mod = path_to_module_hint(root_for_module, fp)
         file_records.append(FileRecord(path=rel_s, module_hint=mod))
         try:

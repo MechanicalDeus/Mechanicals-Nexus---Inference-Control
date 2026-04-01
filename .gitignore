@@ -9,6 +9,7 @@ venv/
 .env.*
 
 # Tests / tools
+.pytest_tmp/
 .pytest_cache/
 .coverage
 htmlcov/

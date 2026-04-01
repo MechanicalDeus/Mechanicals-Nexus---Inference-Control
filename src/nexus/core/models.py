@@ -8,9 +8,16 @@ from typing import Any
 class FileRecord:
     path: str
     module_hint: str
+    redacted: bool = False
 
     def to_dict(self) -> dict[str, Any]:
-        return {"path": self.path, "module_hint": self.module_hint}
+        d: dict[str, Any] = {
+            "path": self.path,
+            "module_hint": self.module_hint,
+        }
+        if self.redacted:
+            d["redacted"] = True
+        return d
 
 
 @dataclass

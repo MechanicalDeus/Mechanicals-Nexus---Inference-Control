@@ -351,6 +351,11 @@ def format_graph_for_llm(
     lines.append(
         f"Files: {len(graph.files)}  Symbols: {len(graph.symbols)}  Edges: {len(graph.edges)}"
     )
+    redacted_paths = sorted(f.path for f in graph.files if f.redacted)
+    if redacted_paths:
+        lines.append(
+            "NEXUS_IGNORE (plaintext not mapped): " + ", ".join(redacted_paths)
+        )
     lines.append(f"Showing {len(syms)} symbol(s).")
     lines.append("")
 

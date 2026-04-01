@@ -14,6 +14,7 @@ from nexus.output.llm_format import (
 )
 from nexus.output.llm_query_modes import detect_special_query_mode
 from nexus.parsing.loader import discover_py_files
+from nexus.parsing.nexus_ignore import NexusIgnore
 
 
 def _configure_stdio_utf8() -> None:
@@ -84,7 +85,13 @@ def _target_paths(
             if p.is_file():
                 out.append(p)
         return out
-    return discover_py_files(repo_root, include_tests=True)
+    paths = discover_py_files(repo_root, include_tests=True)
+    ig = NexusIgnore(repo_root)
+    return [
+        p
+        for p in paths
+        if not ig.covers_file(p.relative_to(repo_root).as_posix())
+    ]
 
 
 def main(argv: list[str] | None = None) -> int:
