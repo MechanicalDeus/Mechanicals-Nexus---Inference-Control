@@ -36,6 +36,10 @@ Nexus adressiert eine konkrete Lücke im Agenten-Workflow: **Orientierung und Wi
 - **CLI `nexus`:** JSON-Export oder **LLM-Brief** (`to_llm_brief`), optional **`--names-only`** für minimale Tokenlast.
 - **CLI `nexus-grep`:** Keine Spezialqueries; Fokus auf **enge Symbolmenge → Suche in wenigen Dateien**.
 
+### Messbare Effizienz
+
+Kurz erklärt mit Zahlen (reproduzierbar im Nexus-Repo, plus Referenzsnapshots größerer Projekte): **`docs/token-efficiency.md`** — Fokus: **einmaliger lokaler Scan** vs. **deckelbare Prompt-Größe** pro Agenten-Runde.
+
 ### Für wen?
 
 - **LLM-gestützte Entwicklung** (Cursor, Codex, eigene Pipelines), die **Kontextbudget** ernst nimmt.

@@ -50,6 +50,12 @@ Example mutation-chain fragment when analysing this repo (your project will diff
 
 More narrative walkthrough: [`docs/proof-of-concept.md`](docs/proof-of-concept.md).
 
+## Efficiency: one scan, bounded prompts
+
+The expensive part for LLM workflows is **not** the local AST pass — it is **repeated context** you send on every turn. Nexus amortises work: you pay **CPU once** per run to build the graph; then **`--names-only`**, **`nexus-grep`**, and small **`--max-symbols`** keep **prompt size** under a cap instead of shipping huge grep walls.
+
+**Reproducible numbers** (this repo + reference legacy scans) and log-style before/after: **[`docs/token-efficiency.md`](docs/token-efficiency.md)** (German, with English summary).
+
 ## Mental model
 
 | Without Nexus        | With Nexus              |

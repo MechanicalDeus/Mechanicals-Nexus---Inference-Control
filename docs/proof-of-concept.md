@@ -53,3 +53,7 @@ That is a **ready-made path** from CLI entry into tagging / semantic annotation 
 ## Security reminder
 
 Any **saved** inference map (`--json`, exports) can encode **structure and paths of your codebase**. Do not commit or publish those files; see root `SECURITY.md` and `.gitignore`.
+
+## Deeper dive: measured efficiency
+
+See [`token-efficiency.md`](token-efficiency.md) for **reproducible character counts**, graph-size metrics, reference numbers from larger projects (e.g. Aether VPN scale), and a short amortisation argument (scan once vs. tokens every turn).
