@@ -1,5 +1,7 @@
 # Nexus
 
+![Nexus on GitHub — Inference Control](docs/assets/readme-banner.png)
+
 > **Grep with structural understanding.**
 
 Nexus is an **inference layer** for Python code. It sits between **raw source** and **reasoning systems** (LLMs, humans, scripts): it turns a tree of `.py` files into a **map** of symbols, calls, reads/writes, mutation hints, and confidence — so you can **target** work instead of drowning in flat search hits.

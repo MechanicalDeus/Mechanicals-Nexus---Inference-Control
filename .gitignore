@@ -46,6 +46,3 @@ exports/
 # Local briefing / query dumps (often contain absolute paths)
 nexus-package-brief.txt
 *-package-brief.txt
-
-# Ad-hoc screenshots / IDE assets (not part of the package)
-/Nexus.png
