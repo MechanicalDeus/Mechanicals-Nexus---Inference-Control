@@ -11,7 +11,7 @@ def test_bundled_nexus_over_grep_mdc() -> None:
     assert "nexus-over-grep.mdc" in names
     root = rules_root()
     text = root.joinpath("nexus-over-grep.mdc").read_text(encoding="utf-8")
-    assert "Nexus statt breitem Grep" in text
+    assert "Nexus instead of broad grep" in text
     assert "nexus-cursor-rules install" in text
 
 

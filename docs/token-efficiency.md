@@ -1,31 +1,31 @@
-# Effizienz & Messlogik — warum sich der Aufwand amortisiert
+# Token efficiency and measurement — why cost amortizes
 
-*Kurz auf Englisch:* One **local** full-repo scan builds a graph in memory. After that, every agent turn can use **bounded** Nexus output (`--names-only`, `nexus-grep`, small `--max-symbols`) instead of shipping huge grep dumps or whole files into the model. Below: **reproducible numbers** from this repository plus **reference scans** from larger legacy codebases.
-
----
-
-## 1. Die ökonomische Kernidee
-
-| Phase | Wo kosten entstehen | Nexus-Verhalten |
-|--------|---------------------|-----------------|
-| **Index / Scan** | CPU-Zeit auf deiner Maschine, **keine** LLM-Tokens | `attach()` / `nexus` / `nexus-grep` lesen den Baum **einmal** (pro Prozess) und halten den Graphen bereit. |
-| **Jede Agenten-Runde** | **Kontext = Tokens** (alles, was ins Prompt-Fenster fließt) | Du steuerst die Menge mit **`--max-symbols`**, **`--names-only`** und **`nexus-grep`** (Slice → dann erst gezielt Dateien lesen). |
-
-**Gewinn in einem Satz:** Das „Einlesen“ eines großen Repos passiert **lokal und einmal pro Lauf**; der **teure Teil** ist wiederholtes **Kontext-Füttern** des Modells — und genau dort hält Nexus die Ausgabe **deckelbar**, statt mit jedem Schritt halbe Trees als Text zu schicken.
+A **local** full-repo scan builds a graph in memory **once per process**. After that, each agent turn can rely on **bounded** Nexus output (`--names-only`, `nexus-grep`, small `--max-symbols`) instead of pasting huge grep dumps or whole files into the model. Below: **reproducible numbers** from this repository plus **reference scans** from larger legacy codebases.
 
 ---
 
-## 2. Reproduzierbare Messung: Repository **Nexus** (dieser Code)
+## 1. Core economics
 
-Umgebung: PowerShell, im Checkout-Root `F:\Nexus` (bzw. dein Pfad), `PYTHONPATH` auf `…\src` oder installiertes `nexus`.
+| Phase | Where cost shows up | Nexus behavior |
+|--------|---------------------|----------------|
+| **Index / scan** | CPU time on your machine, **no** LLM tokens | `attach()` / `nexus` / `nexus-grep` read the tree **once** (per run) and keep the graph in memory. |
+| **Each agent turn** | **Context = tokens** (everything that goes into the prompt) | You cap volume with **`--max-symbols`**, **`--names-only`**, and **`nexus-grep`** (slice → then **read_file** only where it matters). |
 
-### 2.1 Graph-Größe (ein Scan, typische Kopfzeile)
+**One-line takeaway:** Ingesting a large repo happens **locally and once per run**; the **expensive** part is **repeated** model context — and that is where Nexus keeps output **bounded** instead of shipping half the tree as text every step.
+
+---
+
+## 2. Reproducible measurement: **Nexus** (this repository)
+
+Environment: PowerShell, repo checkout root, `PYTHONPATH` pointing at `…/src` or an installed `nexus`.
+
+### 2.1 Graph size (one scan, typical header)
 
 ```bash
 python -m nexus . -q "mutation" --max-symbols 10
 ```
 
-Auszug aus der Ausgabe (nur Metadaten):
+Excerpt from the output (metadata only):
 
 ```text
 REPO: F:\Nexus
@@ -34,73 +34,73 @@ Files: 34  Symbols: 162  Edges: 191
 Showing 10 symbol(s).
 ```
 
-Das sind die **Dimensionen des einmal aufgebauten Indexes** (ungefähr: Dutzende Dateien, ~hundert Symbole, ~hundert Kanten) — **nicht** die Größe des LLM-Prompts.
+These are the **dimensions of the index built once** (on the order of tens of files, ~hundreds of symbols and edges) — **not** the size of the LLM prompt.
 
-### 2.2 Kontext sparen: `--names-only` (statt breitem Textgrep)
+### 2.2 Saving context: `--names-only` (instead of a wide text grep)
 
-Derselbe Filter, nur qualifizierte Namen (Ausgabe gekürzt dargestellt):
+Same filter, qualified names only:
 
 ```bash
 python -m nexus . -q "mutation" --max-symbols 10 --names-only
 ```
 
-**Gemessen (Stand der Auswertung):** etwa **11 Zeilen**, **~480 Zeichen** Gesamtausgabe — ein brauchbarer **Orientierungs-Schritt** fürs Modell.
+**Measured:** about **11 lines**, **~480 characters** total — a practical **orientation** step for the model.
 
-### 2.3 Naiver Gegenpol: „alles, was nach Definition aussieht“
+### 2.3 Naive counterfactual: “everything that looks like a definition”
 
-Als **Proxy** für „Agent schmeißt breiten Grep ins Prompt“: alle Zeilen mit Wort `def` unter `src/` und `tests/` (PowerShell `Select-String`).
+As a **proxy** for “agent pastes a wide grep into the prompt”: all lines containing the word `def` under `src/` and `tests/` (PowerShell `Select-String`).
 
-**Gemessen:** **208 Trefferzeilen**, zusammen **~10.200 Zeichen** reiner Zeilentext (ohne Pfade/Metadaten).
+**Measured:** **208 hit lines**, **~10,200 characters** of raw line text (no paths/metadata).
 
-**Interpretation (vorsichtig):** Das ist **nicht** semantisch dasselbe wie `mutation` — aber es zeigt die **Größenordnung**: breite Text-Trefferlisten skalieren mit **Repo-Wachstum**; **`--names-only` mit festem `--max-symbols`** bleibt **konstant klein**.
+**Interpretation (careful):** This is **not** semantically the same as `mutation` — but it shows **order of magnitude**: broad text hit lists **scale with repo growth**; **`--names-only` with a fixed `--max-symbols`** stays **small**.
 
-### 2.4 Voller Kurzbrief vs. Namensliste
+### 2.4 Full short brief vs. name list
 
-| Modus | Größenordnung (Nexus-Repo, `mutation`, 10 Symbole) |
-|--------|------------------------------------------------------|
-| `--names-only` | ~0,5 KB, ~11 Zeilen |
-| Voller Text-Brief (Felder wie reads, calls, chains) | ~12 KB, ~130 Zeilen |
+| Mode | Order of magnitude (Nexus repo, `mutation`, 10 symbols) |
+|------|-----------------------------------------------------------|
+| `--names-only` | ~0.5 KB, ~11 lines |
+| Full text brief (reads, calls, chains, …) | ~12 KB, ~130 lines |
 
-**Konsequenz:** Erst **dünn** orientieren, **dann** gezielt `read_file` auf 1–3 Pfade; den **vollen Brief** nur holen, wenn die Frage es braucht — sonst zahlt man pro Symbol viele strukturierte Tokens.
+**Implication:** Start **thin**, then **read_file** on 1–3 paths; pull the **full brief** only when the question needs it — otherwise you pay many structured tokens per symbol.
 
 ---
 
-## 3. Referenz: größere produktive Trees (Smoke-/Explorationsläufe)
+## 3. Reference: larger production trees (smoke / exploration runs)
 
-In **zwei** größeren Python-Projekten (u. a. **Aether VPN**-Backend und **TTRPG Studio**-Bereich) wurden Nexus-Läufe zur **Struktur- und Mutations-Orientierung** genutzt — **ohne** die rohen Graph-Exports öffentlich zu teilen (siehe `SECURITY.md`).
+Nexus was used for **structure and mutation orientation** in **two** larger Python projects (including an **Aether VPN** backend and **TTRPG Studio** areas) — **without** publishing raw graph exports (see `SECURITY.md`).
 
-### 3.1 Typische Index-Größe (Aether VPN, repräsentativer Snapshot)
+### 3.1 Typical index size (Aether VPN, representative snapshot)
 
-Aus einer internen Auswertung (Legacy-FastAPI-/Service-Baum):
+From an internal evaluation (legacy FastAPI / service tree):
 
-| Metrik | Größenordnung |
-|--------|----------------|
-| Erfasste `.py`-Dateien | **82** |
-| Symbole | **496** |
-| Kanten im Graph | **392** |
+| Metric | Order of magnitude |
+|--------|-------------------|
+| `.py` files scanned | **82** |
+| Symbols | **496** |
+| Graph edges | **392** |
 
-**Botschaft:** Der **einmalige** Scan erzeugt einen Graphen in dieser Größenordnung — das ist **Arbeit für die CPU**, nicht für das Token-Budget. Was ins LLM geht, entscheidest du mit **Briefing-Länge** und **names-only**.
+**Message:** The **one-time** scan produces a graph of this size — that is **CPU work**, not token budget. What reaches the LLM is controlled by **brief length** and **names-only**.
 
 ### 3.2 TTRPG Studio
 
-Hier liegen **keine** veröffentlichten Roh-JSONs vor; fachlich gilt dieselbe **Staffelung**: bei **mehreren hundert Symbolen** explodieren breite Grep- oder Volltext-Kontexte schneller als **gebündelte** Nexus-Ausgaben mit hartem `--max-symbols`.
+No published raw JSON; the same **tiering** applies: with **hundreds of symbols**, wide grep or full-text context often grows faster than **capped** Nexus output with a hard `--max-symbols`.
 
 ---
 
-## 4. Log-Beispiel: was der Agent „sieht“
+## 4. Log-style example: what the agent “sees”
 
-**A — breit (Stil: viele Trefferzeilen):**
+**A — wide (many hit lines):**
 
 ```text
-# Stil: 208 Zeilen mit "def ..." — nur Ausschnitt
+# Style: 208 lines of "def ..." — excerpt only
 def main(...):
 def attach(...):
 def scan(...):
 def _scan_impl(...):
-# ... hunderte Zeilen weiter, ohne Kanten, ohne Confidence
+# ... hundreds more lines, no edges, no confidence
 ```
 
-**B — Nexus, Orientierung (Stil: feste Kappe):**
+**B — Nexus, orientation (fixed cap):**
 
 ```text
 REPO: …
@@ -108,35 +108,39 @@ Files: 34  Symbols: 162  Edges: 191
 src.nexus.cli_grep.main
 src.nexus.scanner._scan_impl
 src.nexus.cli.main
-# … bis max. 10 Namen
+# … up to max. 10 names
 ```
 
-**C — Nexus, fokussierter Brief (nur wenn nötig):**  
-voller Block mit reads/calls/mutation_chain — **teurer**, aber immer noch **eine** zusammenhängende Struktur statt zufälliger Grep-Schnipsel.
+**C — Nexus, focused brief (only when needed):**  
+full block with reads/calls/mutation_chain — **more expensive**, but still **one** coherent structure instead of random grep fragments.
 
 ---
 
-## 5. Amortisation (grobe Denkrechnung)
+## 5. Amortization (back-of-the-envelope)
 
-- **Einmalig:** Scan-Zeit \(T_{\text{scan}}\) (Sekunden bis wenige Minuten, je nach Rechner und Repo). **0 LLM-Tokens.**
-- **Pro Agenten-Runde:** Wenn du statt ~10k Zeichen „Grep-Wand“ nur ~0,5k Zeichen Namensliste schickst, sparst du grob **~9,5k Zeichen** pro Runde — in Tokens je nach Modell/Zählung oft **einige tausend Tokens** weniger **pro Schleife**.
-- Nach **wenigen** solchen Runden hat sich der Scan **rechnerisch** „verzinst“, ohne dass du sensible Graph-Exports committen musst.
+- **One-time:** scan time \(T_{\text{scan}}\) (seconds to a few minutes, depending on machine and repo). **0 LLM tokens.**
+- **Per agent turn:** If you send **~0.5k characters** (name list) instead of **~10k characters** (“grep wall”), you save on the order of **~9.5k characters per turn** — in tokens, often **thousands fewer tokens per loop**, depending on tokenizer and model.
+- After **a few** such turns, the scan has **paid for itself** in context cost, without committing sensitive graph exports.
 
-Das ist **kein** Garantieversprechen für jede Fragestellung — schlechte Queries können Nexus genauso „leer“ oder „zu fett“ machen wie Grep. Die **Decision-Engine** in der Cursor-Regel (`nexus-over-grep.mdc`) genau dazu: erst dünn, dann lesen, dann eskalieren.
+This is **not** a guarantee for every task — bad queries can make Nexus outputs empty or bloated, just like grep. The **decision engine** in the Cursor rule (`nexus-over-grep.mdc`) exists for that: thin first, read, then escalate.
+
+### Amortization — intuition
+
+Think of the graph build as **fixed local overhead** and each prompt as **recurring variable cost**. Nexus moves spending from “variable” (huge unstructured text every turn) to “fixed + capped” (one scan, then bounded briefings). The break-even number of turns is small whenever you would otherwise paste large search results repeatedly.
 
 ---
 
-## 6. Selbst nachmessen
+## 6. Reproduce it yourself
 
 ```bash
-# Graph-Kopf + bounded brief
-python -m nexus <pfad-zum-repo> -q "mutation" --max-symbols 15
+# Header + bounded brief
+python -m nexus <path-to-repo> -q "mutation" --max-symbols 15
 
-# Minimal-Tokens-Orientierung
-python -m nexus <pfad-zum-repo> -q "mutation" --names-only --max-symbols 25
+# Minimal-token orientation
+python -m nexus <path-to-repo> -q "mutation" --names-only --max-symbols 25
 
-# Slice → dann Grep nur in wenigen Dateien
-nexus-grep <pfad-zum-repo> -q "DeinEindeutigerSymbolname" --max-symbols 20
+# Slice → grep only a few files
+nexus-grep <path-to-repo> -q "YourConcreteSymbol" --max-symbols 20
 ```
 
-Wenn du **eigene** Before/After-Logs für Blog oder README brauchst: einmal **Zeichenzahl** der Prompts mit/ohne Nexus (gleiche Aufgabe) vergleichen — das ist die ehrlichste „Messung“ für dein Setup.
+For honest **before/after** metrics in your setup: compare **character counts** of prompts with and without Nexus for the **same** task — that is the most credible measurement for your workflow.

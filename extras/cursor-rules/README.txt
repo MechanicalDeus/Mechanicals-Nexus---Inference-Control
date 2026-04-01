@@ -1,43 +1,43 @@
-Nexus als Agent-Tool (Token-effizient statt breitem Grep)
+Nexus as an agent tool (token-efficient instead of broad grep)
 
-Die Cursor-Regel (.mdc) liegt jetzt IM PAKET und wird mit nexus-inference ausgeliefert:
-  Python-Modul: nexus.cursor_rules
-  Quelldatei im Klon: src/nexus/cursor_rules/nexus-over-grep.mdc
+The Cursor rule (.mdc) ships INSIDE THE PACKAGE with nexus-inference:
+  Python module: nexus.cursor_rules
+  Source in a clone: src/nexus/cursor_rules/nexus-over-grep.mdc
 
-INSTALLATION IN DEIN PYTHON-PROJEKT (Cursor erkennt .cursor/rules/*.mdc):
-  cd <dein-projekt-root>
+INSTALL INTO YOUR PYTHON PROJECT (Cursor loads .cursor/rules/*.mdc):
+  cd <your-project-root>
   nexus-cursor-rules install
-  # oder: python -m nexus.cursor_rules install
-  # Überschreiben: nexus-cursor-rules install --force
-  # Nur Pfad anzeigen: nexus-cursor-rules --path
+  # or: python -m nexus.cursor_rules install
+  # overwrite: nexus-cursor-rules install --force
+  # print bundled path: nexus-cursor-rules --path
 
-Agenten-Doku (Nachimport, Kommandos):
-  AGENTS.md  (Repo-Root des Nexus-Klons)
+Agent docs (setup, commands):
+  AGENTS.md  (repo root of the Nexus clone)
 
-Sicherheit (Inferenz-Exports nicht committen):
+Security (do not commit inference exports):
   SECURITY.md
 
-README (Überblick):
+Overview:
   README.md
 
 ---
 
-1) Global auf einem Rechner (optional)
-   - Regel-Datei nach %USERPROFILE%\.cursor\rules\ kopieren (z. B. aus nexus-cursor-rules --path)
-   - Oder Inhalt der .mdc in Cursor Settings > Rules > User Rules
-   - Checkout-Pfad und pipx-Pfad in Doku anpassen
+1) Global on one machine (optional)
+   - Copy the rule file to %USERPROFILE%\.cursor\rules\ (e.g. from nexus-cursor-rules --path)
+   - Or paste .mdc content into Cursor Settings > Rules > User Rules
+   - Adjust checkout path and pipx paths in docs as needed
 
-2) Nur pro Python-Projekt (empfohlen)
-   - nexus-cursor-rules install  im Projektroot
+2) Per Python project (recommended)
+   - nexus-cursor-rules install  at project root
 
-3) CLI überall
+3) CLI everywhere
    pip install nexus-inference
    pipx install nexus-inference
-   Danach: nexus . -q "mutation" --max-symbols 20
+   Then: nexus . -q "mutation" --max-symbols 20
    Windows PowerShell: python -m nexus . "-q" "mutation" "--max-symbols" "20"
 
 4) Optional
-   NEXUS_HOME = Pfad zum Nexus-Checkout
+   NEXUS_HOME = path to Nexus checkout
    PYTHONPATH=%NEXUS_HOME%\src
 
-Staffelung: nexus-grep / nexus --names-only -> read_file (Slice) -> nexus -q -> --json nur bei Bedarf.
+Tiering: nexus-grep / nexus --names-only -> read_file (slice) -> nexus -q -> --json only when needed.

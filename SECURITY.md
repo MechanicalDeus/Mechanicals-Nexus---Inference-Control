@@ -6,10 +6,10 @@ Nexus generates **inference maps** (e.g. JSON graph exports, saved briefings) th
 
 - Structural relationships between code symbols  
 - Call graphs and mutation chains  
-- Heuristic behavioural / state-touching analysis  
+- Heuristic behavioral / state-touching analysis  
 - File paths and qualified names across your tree  
 
-These artefacts may reveal:
+These artifacts may reveal:
 
 - Internal architecture and module layout  
 - Sensitive control flows and integration points  
@@ -26,7 +26,7 @@ Generated inference data must **not** be committed to version control or pasted 
 - Generate maps **locally** only.  
 - Keep exports **out of the repo** (see root `.gitignore` patterns).  
 - Share **redacted summaries** or hand-picked snippets if you need help — not raw full graphs.  
-- For CI: avoid archiving full `--json` exports as public artefacts unless the scanned tree is non-sensitive.
+- For CI: avoid archiving full `--json` exports as public artifacts unless the scanned tree is non-sensitive.
 
 ## Reporting security issues in Nexus itself
 

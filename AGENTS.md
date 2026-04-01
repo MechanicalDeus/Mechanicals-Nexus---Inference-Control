@@ -1,88 +1,87 @@
-# AGENTS.md — Nexus für den Cursor-Agenten
+# AGENTS.md — Nexus for Cursor agents
 
-Diese Datei ist die **Referenz**, wenn du in **beliebigen Python-Repos** arbeitest und **Nexus** (strukturelle Karte statt blindem Grep) nutzen oder einrichten sollst.
+Use this file as the **reference** when working in **any Python repo** and you need to **use or set up Nexus** (structural map instead of blind grep).
 
-## Andere Repos: Nachimport (einmalig pro Projekt)
+## Other repos: one-time setup per project
 
-1. **Nexus installieren** (global nutzbar):  
-   `pipx install -e <pfad-zum-nexus-klon>` **oder** `pip install -e <pfad-zum-nexus-klon>`  
-   Ohne Install: `PYTHONPATH=<nexus-klon>/src` und `python -m nexus …` / `python -m nexus.cli_grep …`.
-2. **Cursor-Regel installieren** (liegt **im Paket** `nexus-inference`, Modul `nexus.cursor_rules`):  
-   Im **Ziel-Repo-Root**: **`nexus-cursor-rules install`** — legt `nexus-over-grep.mdc` nach **`<dein-repo>/.cursor/rules/`** (Cursor lädt `.mdc` von dort).  
-   Alternativen: **`python -m nexus.cursor_rules install`**, Pfad nur anzeigen mit **`nexus-cursor-rules --path`**, bestehende Datei ersetzen mit **`install --force`**.  
-   Beim Arbeiten am Nexus-Klon: Quelle **`src/nexus/cursor_rules/nexus-over-grep.mdc`**; Hinweise in **`extras/cursor-rules/README.txt`**.
-3. **Optional global:** dieselbe `.mdc` nach `%USERPROFILE%\.cursor\rules\` kopieren oder Inhalt in Cursor **User Rules**.
-4. **Diese `AGENTS.md`** als Doku bookmarken oder im Team verlinken — sie ergänzt die `.mdc` um Kommandos; zu Inference-Exports **`SECURITY.md`**.
+1. **Install Nexus** (usable everywhere):  
+   `pipx install -e <path-to-nexus-clone>` **or** `pip install -e <path-to-nexus-clone>`  
+   Without install: `PYTHONPATH=<nexus-clone>/src` and `python -m nexus …` / `python -m nexus.cli_grep …`.
+2. **Install the Cursor rule** (ships in **`nexus-inference`**, module `nexus.cursor_rules`):  
+   From the **target repo root**: **`nexus-cursor-rules install`** — writes `nexus-over-grep.mdc` to **`<your-repo>/.cursor/rules/`** (Cursor loads `.mdc` from there).  
+   Alternatives: **`python -m nexus.cursor_rules install`**, print bundled path with **`nexus-cursor-rules --path`**, overwrite with **`install --force`**.  
+   When hacking on Nexus itself: source **`src/nexus/cursor_rules/nexus-over-grep.mdc`**; notes in **`extras/cursor-rules/README.txt`**.
+3. **Optional global:** copy the same `.mdc` to `%USERPROFILE%\.cursor\rules\` or paste into Cursor **User Rules**.
+4. **Bookmark or share this `AGENTS.md`** — it complements the `.mdc` with commands; for inference exports see **`SECURITY.md`**.
 
-## Design: Token-Effizienz und Grep
+## Design: token efficiency and grep
 
-**Ziel:** Agenten sollen in großen Codebases **nicht** zuerst halbe Repos per breitem `rg` in den Kontext ziehen. **Nexus** strukturiert die Suche; **`nexus-grep`** ist die **Standard-Stufe** (dünne Ausgabe). **Grep** bleibt sinnvoll **nach** der Einengung oder für Nicht-Python — siehe Decision Layer und **Decision Engine** (Default: enge `nexus-grep` → Slice lesen → STOP) in der `.mdc`. **`nexus --json`** und lange **`nexus -q`**-Briefings nur bei Bedarf (Export, Ketten, Impact).
+**Goal:** Agents should not drag half a repo into context via broad `rg` first. **Nexus** structures search; **`nexus-grep`** is the **default tier** (thin output). **Grep** still makes sense **after** narrowing or for non-Python — see the decision layer and **decision engine** in the `.mdc` (default: tight `nexus-grep` → read slice → STOP). Use **`nexus --json`** and long **`nexus -q`** briefs only when needed (export, chains, impact).
 
-## 1. Standardverhalten (wenn Nexus schon geht)
+## 1. Default usage (when Nexus is available)
 
-Im **Ziel-Repo-Root** (oder `src/<paket>`):
+From the **target repo root** (or `src/<package>`):
 
 ```bash
 nexus . -q "mutation" --max-symbols 25
 nexus . -q "full mutation chain" --max-symbols 40
-nexus . -q "impact Klassenname"
+nexus . -q "impact ClassName"
 nexus . -q "state" --names-only --max-symbols 50
 nexus-grep . -q "mutation" --max-symbols 25
 nexus . --json > nexus-inference.json
 ```
 
-**Agent-Reihenfolge bei unbekannter Codebasis:** zuerst `nexus … --names-only` oder `nexus-grep …` (Struktur → gezielte Namenssuche in wenigen `.py`), dann relevante Dateien öffnen; breites `grep`/`rg` nicht als ersten Schritt. Spezialqueries (`impact`, `why`, …) weiter mit `nexus -q`, nicht mit `nexus-grep`.
+**Agent order on an unfamiliar codebase:** start with `nexus … --names-only` or `nexus-grep …` (structure → targeted name search in a few `.py` files), then open relevant files; do **not** start with broad `grep`/`rg`. Special queries (`impact`, `why`, …) stay on `nexus -q`, not `nexus-grep`.
 
-**Windows PowerShell** ohne global installiertes `nexus`:
+**Windows PowerShell** without `nexus` on PATH:
 
 ```powershell
-$env:PYTHONPATH = "F:\Nexus\src"   # Pfad zum Nexus-Checkout anpassen
+$env:PYTHONPATH = "F:\Nexus\src"   # adjust to your Nexus checkout
 python -m nexus . "-q" "mutation" "--max-symbols" "20"
 python -m nexus.cli_grep . "-q" "mutation" "--max-symbols" "25"
 ```
 
-## 2. Checkliste: Nexus in einem **neuen** Repo „fertig machen“
+## 2. Checklist: Nexus in a **new** repo
 
-1. **Prüfen:** Läuft `nexus` bzw. `python -m nexus --help` (mit gesetztem `PYTHONPATH` auf Nexus-`src`)?
-2. **Falls nein — einmalig installieren** (empfohlen, dann in jedem Repo nutzbar):
-   - `pipx install -e F:\Nexus` **oder** `pip install -e F:\Nexus` (gilt für alle Venvs, die der Nutzer aktiv hat)
-   - Checkout-Pfad `F:\Nexus` durch den **tatsächlichen** Nexus-Klon ersetzen.
-3. **Regel im Ziel-Repo:**  
-   **`nexus-cursor-rules install`** im Ziel-Repo-Root ausführen (siehe Abschnitt „Andere Repos“ oben).
-4. **Große / langsame Scans:** lieber `-q` + `--max-symbols` oder `nexus-grep` als sofort `--json` auf dem ganzen Monorepo.
+1. **Check:** Does `nexus` or `python -m nexus --help` work (with `PYTHONPATH` on Nexus `src`)?
+2. **If not — install once** (recommended):  
+   `pipx install -e F:\Nexus` **or** `pip install -e F:\Nexus`  
+   Replace `F:\Nexus` with your real checkout path.
+3. **Rule in target repo:** run **`nexus-cursor-rules install`** in the target root (see “Other repos” above).
+4. **Large / slow scans:** prefer `-q` + `--max-symbols` or `nexus-grep` over an immediate full-tree `--json`.
 
-## 3. Umgebungsvariable (optional, für alle Rechner)
+## 3. Environment variable (optional)
 
-Nutzer kann setzen:
+Set:
 
-- `NEXUS_HOME` = Pfad zum Nexus-Checkout (Ordner mit `pyproject.toml`).
+- `NEXUS_HOME` = path to the Nexus checkout (folder with `pyproject.toml`).
 
-Dann Fallback z. B.:
+Example:
 
 ```powershell
 $env:PYTHONPATH = "$env:NEXUS_HOME\src"
 python -m nexus . "-q" "flow" "--names-only" "--max-symbols" "40"
 ```
 
-## 4. Wann **nicht** Nexus
+## 4. When **not** to use Nexus
 
-- Kein Python, reine String-Suche in Config/Logs → `grep` / Suche im Editor ist ok.
-- Sehr kleine Datei, eine bekannte Stelle → direkt Datei öffnen.
+- Not Python, pure string search in config/logs → `grep` / editor search is fine.
+- Very small file, known location → open the file directly.
 
-## 5. Wo liegt die Cursor-Vorlage?
+## 5. Where is the Cursor template?
 
-- **Im installierten Paket:** `nexus.cursor_rules` → Installation mit **`nexus-cursor-rules install`** im Ziel-Repo-Root.  
-- **Im Nexus-Klon (Quelle):** **`src/nexus/cursor_rules/nexus-over-grep.mdc`** — zusätzlich **`extras/cursor-rules/README.txt`**.
-- **Global (einzelner Rechner):**  
+- **Installed package:** `nexus.cursor_rules` → **`nexus-cursor-rules install`** from the target repo root.  
+- **Nexus clone (source):** **`src/nexus/cursor_rules/nexus-over-grep.mdc`** — also **`extras/cursor-rules/README.txt`**.
+- **Global (single machine):**  
   `%USERPROFILE%\.cursor\rules\nexus-python-context.mdc`  
-  — kann denselben Inhalt referenzieren; Pfade (`F:\Nexus` etc.) anpassen.
+  — same content; adjust paths (`F:\Nexus`, etc.) as needed.
 
-## 6. Inferenz-Karten: lokal halten, nicht committen
+## 6. Inference maps: keep local, do not commit
 
-**Wichtig:** Ausgaben von `nexus … --json` oder gespeicherte Graph-Exports sind **keine neutralen Logs**. Sie enthalten typischerweise **Symbollisten, Aufrufbeziehungen, Pfade und heuristische Verhaltenshinweise** eures gescannten Codes — vergleichbar mit **Quelltext + Architekturindex**. Das kann **vertraulich und sicherheitsrelevant** sein (interne Struktur, sensible Flüsse).
+**Important:** Output from `nexus … --json` or saved graph exports are **not neutral logs**. They usually contain **symbol lists, call relationships, paths, and heuristic behavior hints** for the scanned code — comparable to **source plus an architecture index**. That can be **confidential and security-sensitive**.
 
-- **Nicht** ins Git legen, **nicht** ungefiltert in öffentliche Issues/PRs posten.  
-- Im Nexus-Repo helfen **`.gitignore`-Muster** und **`SECURITY.md`**; dasselbe Muster solltet ihr im **Ziel-Repo** übernehmen, sobald ihr Exporte erzeugt.  
-- Für Hilfe von außen: nur **reduzierte Auszüge** oder manuell geschwärzte Kurzbriefings — **keine** vollen Roh-Graph-Dateien.
+- **Do not** commit them or paste full exports into public issues/PRs.  
+- This repo uses **`.gitignore` patterns** and **`SECURITY.md`**; apply the same in **your** repo once you generate exports.  
+- For external help: **redacted excerpts** or manually scrubbed short briefs only — **no** raw full graphs.
 
-Eigene Projekte lokal z. B.: `nexus <pfad> --json > ./exports/mein-graph.json` (Ordner `exports/` bzw. genutzte Pfade **ignorieren**).
+Example local path: `nexus <path> --json > ./exports/my-graph.json` (keep `exports/` **ignored**).

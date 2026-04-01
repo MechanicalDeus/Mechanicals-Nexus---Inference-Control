@@ -57,6 +57,7 @@ include = [
   "SECURITY.md",
   "LICENSE",
   "AGENTS.md",
+  "NEXUS-REPORT.md",
 ]
 
 [tool.pytest.ini_options]

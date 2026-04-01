@@ -17,7 +17,7 @@ LLMs and developers burn context on **irrelevant files**.
 Classic tools (`grep`, `rg`):
 
 - return **lines of text**, not **meaning**  
-- scale poorly to “where does this behaviour live?” questions  
+- scale poorly to “where does this behavior live?” questions  
 
 → High cost, low precision.
 
@@ -52,9 +52,9 @@ More narrative walkthrough: [`docs/proof-of-concept.md`](docs/proof-of-concept.m
 
 ## Efficiency: one scan, bounded prompts
 
-The expensive part for LLM workflows is **not** the local AST pass — it is **repeated context** you send on every turn. Nexus amortises work: you pay **CPU once** per run to build the graph; then **`--names-only`**, **`nexus-grep`**, and small **`--max-symbols`** keep **prompt size** under a cap instead of shipping huge grep walls.
+The expensive part for LLM workflows is **not** the local AST pass — it is **repeated context** you send on every turn. Nexus **amortizes** work: you pay **CPU once** per run to build the graph; then **`--names-only`**, **`nexus-grep`**, and small **`--max-symbols`** keep **prompt size** under a cap instead of shipping huge grep walls.
 
-**Reproducible numbers** (this repo + reference legacy scans) and log-style before/after: **[`docs/token-efficiency.md`](docs/token-efficiency.md)** (German, with English summary).
+**Reproducible numbers** (this repo + reference legacy scans), log-style before/after, and an **amortization** section: **[`docs/token-efficiency.md`](docs/token-efficiency.md)**.
 
 ## Mental model
 
@@ -111,7 +111,7 @@ Use **`--json` / saved exports only when necessary** — they can be **security-
 3. **`nexus -q`** — impact, mutation chains, etc., with a tight `--max-symbols`.  
 4. **`nexus . --json`** — full graph export **only** if you need it and can keep it **private**.
 
-Agent-oriented checklist (German): [`AGENTS.md`](AGENTS.md).
+Agent-oriented checklist: [`AGENTS.md`](AGENTS.md). Executive summary: [`NEXUS-REPORT.md`](NEXUS-REPORT.md).
 
 ## Security: inference maps
 
