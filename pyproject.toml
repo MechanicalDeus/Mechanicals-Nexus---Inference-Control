@@ -33,11 +33,11 @@ nexus-cursor-rules = "nexus.cursor_rules_cli:main"
 dev = ["pytest>=7.0"]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_ORG/nexus"
-Documentation = "https://github.com/YOUR_ORG/nexus#readme"
-Repository = "https://github.com/YOUR_ORG/nexus"
-Issues = "https://github.com/YOUR_ORG/nexus/issues"
-Changelog = "https://github.com/YOUR_ORG/nexus/releases"
+Homepage = "https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control"
+Documentation = "https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control#readme"
+Repository = "https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control"
+Issues = "https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control/issues"
+Changelog = "https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control/releases"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/nexus"]
