@@ -7,15 +7,15 @@
 
 Nexus is an **inference layer** for Python code. It sits between **raw source** and **reasoning systems** (LLMs, humans, scripts): it turns a tree of `.py` files into a **map** of symbols, calls, reads/writes, mutation hints, and confidence — so you can **target** work instead of drowning in flat search hits.
 
-**Core claim:** You can **understand how code fits together** — what exists, who calls whom, what might touch state, where to open next — from a **bounded structural brief**, often **before opening the file**. The expensive part of many workflows is not compression; it is **reading** whole files to build a mental model. Nexus **removes the need to read code first**; it gives you **meaning-shaped structure**, not a wall of text.
+**Core claim:** The **CPU scans the repo once** (AST + inference) and keeps a **map**. The **LLM does not open files** to “find” structure — it **asks Nexus** (again on the CPU) with a **query** and gets back a **bounded, topographic slice**: symbols, calls, writes, `NEXT_OPEN` regions — an **IR-shaped view** of the requested area, not a dump of every file body. To go deeper or follow a different thread, the model **changes the query**; Nexus already encoded **who calls whom** and **what might touch state**, so you are not manually **filtering dependencies** or **grep-hopping** the tree. **Retrieval is structural and local**, not “read everything in the editor.”
 
-**Nexus does not reduce tokens mainly by compressing text. It reduces tokens by removing the need to read irrelevant code at all.**
+**Nexus does not reduce tokens mainly by compressing text. It reduces tokens by removing the need to ship whole-file context before you understand shape.**
 
 ---
 
 ## Problem
 
-LLMs and developers burn context on **irrelevant files** — and on **opening files at all** just to learn what a symbol does, who calls it, or what it mutates.
+LLMs and developers burn context when the **model is forced to behave like a file browser**: open file, read wall of text, guess structure, repeat. The model **searches for content** by **absorbing text**, instead of **asking an index** for the **shape** of a region.
 
 Classic tools (`grep`, `rg`):
 
@@ -34,9 +34,9 @@ Nexus builds an **inference map** of your project — **structure as the primary
 - Mutation / state-touching hints and chains  
 - Layering and confidence  
 
-Instead of only raw matches, you get **structured reasoning paths** and **briefings** (`nexus -q`, `nexus-grep`). A model (or human) can **query that map** and get **`NEXT_OPEN` hints** and symbol cards — **without** having loaded every body.
+Instead of only raw matches, you get **structured reasoning paths** and **briefings** (`nexus -q`, `nexus-grep`). A model (or human) **queries the map on the CPU** and receives the **next relevant region** as structured output — **not** by opening each file in the IDE. Dependencies and call edges are **already resolved in the graph**; refining understanding means **a new query / slice**, not re-filtering the repo by hand.
 
-**In one line:** *Nexus lets models understand code **without reading the whole file first** — by answering in structure, not by dumping source.*
+**In one line:** *The LLM doesn’t open files to explore — it queries Nexus; the CPU returns a topographic structural slice of the area you asked for.*
 
 ## Quick example (PoC)
 
@@ -80,7 +80,7 @@ More narrative walkthrough: [`docs/proof-of-concept.md`](docs/proof-of-concept.m
 
 ## Efficiency: one scan, bounded prompts
 
-The expensive part for LLM workflows is **not** the local AST pass — it is **repeated context** you send on every turn. Nexus **amortizes** work: you pay **CPU once** per run to build the graph; then **`--names-only`**, **`nexus-grep`**, and small **`--max-symbols`** keep **prompt size** under a cap instead of shipping huge grep walls.
+The expensive part for LLM workflows is **not** the local AST pass — it is **repeated full-file context** in the prompt. Nexus **amortizes** on the **CPU**: one scan builds the graph; each **follow-up** is a **cheap structural query** (new `-q`, tighter caps) instead of pasting more files. The **model’s loop** becomes *ask Nexus → interpret slice → ask again*, not *open next file → read everything*.
 
 **Reproducible numbers** (this repo + reference legacy scans), log-style before/after, and an **amortization** section: **[`docs/token-efficiency.md`](docs/token-efficiency.md)**.
 
@@ -88,7 +88,8 @@ The expensive part for LLM workflows is **not** the local AST pass — it is **r
 
 | Without Nexus        | With Nexus              |
 |---------------------|-------------------------|
-| Search → read → guess | Understand → target → read |
+| Model opens files → reads text → guesses structure | **CPU** scans once → **model queries map** → gets **structural slice** → opens source **only when needed** |
+| Search → read → guess | **Query structure** → narrow region → read targeted code |
 
 ## Installation
 
@@ -172,7 +173,7 @@ Generated maps (JSON graphs, large briefings) can expose **architecture, paths, 
 
 ## Positioning
 
-Nexus is **not** a linter, type checker, or profiler. It is a **static, heuristic inference layer** optimised for **context-efficient** navigation — a form of **semantic code indexing for LLM workflows** (and for humans who want the same map). The pitch is not “another AST tool”; it is **understanding before reading** — **meaning over text** for the first hop.
+Nexus is **not** a linter, type checker, or profiler. It is a **static, heuristic inference layer** optimised for **context-efficient** navigation — a form of **semantic code indexing for LLM workflows** (and for humans who want the same map). The pitch is not “another AST tool”; it is **the LLM querying structure on your machine** instead of **opening files to discover** it — **meaning-shaped slices** before bulk text.
 
 ## Tutorial
 

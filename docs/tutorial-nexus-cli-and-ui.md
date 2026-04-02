@@ -4,12 +4,18 @@
 
 ## Why this exists (core claim)
 
-Most workflows assume: **open file → read text → infer structure**. That is slow, token-heavy, and noisy for LLMs.
+Most workflows treat the LLM like a **human with an editor**: open a file, read the buffer, infer relationships, open the next file. That forces the **model** to **search by reading text** — expensive and noisy.
 
-Nexus flips the default: it reads the codebase **once structurally** (AST-based inference) and answers in **symbols, edges, mutation hints, and `NEXT_OPEN` slices**. A model can learn **what is there and how it connects** from a **bounded brief** — often **without** loading full file bodies first. **Reading source becomes optional** once you know *where* and *what*.
+**Nexus separates roles:**
+
+1. **CPU (local):** scans the Python tree **once** and holds an **`InferenceGraph`** (symbols, calls, writes, mutation hints, confidence).  
+2. **LLM:** does **not** need to “open” files to **discover** structure — it **queries Nexus** with a **`-q` string** (and caps) and gets back a **bounded, topographic slice**: the **shape** of the relevant region — an **IR-like briefing**, not every line of every file.  
+3. **Refinement:** to follow another thread or zoom in, the model issues a **new query** (or tighter caps). **Callers, callees, and mutation hints are already in the map** — you are not manually **filtering dependencies** or **rg-ing** the repo; Nexus returns the **next relevant neighborhood** as structured output.
+
+*Nexus’s CLI takes a **`-q` string** (heuristic), not raw natural language. In agent setups, the model chooses the next query; a **tool** or **human** runs `nexus` locally — the important part is **retrieval stays on the CPU** as structure, not file-by-file browsing in the prompt.*
 
 **Tagline:** *Stop reading code. Start querying structure.*  
-**One line:** *Nexus removes the need to read code before understanding it — for the first hop, structure is enough.*
+**One line:** *The model asks the CPU for structure; it doesn’t open files to find it.*
 
 ---
 
@@ -28,7 +34,7 @@ Read it like a **short story**: first the **ending** (what lands in the terminal
 | **Invariant** | One **`InferenceGraph`** per scan: symbols, calls, writes, mutation hints, confidence, layers. |
 | **Variable** | *How* you look at it: terminal text, table, graph, clipboard — **not** a second analyzer. |
 | **LLM** | **Copy Brief** in the UI = **`nexus -q …`** stdout for the same repo, query, and `--max-symbols` / `--min-confidence`. |
-| **Core payoff** | **Understand** (existence, callers, state hints, where to open) from the brief — **not** by reading every file first. |
+| **Core payoff** | **LLM ↔ Nexus on CPU** for structural slices; **not** LLM ↔ open every file to hunt dependencies. |
 
 ---
 
