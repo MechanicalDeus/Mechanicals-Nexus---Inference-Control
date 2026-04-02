@@ -41,6 +41,7 @@ nexus_output/
 .cache/nexus/
 .nexus-cache/
 .tmp_nexus_cache/
+.tmp/
 
 # Optional: full export directories
 exports/
