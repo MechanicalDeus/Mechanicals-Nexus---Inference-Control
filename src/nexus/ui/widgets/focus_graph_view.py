@@ -6,6 +6,7 @@ from PyQt6.QtCore import QPointF, Qt
 from PyQt6.QtGui import QBrush, QColor, QPainter, QPen
 from PyQt6.QtWidgets import QGraphicsEllipseItem, QGraphicsScene, QGraphicsView, QGraphicsLineItem
 
+
 class FocusGraphView(QGraphicsView):
     """Fixes Layout: Mitte = selection, links = callers, rechts = callees — nicht mehr."""
 

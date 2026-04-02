@@ -15,7 +15,9 @@ def format_symbol_detail(symbol: SymbolRecord) -> str:
         f"layer: {symbol.layer}",
     ]
     if symbol.docstring:
-        lines.append(f"docstring: {symbol.docstring[:500]}{'…' if len(symbol.docstring) > 500 else ''}")
+        lines.append(
+            f"docstring: {symbol.docstring[:500]}{'…' if len(symbol.docstring) > 500 else ''}"
+        )
     if symbol.semantic_tags:
         lines.append(f"semantic_tags: {', '.join(symbol.semantic_tags)}")
     lines.append(f"has_dynamic_call: {symbol.has_dynamic_call}")
@@ -39,11 +41,7 @@ def format_symbol_detail(symbol: SymbolRecord) -> str:
     if symbol.mutation_paths:
         lines.append("mutation_paths:")
         for i, path in enumerate(symbol.mutation_paths[:12]):
-            score = (
-                symbol.mutation_path_scores[i]
-                if i < len(symbol.mutation_path_scores)
-                else None
-            )
+            score = symbol.mutation_path_scores[i] if i < len(symbol.mutation_path_scores) else None
             conf = (
                 symbol.mutation_path_confidence[i]
                 if i < len(symbol.mutation_path_confidence)

@@ -54,9 +54,7 @@ def discover_py_files(
         dirnames[:] = pruned
 
         parts_lower = {p.lower() for p in rel.parts if p != "."}
-        if not include_tests and (
-            "tests" in parts_lower or "test" in parts_lower
-        ):
+        if not include_tests and ("tests" in parts_lower or "test" in parts_lower):
             continue
         for fn in filenames:
             if not fn.endswith(".py"):

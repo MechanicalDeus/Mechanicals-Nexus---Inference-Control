@@ -132,7 +132,9 @@ def cache_paths(cache_dir: Path, key: CacheKey) -> tuple[Path, Path]:
     return cache_dir / f"graph-{cid}.json", cache_dir / f"graph-{cid}.meta.json"
 
 
-def load_cached_graph(cache_dir: Path, key: CacheKey) -> tuple[InferenceGraph | None, dict[str, Any] | None]:
+def load_cached_graph(
+    cache_dir: Path, key: CacheKey
+) -> tuple[InferenceGraph | None, dict[str, Any] | None]:
     graph_path, meta_path = cache_paths(cache_dir, key)
     try:
         g_raw = json.loads(graph_path.read_text(encoding="utf-8"))
@@ -159,4 +161,3 @@ def save_cached_graph(
     graph_path, meta_path = cache_paths(cache_dir, key)
     graph_path.write_text(graph.to_json(indent=2), encoding="utf-8")
     meta_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
-

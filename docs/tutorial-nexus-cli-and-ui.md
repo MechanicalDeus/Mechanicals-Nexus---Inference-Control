@@ -44,7 +44,7 @@ Read it like a **short story**: first the **ending** (what lands in the terminal
 
 ```bash
 pip install -e .
-# or: pip install nexus-inference
+# or (PyPI): pip install nexus-inference
 ```
 
 **Inference Console** (optional, needs PyQt6):
@@ -55,7 +55,7 @@ nexus-console
 # or: python -m nexus.ui
 ```
 
-Entry points: `nexus`, `nexus-grep`, `nexus-policy`, `nexus-console`.
+**CLI commands** (on `PATH` after install): `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`, `nexus-console`. The **distribution** you install with pip is **`nexus-inference`** — not a shell command.
 
 ---
 

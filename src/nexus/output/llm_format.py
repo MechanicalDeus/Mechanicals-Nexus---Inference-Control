@@ -56,7 +56,9 @@ def _reason_one_liner(s: SymbolRecord, q: str) -> str:
     w = len(s.writes) + len(s.indirect_writes) + len(s.transitive_writes)
     if w >= 6:
         return "high mutation centrality"
-    if w > 0 and any(k in ql for k in ("mutat", "write", "change", "state", "zustand", "commit", "delta")):
+    if w > 0 and any(
+        k in ql for k in ("mutat", "write", "change", "state", "zustand", "commit", "delta")
+    ):
         return "mutation hits"
 
     if len(s.called_by) >= 8:
@@ -257,11 +259,7 @@ def generic_query_symbol_slice(
         )
     )
     if mutation_kw:
-        syms = [
-            s
-            for s in syms
-            if s.writes or s.indirect_writes or s.transitive_writes
-        ]
+        syms = [s for s in syms if s.writes or s.indirect_writes or s.transitive_writes]
     elif flow_kw:
         syms = [s for s in syms if s.calls or callees_by_from.get(s.id)]
 
@@ -269,15 +267,15 @@ def generic_query_symbol_slice(
     if runtime_q:
         syms.sort(
             key=lambda s: (
-                -core_runtime_query_boost(s, q),
-                -entry_point_heuristic_score(s),
+                (
+                    -core_runtime_query_boost(s, q),
+                    -entry_point_heuristic_score(s),
+                )
+                + _query_rank_key(s)
             )
-            + _query_rank_key(s)
         )
     else:
-        syms.sort(
-            key=lambda s: (-entry_point_heuristic_score(s),) + _query_rank_key(s)
-        )
+        syms.sort(key=lambda s: (-entry_point_heuristic_score(s),) + _query_rank_key(s))
 
     if min_confidence is not None:
         syms = [s for s in syms if s.confidence >= min_confidence]
@@ -618,9 +616,7 @@ def format_graph_for_llm(
     )
     redacted_paths = sorted(f.path for f in graph.files if f.redacted)
     if redacted_paths:
-        lines.append(
-            "NEXUS_IGNORE (plaintext not mapped): " + ", ".join(redacted_paths)
-        )
+        lines.append("NEXUS_IGNORE (plaintext not mapped): " + ", ".join(redacted_paths))
     if query_mode:
         primaries = _primary_symbols_in_order(syms)
         folded = len(syms) - len(primaries)
@@ -643,8 +639,7 @@ def format_graph_for_llm(
     mutators = [
         s
         for s in syms_for_sections
-        if s not in entry
-        and (s.writes or s.indirect_writes or s.transitive_writes)
+        if s not in entry and (s.writes or s.indirect_writes or s.transitive_writes)
     ]
     helpers = [s for s in syms_for_sections if s not in entry and s not in mutators]
     alts_map = _same_name_alternatives(syms) if query_mode else {}
@@ -655,25 +650,19 @@ def format_graph_for_llm(
             lines.append("")
             for s in entry:
                 also = alts_map.get(s.name)
-                lines.extend(
-                    _format_symbol_block(s, callees_by_from, same_name_also=also)
-                )
+                lines.extend(_format_symbol_block(s, callees_by_from, same_name_also=also))
         if mutators:
             lines.append("## Mutation / state-touching symbols")
             lines.append("")
             for s in mutators:
                 also = alts_map.get(s.name)
-                lines.extend(
-                    _format_symbol_block(s, callees_by_from, same_name_also=also)
-                )
+                lines.extend(_format_symbol_block(s, callees_by_from, same_name_also=also))
         if helpers:
             lines.append("## Other symbols (in this slice)")
             lines.append("")
             for s in helpers:
                 also = alts_map.get(s.name)
-                lines.extend(
-                    _format_symbol_block(s, callees_by_from, same_name_also=also)
-                )
+                lines.extend(_format_symbol_block(s, callees_by_from, same_name_also=also))
     else:
         for s in syms:
             lines.extend(_format_symbol_block(s, callees_by_from))

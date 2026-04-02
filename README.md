@@ -108,7 +108,7 @@ pip install -e .
 # or: pipx install -e .
 ```
 
-Python **3.10+**. Entry points: `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`, `nexus-console`.
+Python **3.10+**. Continuous integration runs **3.10** and **3.12** on **Ubuntu** and **Windows** (see `.github/workflows/ci.yml`). After install, use these **commands**: **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`**. The pip/PyPI **distribution** name is **`nexus-inference`** — there is **no** `nexus-inference` shell command.
 
 ### Nexus Inference Console (optional GUI)
 
@@ -137,6 +137,14 @@ nexus-cursor-rules install
 Bundled source in this repo: [`src/nexus/cursor_rules/nexus-over-grep.mdc`](src/nexus/cursor_rules/nexus-over-grep.mdc). Extra notes: [`extras/cursor-rules/README.txt`](extras/cursor-rules/README.txt).
 
 **Agent + Cursor (explanation anchor):** **[`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md)** — how the agent loop uses Nexus, what appears in the terminal, rules, and limits.
+
+## Repo health & known limitations
+
+- **Python:** Requires **3.10+**; tested in CI on **3.10** and **3.12** (Windows + Linux). Other 3.x versions may work but are not part of the matrix.
+- **Static analysis:** Nexus is **AST-based** and **approximate**. Dynamic patterns (`setattr`/`getattr` indirection, runtime imports, decorators, frameworks that register handlers implicitly) may be **missing**, **merged**, or **over-linked**. Treat the graph as a **navigation aid**, not a formal proof of behavior.
+- **Confidence & layers:** Scores and tags (e.g. mutation hints, layers) are **heuristics** to rank and filter slices. They can be **wrong** or **noisy** on edge-heavy code — **verify** on source for correctness-critical or security-sensitive paths.
+- **Query strings (`-q`):** Heuristic keyword / identifier matching, not a full NL interface inside Nexus; the **agent or human** chooses the next query. Prefer **concrete symbols** and **file-local names** over vague buzzwords (see **`AGENTS.md`** and **`docs/token-efficiency.md`**).
+- **Scale:** Very large trees cost **I/O + parse time**; use **subpaths**, **`nexus-grep`**, **`nexus-policy`**, and **caps** before reaching for full **`--json`** exports.
 
 ## Library
 

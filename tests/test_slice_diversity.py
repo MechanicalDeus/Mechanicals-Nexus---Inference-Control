@@ -31,4 +31,3 @@ def test_generic_query_slice_diversifies_files(tmp_path: Path) -> None:
     files = {s.file for s in syms}
     assert "hot.py" in files
     assert "other.py" in files
-

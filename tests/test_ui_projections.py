@@ -73,7 +73,7 @@ def test_build_json_slice_only_internal_edges() -> None:
 
 def test_build_focus_graph_one_hop() -> None:
     a = _sym("mod.a", calls=["b"])
-    b = _sym("mod.b", called_by=[f"symbol:mod.a"])
+    b = _sym("mod.b", called_by=["symbol:mod.a"])
     e = Edge(from_id=a.id, to_id=b.id, type="calls")
     g = InferenceGraph(
         repo_root="/r",

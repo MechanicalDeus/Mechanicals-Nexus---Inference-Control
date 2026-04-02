@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 import yaml
 
@@ -95,21 +95,36 @@ class ProfileV2:
             stages[sid] = StageConfig(
                 names_only=bool(s_raw.get("names_only") if "names_only" in s_raw else True),
                 annotate=bool(s_raw.get("annotate") if "annotate" in s_raw else True),
-                k_default=int(s_raw.get("k_default") or (5 if sid == "1" else 10 if sid == "2" else 20)),
-                k_high_risk=int(s_raw.get("k_high_risk") or (3 if sid == "1" else 6 if sid == "2" else 12)),
-                allow_scope_expand=bool(s_raw.get("allow_scope_expand") if "allow_scope_expand" in s_raw else (sid == "3")),
+                k_default=int(
+                    s_raw.get("k_default") or (5 if sid == "1" else 10 if sid == "2" else 20)
+                ),
+                k_high_risk=int(
+                    s_raw.get("k_high_risk") or (3 if sid == "1" else 6 if sid == "2" else 12)
+                ),
+                allow_scope_expand=bool(
+                    s_raw.get("allow_scope_expand")
+                    if "allow_scope_expand" in s_raw
+                    else (sid == "3")
+                ),
                 include_budget_footer=bool(
                     s_raw.get("include_budget_footer") if "include_budget_footer" in s_raw else True
                 ),
                 include_control_header=bool(
-                    s_raw.get("include_control_header") if "include_control_header" in s_raw else False
+                    s_raw.get("include_control_header")
+                    if "include_control_header" in s_raw
+                    else False
                 ),
             )
 
         scope_raw = raw.get("scope") or {}
         if not isinstance(scope_raw, dict):
             scope_raw = {}
-        tiers = scope_raw.get("tiers") or ["primary_core", "primary_adjacent", "secondary_tests", "secondary_vendor"]
+        tiers = scope_raw.get("tiers") or [
+            "primary_core",
+            "primary_adjacent",
+            "secondary_tests",
+            "secondary_vendor",
+        ]
         if not isinstance(tiers, list) or not tiers:
             tiers = ["primary_core", "primary_adjacent", "secondary_tests", "secondary_vendor"]
         tiers_typed: list[ScopeTier] = []
@@ -117,13 +132,26 @@ class ProfileV2:
             if t in ("primary_core", "primary_adjacent", "secondary_tests", "secondary_vendor"):
                 tiers_typed.append(t)  # type: ignore[arg-type]
         if not tiers_typed:
-            tiers_typed = ["primary_core", "primary_adjacent", "secondary_tests", "secondary_vendor"]
+            tiers_typed = [
+                "primary_core",
+                "primary_adjacent",
+                "secondary_tests",
+                "secondary_vendor",
+            ]
         scope = ScopeConfig(
             tiers=tiers_typed,
-            primary_core_dir_names=[str(x) for x in (scope_raw.get("primary_core_dir_names") or [])],
-            primary_adjacent_dir_names=[str(x) for x in (scope_raw.get("primary_adjacent_dir_names") or [])],
-            secondary_tests_dir_names=[str(x) for x in (scope_raw.get("secondary_tests_dir_names") or [])],
-            secondary_vendor_dir_names=[str(x) for x in (scope_raw.get("secondary_vendor_dir_names") or [])],
+            primary_core_dir_names=[
+                str(x) for x in (scope_raw.get("primary_core_dir_names") or [])
+            ],
+            primary_adjacent_dir_names=[
+                str(x) for x in (scope_raw.get("primary_adjacent_dir_names") or [])
+            ],
+            secondary_tests_dir_names=[
+                str(x) for x in (scope_raw.get("secondary_tests_dir_names") or [])
+            ],
+            secondary_vendor_dir_names=[
+                str(x) for x in (scope_raw.get("secondary_vendor_dir_names") or [])
+            ],
             excluded_dir_names=[str(x) for x in (scope_raw.get("excluded_dir_names") or [])],
         )
 
@@ -169,4 +197,3 @@ def default_profile_path() -> Path:
 
 def load_default_profile() -> ProfileV2:
     return ProfileV2.load(default_profile_path())
-

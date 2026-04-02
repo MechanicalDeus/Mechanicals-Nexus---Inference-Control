@@ -13,9 +13,7 @@ def test_cross_file_import_resolves_mutation(tmp_path: Path) -> None:
         encoding="utf-8",
     )
     (d / "runner.py").write_text(
-        "from combat.damage import deal_damage\n\n"
-        "def attack(enemy):\n"
-        "    deal_damage(enemy)\n",
+        "from combat.damage import deal_damage\n\ndef attack(enemy):\n    deal_damage(enemy)\n",
         encoding="utf-8",
     )
     g = attach(tmp_path)
@@ -42,9 +40,7 @@ def test_transitive_multi_hop(tmp_path: Path) -> None:
 def test_entrypoint_tag(tmp_path: Path) -> None:
     p = tmp_path / "cli.py"
     p.write_text(
-        "def main():\n    pass\n\n"
-        'if __name__ == "__main__":\n'
-        "    main()\n",
+        'def main():\n    pass\n\nif __name__ == "__main__":\n    main()\n',
         encoding="utf-8",
     )
     g = attach(tmp_path)
@@ -55,8 +51,7 @@ def test_entrypoint_tag(tmp_path: Path) -> None:
 def test_llm_brief_query_mutation_filter(tmp_path: Path) -> None:
     p = tmp_path / "m.py"
     p.write_text(
-        "def ro(x):\n    return x\n\n"
-        "def mut(y):\n    y.z = 1\n",
+        "def ro(x):\n    return x\n\ndef mut(y):\n    y.z = 1\n",
         encoding="utf-8",
     )
     g = attach(tmp_path)

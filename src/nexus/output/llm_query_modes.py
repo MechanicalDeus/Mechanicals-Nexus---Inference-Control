@@ -108,7 +108,9 @@ def _why_path_reason_lines(path: list[str], qn_to_sym: dict[str, SymbolRecord]) 
     lines: list[str] = []
     blob = " ".join(path).lower()
     if "resolver" in blob or any("resolver" in (n.file or "").lower() for n in nodes):
-        lines.append("    reason: Auslöser-Pfad enthält Resolver/Orchestrierung (Namens-/Pfad-Heuristik).")
+        lines.append(
+            "    reason: Auslöser-Pfad enthält Resolver/Orchestrierung (Namens-/Pfad-Heuristik)."
+        )
     elif nodes[0].layer == "core":
         lines.append("    reason: Einstieg in der Core-Schicht.")
     mids = [n for n in nodes[1:-1]]
@@ -144,11 +146,7 @@ def format_impact_view(
         targets = [
             s
             for s in graph.symbols.values()
-            if any(
-                needle in p.lower()
-                for path in s.mutation_paths
-                for p in path
-            )
+            if any(needle in p.lower() for path in s.mutation_paths for p in path)
         ]
     lines: list[str] = []
     lines.append(f"REPO: {graph.repo_root}")
@@ -217,10 +215,9 @@ def format_mutation_chain_view(
     min_confidence: float | None,
 ) -> str:
     syms = [
-        s
-        for s in graph.symbols.values()
-        if s.kind in ("function", "method") and s.mutation_paths
+        s for s in graph.symbols.values() if s.kind in ("function", "method") and s.mutation_paths
     ]
+
     def _best_path_score(s: SymbolRecord) -> float:
         return max(s.mutation_path_scores, default=0.0)
 
@@ -242,9 +239,7 @@ def format_mutation_chain_view(
     lines: list[str] = []
     lines.append(f"REPO: {graph.repo_root}")
     lines.append(f"QUERY (mutation chains): {raw_query.strip()}")
-    lines.append(
-        f"Symbols with ≥1 path to a direct writer: {len(syms)} (capped)"
-    )
+    lines.append(f"Symbols with ≥1 path to a direct writer: {len(syms)} (capped)")
     lines.append("")
     for s in syms:
         lines.append(f"### {s.qualified_name}  layer={s.layer}")
@@ -313,8 +308,7 @@ def format_core_mutation_view(
     syms = [
         s
         for s in graph.symbols.values()
-        if s.layer == "core"
-        and (s.writes or s.indirect_writes or s.transitive_writes)
+        if s.layer == "core" and (s.writes or s.indirect_writes or s.transitive_writes)
     ]
     syms.sort(key=lambda s: (-s.confidence, s.qualified_name))
     if min_confidence is not None:

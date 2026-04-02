@@ -96,9 +96,7 @@ class MainWindow(QMainWindow):
         left_split = QSplitter(Qt.Orientation.Vertical)
         self._table = QTableView()
         self._model = QStandardItemModel(0, 5)
-        self._model.setHorizontalHeaderLabels(
-            ["name", "confidence", "layer", "writes", "calls"]
-        )
+        self._model.setHorizontalHeaderLabels(["name", "confidence", "layer", "writes", "calls"])
         self._table.setModel(self._model)
         self._table.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self._table.setSelectionMode(QTableView.SelectionMode.SingleSelection)
@@ -160,7 +158,9 @@ class MainWindow(QMainWindow):
         focus_tab = QWidget()
         fl = QVBoxLayout(focus_tab)
         self._focus_view = FocusGraphView()
-        fl.addWidget(QLabel("Selektiere ein Symbol in der Slice-Tabelle (1 Hop: callers / callees)."))
+        fl.addWidget(
+            QLabel("Selektiere ein Symbol in der Slice-Tabelle (1 Hop: callers / callees).")
+        )
         fl.addWidget(self._focus_view, stretch=1)
         tabs.addTab(focus_tab, "Focus Graph")
 
@@ -246,7 +246,9 @@ class MainWindow(QMainWindow):
     def _copy_brief(self) -> None:
         text = self._session.get_brief()
         if not text.strip():
-            QMessageBox.information(self, "Copy Brief", "Kein Brief — Query ausführen oder Query setzen.")
+            QMessageBox.information(
+                self, "Copy Brief", "Kein Brief — Query ausführen oder Query setzen."
+            )
             return
         QGuiApplication.clipboard().setText(text)
         self.statusBar().showMessage("Balanced Brief kopiert.", 3000)

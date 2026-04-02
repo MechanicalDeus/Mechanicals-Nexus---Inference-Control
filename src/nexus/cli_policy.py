@@ -36,7 +36,9 @@ def _truncate_lines(lines: list[str], *, max_lines: int, max_chars: int) -> tupl
     return out, truncated
 
 
-def _budget_footer(*, stage: str, k: int, scope: str, risk: str, est_chars: int, est_lines: int) -> str:
+def _budget_footer(
+    *, stage: str, k: int, scope: str, risk: str, est_chars: int, est_lines: int
+) -> str:
     return (
         f"BUDGET: est_chars≈{est_chars}, lines≈{est_lines}, stage={stage}, K={k}, "
         f"scope={scope}, risk={risk}"
@@ -83,7 +85,9 @@ def main(argv: list[str] | None = None) -> int:
         default="fresh",
         help="Inference mode (same as `nexus`).",
     )
-    parser.add_argument("--cache-dir", default=None, metavar="PATH", help="Cache dir for persistent/hybrid.")
+    parser.add_argument(
+        "--cache-dir", default=None, metavar="PATH", help="Cache dir for persistent/hybrid."
+    )
     args = parser.parse_args(argv)
 
     if args.mode != "fresh" and not args.cache_dir:
@@ -175,4 +179,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

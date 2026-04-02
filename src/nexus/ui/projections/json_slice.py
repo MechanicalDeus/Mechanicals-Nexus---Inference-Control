@@ -16,11 +16,7 @@ def build_json_slice(
     """
     ids = {s.id for s in slice_symbols}
     symbols_out = [s.to_dict() for s in slice_symbols]
-    edges_out = [
-        e.to_dict()
-        for e in graph.edges
-        if e.from_id in ids and e.to_id in ids
-    ]
+    edges_out = [e.to_dict() for e in graph.edges if e.from_id in ids and e.to_id in ids]
     return {
         "repo": graph.repo_root,
         "symbols": symbols_out,

@@ -10,7 +10,7 @@ This page is a **fixed explanation anchor**: no marketing, just **roles**, **dat
 |------|------|
 | **You** | Goal + repo open in Cursor. |
 | **Cursor agent** (Composer / Agent mode) | LLM + tools: can run **terminal commands**, **read files**, edit — depending on your Cursor version and settings. |
-| **Nexus** (CLI on **your** machine) | `nexus`, `nexus-grep`, `nexus-policy`: builds an **inference map** from `.py`, returns **bounded** text (brief, names, policy slice). |
+| **Nexus** (CLI on **your** machine) | Commands **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, optional **`nexus-console`**: build an **inference map** from `.py`, return **bounded** text (brief, names, policy slice). Install the **`nexus-inference`** package; there is no `nexus-inference` executable. |
 | **Your codebase** | Files on disk; Nexus reads them during a run; the agent reads **specific** paths when needed. |
 
 The **model does not “have” Nexus inside the weights**. Nexus runs as a **subprocess** when the agent (or you) invokes the CLI. The model only sees **whatever is returned** (terminal capture) or what you paste.
@@ -95,7 +95,7 @@ Many teams add an **`AGENTS.md`** at the project root with **copy-paste commands
 
 | Situation | What to do |
 |-----------|------------|
-| Nexus on PATH | `nexus`, `nexus-grep`, … work as-is. |
+| Nexus on PATH | **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, … work as-is (from package **`nexus-inference`**). |
 | Editable clone | `pip install -e /path/to/Nexus` or `pipx install -e …`. |
 | No install | Set **`PYTHONPATH`** to `…/Nexus/src`, use **`python -m nexus …`** / **`python -m nexus.cli_grep …`**. |
 
@@ -106,6 +106,7 @@ Agents do not need the **Inference Console** (`nexus-console`); that is optional
 ## Limits (honest)
 
 - **`-q` is heuristic text**, not free-form natural language inside Nexus itself; the **agent** picks the next string (e.g. `"runtime mutation"`).  
+- **Static graph:** **AST + heuristics** — dynamic Python, indirection, and frameworks can produce **gaps** or **false links**; **confidence** and mutation hints are **hints**, not proofs.  
 - **Default CLI mode** rebuilds the map **per `nexus` invocation** (`fresh`); “one scan forever” applies more to a **long-lived** UI session or **cached** modes (opt-in; see **SECURITY.md**).  
 - **Full `--json`** exports are sensitive — do not commit or paste wholesale (see **[`SECURITY.md`](../SECURITY.md)**).
 

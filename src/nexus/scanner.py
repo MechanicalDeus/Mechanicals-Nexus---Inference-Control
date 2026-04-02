@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+from typing import Literal
 from collections import defaultdict
 from contextlib import contextmanager
 from pathlib import Path
@@ -62,7 +63,9 @@ def _add_alias_target(
         lst.append(fqn)
 
 
-def _build_module_exports(analyses_by_path: dict[str, FileAnalysis]) -> dict[str, list[tuple[str, str]]]:
+def _build_module_exports(
+    analyses_by_path: dict[str, FileAnalysis],
+) -> dict[str, list[tuple[str, str]]]:
     exports: dict[str, list[tuple[str, str]]] = defaultdict(list)
     for fa in analyses_by_path.values():
         m = fa.module_hint
@@ -413,9 +416,7 @@ def _scan_impl(
                 if tid in symbols:
                     symbols[tid].called_by.append(sid)
 
-    callees_by_caller: dict[str, list[str]] = {
-        k: sorted(v) for k, v in callee_set.items()
-    }
+    callees_by_caller: dict[str, list[str]] = {k: sorted(v) for k, v in callee_set.items()}
 
     for sid, s in symbols.items():
         indirect: set[str] = set()
@@ -529,7 +530,7 @@ def attach(
     include_tests: bool = True,
     follow_imports: bool = False,
     transitive_depth: int = 12,
-    mode: "InferenceMode" = "fresh",
+    mode: Literal["fresh", "persistent", "hybrid"] = "fresh",
     cache_dir: str | Path | None = None,
 ) -> InferenceGraph:
     """Alias für :func:`scan` — API-Idee „Nexus an das Repo anbinden“.
@@ -539,12 +540,19 @@ def attach(
     - persistent: reuse a cached full graph if present (may be stale)
     - hybrid: reuse cached graph only if a cheap repo fingerprint still matches
     """
-    from nexus.inference_modes import CacheKey, InferenceMode, load_cached_graph, repo_fingerprint, save_cached_graph
+    from nexus.inference_modes import (
+        CacheKey,
+        load_cached_graph,
+        repo_fingerprint,
+        save_cached_graph,
+    )
 
     _ = follow_imports
     root = Path(path).resolve()
     repo_root = root if root.is_dir() else root.parent
-    key = CacheKey(repo_root=str(repo_root), include_tests=include_tests, transitive_depth=transitive_depth)
+    key = CacheKey(
+        repo_root=str(repo_root), include_tests=include_tests, transitive_depth=transitive_depth
+    )
 
     if mode not in ("fresh", "persistent", "hybrid"):
         raise ValueError(f"Unknown mode: {mode!r}")

@@ -37,4 +37,3 @@ def test_nexus_annotate_requires_names_only() -> None:
     with pytest.raises(SystemExit) as e:
         main(["-q", "flow", "--annotate"])
     assert e.value.code == 2
-

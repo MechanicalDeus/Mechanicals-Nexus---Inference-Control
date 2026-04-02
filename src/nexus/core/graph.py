@@ -54,9 +54,7 @@ class InferenceGraph:
     def trace_mutation(self, state_key_substring: str) -> dict[str, Any]:
         k = state_key_substring.lower()
         direct = [
-            s.to_dict()
-            for s in self.symbols.values()
-            if any(k in w.lower() for w in s.writes)
+            s.to_dict() for s in self.symbols.values() if any(k in w.lower() for w in s.writes)
         ]
         indirect = [
             s.to_dict()

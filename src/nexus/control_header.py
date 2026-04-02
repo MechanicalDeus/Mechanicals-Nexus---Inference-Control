@@ -93,4 +93,3 @@ def control_header_enabled(flag_value: bool) -> bool:
     - Env var can enable globally: NEXUS_CONTROL_HEADER=1
     """
     return bool(flag_value) or _truthy_env("NEXUS_CONTROL_HEADER")
-

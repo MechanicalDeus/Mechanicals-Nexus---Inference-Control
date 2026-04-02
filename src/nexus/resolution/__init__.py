@@ -9,4 +9,3 @@ __all__ = [
     "qualify_call_name",
     "resolve_relative_base",
 ]
-

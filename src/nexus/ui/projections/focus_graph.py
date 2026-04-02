@@ -15,11 +15,7 @@ def build_focus_graph(
     Keine zusätzliche Traversierung — keine neue Semantik.
     """
     caller_ids = list(center.called_by)
-    callee_ids = [
-        e.to_id
-        for e in graph.edges
-        if e.type == "calls" and e.from_id == center.id
-    ]
+    callee_ids = [e.to_id for e in graph.edges if e.type == "calls" and e.from_id == center.id]
 
     seen: set[str] = {center.id}
     nodes: list[dict[str, str]] = [

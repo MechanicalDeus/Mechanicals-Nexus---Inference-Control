@@ -7,9 +7,9 @@ Use this file as the **reference** when working in **any Python repo** and you n
 ## Other repos: one-time setup per project
 
 1. **Install Nexus** (usable everywhere):  
-   `pipx install -e <path-to-nexus-clone>` **or** `pip install -e <path-to-nexus-clone>`  
+   `pipx install -e <path-to-nexus-clone>` **or** `pip install -e <path-to-nexus-clone>` (distribution **`nexus-inference`** on PyPI).  
    Without install: `PYTHONPATH=<nexus-clone>/src` and `python -m nexus …` / `python -m nexus.cli_grep …`.
-2. **Install the Cursor rule** (ships in **`nexus-inference`**, module `nexus.cursor_rules`):  
+2. **Install the Cursor rule** (bundled in the **`nexus-inference`** package, import **`nexus.cursor_rules`**):  
    From the **target repo root**: **`nexus-cursor-rules install`** — writes `nexus-over-grep.mdc` to **`<your-repo>/.cursor/rules/`** (Cursor loads `.mdc` from there).  
    Alternatives: **`python -m nexus.cursor_rules install`**, print bundled path with **`nexus-cursor-rules --path`**, overwrite with **`install --force`**.  
    When hacking on Nexus itself: source **`src/nexus/cursor_rules/nexus-over-grep.mdc`**; notes in **`extras/cursor-rules/README.txt`**.
@@ -33,7 +33,7 @@ nexus . -q "state" --names-only --max-symbols 50
 # Names-only with confidence/tags/layer/path (fewer follow-up turns than plain names)
 nexus . -q "mutation" --names-only --annotate --max-symbols 20
 nexus-grep . -q "mutation" --max-symbols 25
-nexus . --json > nexus-inference.json
+nexus . --json > ./exports/graph.json
 ```
 
 **Slice behaviour (plain `-q`, not special modes):** default **`--max-symbols` is 12** if omitted. The textual brief adds **`NEXT_OPEN`** hints and folds **duplicate simple names** in the slice into one primary symbol plus compact **`SAME_NAME`** / `same_name_also` hints — see **`docs/token-efficiency.md`**.
@@ -124,7 +124,7 @@ Use **`nexus-policy`** when you want “safe by default” exploration:
 - This repo uses **`.gitignore` patterns** and **`SECURITY.md`**; apply the same in **your** repo once you generate exports.  
 - For external help: **redacted excerpts** or manually scrubbed short briefs only — **no** raw full graphs.
 
-Example local path: `nexus <path> --json > ./exports/my-graph.json` (keep `exports/` **ignored**).
+Example local path: `nexus <path> --json > ./exports/graph.json` (keep `exports/` **ignored**).
 
 ## 7. Inference modes (fresh vs cached)
 

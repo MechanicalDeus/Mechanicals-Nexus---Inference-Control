@@ -93,11 +93,7 @@ def _target_paths(
         return out
     paths = discover_py_files(repo_root, include_tests=True)
     ig = NexusIgnore(repo_root)
-    return [
-        p
-        for p in paths
-        if not ig.covers_file(p.relative_to(repo_root).as_posix())
-    ]
+    return [p for p in paths if not ig.covers_file(p.relative_to(repo_root).as_posix())]
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -39,6 +39,8 @@ pip install -e .
 nexus-grep . -q "mutation" --max-symbols 10
 ```
 
+**Commands** (after install): **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`** (GUI). The pip package name is **`nexus-inference`** — that is not a terminal command.
+
 Optional GUI:
 
 ```bash

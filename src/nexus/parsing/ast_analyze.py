@@ -28,9 +28,7 @@ def _expr_to_access_string(node: ast.AST) -> str | None:
         return node.attr
     if isinstance(node, ast.Subscript):
         val = _expr_to_access_string(node.value)
-        if val and isinstance(node.slice, ast.Constant) and isinstance(
-            node.slice.value, str
-        ):
+        if val and isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str):
             return f"{val}.{node.slice.value}"
         if val and isinstance(node.slice, ast.Constant):
             return f"{val}[{node.slice.value!r}]"

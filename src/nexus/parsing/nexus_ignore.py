@@ -21,9 +21,7 @@ class NexusIgnore:
     def __init__(self, scan_root: Path) -> None:
         self.scan_root = scan_root.resolve()
         p = self.scan_root / NEXUS_IGNORE_NAME
-        self._matchers: list[Matcher] = (
-            parse_pattern_file(p) if p.is_file() else []
-        )
+        self._matchers: list[Matcher] = parse_pattern_file(p) if p.is_file() else []
 
     def matches(self, rel_posix: str, *, is_dir: bool) -> bool:
         rel = rel_posix.strip().lstrip("/")

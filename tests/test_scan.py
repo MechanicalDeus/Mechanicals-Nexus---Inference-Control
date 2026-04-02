@@ -6,7 +6,7 @@ from nexus import attach
 
 
 def test_attack_deal_damage_indirect_write(tmp_path: Path) -> None:
-    code = '''
+    code = """
 class Enemy:
     hp: int
 
@@ -15,15 +15,13 @@ def deal_damage(target):
 
 def attack(enemy):
     deal_damage(enemy)
-'''
+"""
     p = tmp_path / "fight.py"
     p.write_text(code, encoding="utf-8")
     g = attach(tmp_path)
     attack = next(s for s in g.symbols.values() if s.name == "attack")
     assert "deal_damage" in attack.calls
-    assert any("hp" in w for w in attack.indirect_writes) or any(
-        "hp" in w for w in attack.writes
-    )
+    assert any("hp" in w for w in attack.indirect_writes) or any("hp" in w for w in attack.writes)
 
 
 def test_direct_write(tmp_path: Path) -> None:

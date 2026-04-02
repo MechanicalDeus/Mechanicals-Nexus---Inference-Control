@@ -61,8 +61,7 @@ def assess_risk(query: str, *, repo_shape: RepoShape, profile: ProfileV2) -> Ris
     noisy_hits = sum(1 for t in toks if t in noisy) + sum(1 for k in noisy if k in q)
 
     looks_like_identifier = any(
-        any(c.isupper() for c in t) or "_" in t or "." in t or (len(t) >= 10)
-        for t in toks
+        any(c.isupper() for c in t) or "_" in t or "." in t or (len(t) >= 10) for t in toks
     )
 
     if len(toks) <= 1:
@@ -143,4 +142,3 @@ def build_plan(
     scope = resolve_scope(shape.repo_root, profile=profile, allow_expand=st.allow_scope_expand)
 
     return Plan(stage=stage, scope=scope, risk=risk, intents=intents, k=k)
-

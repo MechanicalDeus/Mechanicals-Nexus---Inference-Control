@@ -33,6 +33,7 @@ Overview:
 3) CLI everywhere
    pip install nexus-inference
    pipx install nexus-inference
+   (pip package name nexus-inference; shell commands are nexus, nexus-grep, nexus-policy, nexus-cursor-rules, nexus-console)
    Then: nexus . -q "mutation" --max-symbols 20
    Windows PowerShell: python -m nexus . "-q" "mutation" "--max-symbols" "20"
 

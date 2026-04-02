@@ -9,9 +9,7 @@ def test_ambiguous_import_two_targets(tmp_path: Path) -> None:
     (tmp_path / "a.py").write_text("def foo():\n    return 1\n", encoding="utf-8")
     (tmp_path / "b.py").write_text("def foo():\n    return 2\n", encoding="utf-8")
     (tmp_path / "c.py").write_text(
-        "from a import foo\nfrom b import foo\n\n"
-        "def bar():\n"
-        "    foo()\n",
+        "from a import foo\nfrom b import foo\n\ndef bar():\n    foo()\n",
         encoding="utf-8",
     )
     g = attach(tmp_path)
@@ -24,9 +22,7 @@ def test_ambiguous_import_two_targets(tmp_path: Path) -> None:
 def test_star_import_in_repo(tmp_path: Path) -> None:
     (tmp_path / "lib.py").write_text("def exported():\n    pass\n", encoding="utf-8")
     (tmp_path / "use.py").write_text(
-        "from lib import *\n\n"
-        "def run():\n"
-        "    exported()\n",
+        "from lib import *\n\ndef run():\n    exported()\n",
         encoding="utf-8",
     )
     g = attach(tmp_path)
@@ -37,9 +33,7 @@ def test_star_import_in_repo(tmp_path: Path) -> None:
 
 def test_star_import_unknown_marks_unknown_import(tmp_path: Path) -> None:
     (tmp_path / "x.py").write_text(
-        "from nonexistent_pkg_xyz import *\n\n"
-        "def f():\n"
-        "    pass\n",
+        "from nonexistent_pkg_xyz import *\n\ndef f():\n    pass\n",
         encoding="utf-8",
     )
     g = attach(tmp_path)
@@ -65,8 +59,7 @@ def test_inherited_method_resolution(tmp_path: Path) -> None:
 
 def test_dynamic_call_tagged(tmp_path: Path) -> None:
     (tmp_path / "d.py").write_text(
-        "def f():\n"
-        "    (lambda: None)()\n",
+        "def f():\n    (lambda: None)()\n",
         encoding="utf-8",
     )
     g = attach(tmp_path)
@@ -76,9 +69,7 @@ def test_dynamic_call_tagged(tmp_path: Path) -> None:
 
 def test_local_assign_not_state_write(tmp_path: Path) -> None:
     (tmp_path / "l.py").write_text(
-        "def f():\n"
-        "    x = 5\n"
-        "    return x\n",
+        "def f():\n    x = 5\n    return x\n",
         encoding="utf-8",
     )
     g = attach(tmp_path)

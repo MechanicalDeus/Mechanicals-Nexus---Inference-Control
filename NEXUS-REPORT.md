@@ -53,6 +53,10 @@ Explained with numbers (reproducible in the Nexus repo, plus reference snapshots
 - No **runtime guarantees** — inference and heuristics can be **wrong or incomplete**; **confidence** and tags surface uncertainty.
 - **`follow_imports`** exists in the model; the main story stays **intra-repo** and **static**.
 
+### Operator expectations
+
+For **Python / CI support**, **CLI vs. pip package name** (`nexus-inference` vs. `nexus`, `nexus-grep`, …), and **limits of static / heuristic inference** (including confidence and `-q`), see **[README.md — Repo health & known limitations](README.md#repo-health-known-limitations)**.
+
 ---
 
 ## Value (for decision-makers)
