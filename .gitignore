@@ -1,3 +1,6 @@
+# Editor / agent local (not part of the published tree)
+.cursor/
+
 # Bytecode / environment
 __pycache__/
 *.py[cod]

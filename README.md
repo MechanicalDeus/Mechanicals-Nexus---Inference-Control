@@ -97,7 +97,19 @@ pip install -e .
 # or: pipx install -e .
 ```
 
-Python **3.10+**. Entry points: `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`.
+Python **3.10+**. Entry points: `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`, `nexus-console`.
+
+### Nexus Inference Console (optional GUI)
+
+Same inference engine as the CLI: attach a repo, run a query, inspect a **bounded slice**, **trust metadata**, **mutation trace**, and a **one-hop focus graph**; copy **minimal names**, **balanced brief**, or **slice JSON** for LLMs. The console does **not** run a second analyzer — **Copy Brief** is the same `to_llm_brief` text you would get from `nexus -q` with the same query and caps ([tutorial](docs/inference-console-tutorial.md#same-facts-for-humans-and-for-the-llm)).
+
+```bash
+pip install -e ".[ui]"
+nexus-console
+```
+
+- **[Quick tutorial (with screenshots)](docs/inference-console-tutorial.md)**  
+- **[Deep dive (architecture & exports)](docs/inference-console-deep-dive.md)**
 
 ### Cursor rules (bundled in the package)
 

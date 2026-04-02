@@ -30,9 +30,12 @@ nexus = "nexus.cli:main"
 nexus-grep = "nexus.cli_grep:main"
 nexus-cursor-rules = "nexus.cursor_rules_cli:main"
 nexus-policy = "nexus.cli_policy:main"
+nexus-console = "nexus.ui.app:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
+ui = ["PyQt6>=6.5"]
+dev-ui = ["pytest-qt>=4.4"]
 
 [project.urls]
 Homepage = "https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control"
@@ -54,6 +57,7 @@ include = [
   "src/nexus",
   "tests",
   "docs",
+  "console tutorial",
   "extras",
   "pyproject.toml",
   "README.md",
