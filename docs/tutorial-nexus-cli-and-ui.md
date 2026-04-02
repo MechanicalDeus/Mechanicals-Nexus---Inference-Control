@@ -216,6 +216,7 @@ g = attach("./your_repo")
 | [Proof of concept](proof-of-concept.md) | Narrative PoC |
 | [Token efficiency](token-efficiency.md) | Caps, amortization, numbers |
 | [SECURITY.md](../SECURITY.md) | Sensitive exports, ignore/deny |
+| [nexus-agent-cursor.md](nexus-agent-cursor.md) | **Agent + Cursor:** loop, terminal, `.mdc` rules |
 
 ---
 

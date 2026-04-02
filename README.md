@@ -134,6 +134,8 @@ nexus-cursor-rules install
 
 Bundled source in this repo: [`src/nexus/cursor_rules/nexus-over-grep.mdc`](src/nexus/cursor_rules/nexus-over-grep.mdc). Extra notes: [`extras/cursor-rules/README.txt`](extras/cursor-rules/README.txt).
 
+**Agent + Cursor (explanation anchor):** **[`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md)** — how the agent loop uses Nexus, what appears in the terminal, rules, and limits.
+
 ## Library
 
 ```python

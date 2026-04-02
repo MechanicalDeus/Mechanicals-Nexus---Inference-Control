@@ -2,6 +2,8 @@
 
 Use this file as the **reference** when working in **any Python repo** and you need to **use or set up Nexus** (structural map instead of blind grep).
 
+**Cursor-specific explanation anchor** (agent loop, terminal, rules): **[`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md)** in the Nexus repo.
+
 ## Other repos: one-time setup per project
 
 1. **Install Nexus** (usable everywhere):  

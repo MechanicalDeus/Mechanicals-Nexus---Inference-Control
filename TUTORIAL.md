@@ -22,6 +22,7 @@ That guide is written as a **story**: first the **CLI output** (what you already
 
 | Topic | Document |
 |--------|----------|
+| **Agent + Cursor** (loop, terminal, rules) | [`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md) |
 | Console only (quick steps) | [`docs/inference-console-tutorial.md`](docs/inference-console-tutorial.md) |
 | Console architecture & exports | [`docs/inference-console-deep-dive.md`](docs/inference-console-deep-dive.md) |
 | Token caps & amortization | [`docs/token-efficiency.md`](docs/token-efficiency.md) |
