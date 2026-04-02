@@ -25,7 +25,7 @@ That guide is written as a **story**: first the **CLI output** (what you already
 | **Agent + Cursor** (loop, terminal, rules) | [`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md) |
 | Console only (quick steps) | [`docs/inference-console-tutorial.md`](docs/inference-console-tutorial.md) |
 | Console architecture & exports | [`docs/inference-console-deep-dive.md`](docs/inference-console-deep-dive.md) |
-| Token caps & amortization | [`docs/token-efficiency.md`](docs/token-efficiency.md) |
+| Token caps & amortization (totals **vs** purpose / search offloaded) | [`docs/token-efficiency.md`](docs/token-efficiency.md) (§1.1) |
 | Narrative PoC | [`docs/proof-of-concept.md`](docs/proof-of-concept.md) |
 
 **Screenshots** (GUI + CLI-in-IDE) live in **[`console tutorial/`](console tutorial/)**.

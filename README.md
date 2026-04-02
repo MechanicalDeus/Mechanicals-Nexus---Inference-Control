@@ -82,7 +82,9 @@ More narrative walkthrough: [`docs/proof-of-concept.md`](docs/proof-of-concept.m
 
 The expensive part for LLM workflows is **not** the local AST pass — it is **repeated full-file context** in the prompt. Nexus **amortizes** on the **CPU**: one scan builds the graph; each **follow-up** is a **cheap structural query** (new `-q`, tighter caps) instead of pasting more files. The **model’s loop** becomes *ask Nexus → interpret slice → ask again*, not *open next file → read everything*.
 
-**Reproducible numbers** (this repo + reference legacy scans), log-style before/after, and an **amortization** section: **[`docs/token-efficiency.md`](docs/token-efficiency.md)**.
+**Amortization nuance:** Comparing only **total** tokens with vs without Nexus **does not show what those tokens paid for**. With Nexus, one thing is **structural** for the orientation phase: the model is **not** spending that context on **search-shaped** work (huge grep walls, exploratory full-file churn) — that part runs **locally**. Totals still include reasoning, edits, and targeted reads; see **[`docs/token-efficiency.md`](docs/token-efficiency.md)** §1.1.
+
+**Reproducible numbers** (this repo + reference legacy scans), log-style before/after, and full **amortization** discussion: **[`docs/token-efficiency.md`](docs/token-efficiency.md)**.
 
 ## Mental model
 

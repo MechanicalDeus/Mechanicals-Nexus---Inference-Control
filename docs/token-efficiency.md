@@ -13,6 +13,26 @@ A **local** full-repo scan builds a graph in memory **once per process**. After 
 
 **One-line takeaway:** Ingesting a large repo happens **locally and once per run**; the **expensive** part is **repeated** model context — and that is where Nexus keeps output **bounded** instead of shipping half the tree as text every step.
 
+### 1.1 Amortization: totals alone miss the point
+
+Teams often diff **only** “tokens out **with** Nexus” vs “tokens out **without** Nexus.” That **aggregates** spend but **does not say what the tokens bought**.
+
+| What you are comparing | What it hides |
+|------------------------|----------------|
+| **Total prompt tokens per task** | Same total can mean very different **mixes**: e.g. mostly **search/navigation** vs mostly **reasoning + targeted reads**. |
+
+**What Nexus guarantees (for orientation / retrieval):**  
+For the **discovery** step, the model is **not** using context to **search** in the sense of **absorbing huge unstructured grep walls** or **file-after-file exploration** just to learn **where** things live and **how** they connect. That work is done by **Nexus on the CPU**; the model receives a **bounded structural slice** (brief, names, `NEXT_OPEN`, …).
+
+The model **still** spends tokens on **other** things: chain-of-thought, final answers, **read_file** on paths you chose, patches, tool chatter, system prompts. **Nexus does not zero those out** — it **removes search-shaped spend** from the prompt for that phase.
+
+So **amortization** here is not only “fewer tokens” — it is **reallocation**:
+
+- **Without Nexus (naive agent):** a large share of context often goes to **finding** structure (raw hits, long file dumps).
+- **With Nexus:** that share moves to **local scan + small structured output**; tokens shift toward **using** the map (reasoning, edits, narrow reads).
+
+When you measure, add a **purpose tag** if you can (even rough): *orientation / search*, *reasoning*, *source read*, *output* — so “before/after” reflects **what** changed, not only the scalar total.
+
 ---
 
 ## 2. Reproducible measurement: **Nexus** (this repository)
@@ -136,9 +156,11 @@ full block with reads/calls/mutation_chain — **more expensive**, but still **o
 
 This is **not** a guarantee for every task — bad queries can make Nexus outputs empty or bloated, just like grep. The **decision engine** in the Cursor rule (`nexus-over-grep.mdc`) exists for that: thin first, read, then escalate.
 
+**Link to §1.1:** Scalar savings are only half the story. The **reliable** win is **not** funding **search** with LLM context for that step — see **§1.1** (totals vs purpose).
+
 ### Amortization — intuition
 
-Think of the graph build as **fixed local overhead** and each prompt as **recurring variable cost**. Nexus moves spending from “variable” (huge unstructured text every turn) to “fixed + capped” (one scan, then bounded briefings). The break-even number of turns is small whenever you would otherwise paste large search results repeatedly.
+Think of the graph build as **fixed local overhead** and each prompt as **recurring variable cost**. Nexus moves spending from “variable” (huge unstructured text every turn) to “fixed + capped” (one scan, then bounded briefings). The break-even number of turns is small whenever you would otherwise paste large search results repeatedly. Prefer to describe wins as **“search tokens → CPU”** plus optional **total** delta, not **total alone**.
 
 ---
 
@@ -158,4 +180,4 @@ python -m nexus <path-to-repo> -q "mutation" --names-only --annotate --max-symbo
 nexus-grep <path-to-repo> -q "YourConcreteSymbol" --max-symbols 20
 ```
 
-For honest **before/after** metrics in your setup: compare **character counts** of prompts with and without Nexus for the **same** task — that is the most credible measurement for your workflow.
+For honest **before/after** metrics in your setup: compare **character counts** (or tokens) of prompts with and without Nexus for the **same** task — and, if possible, **label** chunks by **purpose** (orientation vs read vs answer) so you see **what** moved off the model (see **§1.1**).
