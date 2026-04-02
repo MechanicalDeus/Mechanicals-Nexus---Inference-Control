@@ -2,6 +2,17 @@
 
 **Repo hub:** [`TUTORIAL.md`](../TUTORIAL.md) (short index + links).
 
+## Why this exists (core claim)
+
+Most workflows assume: **open file → read text → infer structure**. That is slow, token-heavy, and noisy for LLMs.
+
+Nexus flips the default: it reads the codebase **once structurally** (AST-based inference) and answers in **symbols, edges, mutation hints, and `NEXT_OPEN` slices**. A model can learn **what is there and how it connects** from a **bounded brief** — often **without** loading full file bodies first. **Reading source becomes optional** once you know *where* and *what*.
+
+**Tagline:** *Stop reading code. Start querying structure.*  
+**One line:** *Nexus removes the need to read code before understanding it — for the first hop, structure is enough.*
+
+---
+
 ## The story this page tells
 
 When you run **`nexus -q "…"`**, Nexus does a fixed sequence of things: scan Python into an **`InferenceGraph`**, pick a **bounded slice** of symbols, then **format** that slice as a brief (plus optional traces). None of that is magic — it is the same code path whether text goes to **stdout** or to **pixels**.
@@ -17,6 +28,7 @@ Read it like a **short story**: first the **ending** (what lands in the terminal
 | **Invariant** | One **`InferenceGraph`** per scan: symbols, calls, writes, mutation hints, confidence, layers. |
 | **Variable** | *How* you look at it: terminal text, table, graph, clipboard — **not** a second analyzer. |
 | **LLM** | **Copy Brief** in the UI = **`nexus -q …`** stdout for the same repo, query, and `--max-symbols` / `--min-confidence`. |
+| **Core payoff** | **Understand** (existence, callers, state hints, where to open) from the brief — **not** by reading every file first. |
 
 ---
 

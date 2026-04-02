@@ -2,35 +2,41 @@
 
 ![Nexus on GitHub — Inference Control](docs/assets/readme-banner.png)
 
-> **Grep with structural understanding.**
+> **Grep with structural understanding.**  
+> **Stop reading code. Start querying structure.**
 
 Nexus is an **inference layer** for Python code. It sits between **raw source** and **reasoning systems** (LLMs, humans, scripts): it turns a tree of `.py` files into a **map** of symbols, calls, reads/writes, mutation hints, and confidence — so you can **target** work instead of drowning in flat search hits.
 
-**Nexus does not reduce tokens by compressing text. It reduces tokens by removing the need to read irrelevant code at all.**
+**Core claim:** You can **understand how code fits together** — what exists, who calls whom, what might touch state, where to open next — from a **bounded structural brief**, often **before opening the file**. The expensive part of many workflows is not compression; it is **reading** whole files to build a mental model. Nexus **removes the need to read code first**; it gives you **meaning-shaped structure**, not a wall of text.
+
+**Nexus does not reduce tokens mainly by compressing text. It reduces tokens by removing the need to read irrelevant code at all.**
 
 ---
 
 ## Problem
 
-LLMs and developers burn context on **irrelevant files**.
+LLMs and developers burn context on **irrelevant files** — and on **opening files at all** just to learn what a symbol does, who calls it, or what it mutates.
 
 Classic tools (`grep`, `rg`):
 
 - return **lines of text**, not **meaning**  
 - scale poorly to “where does this behavior live?” questions  
+- still push you toward **read the file → infer structure** yourself  
 
-→ High cost, low precision.
+→ High cost, low precision. **Understanding** becomes **reading**.
 
 ## Solution
 
-Nexus builds an **inference map** of your project:
+Nexus builds an **inference map** of your project — **structure as the primary artifact**, not raw text:
 
 - Symbols (functions, classes, methods)  
 - Call relationships  
 - Mutation / state-touching hints and chains  
 - Layering and confidence  
 
-Instead of only raw matches, you get **structured reasoning paths** and **briefings** (`nexus -q`, `nexus-grep`).
+Instead of only raw matches, you get **structured reasoning paths** and **briefings** (`nexus -q`, `nexus-grep`). A model (or human) can **query that map** and get **`NEXT_OPEN` hints** and symbol cards — **without** having loaded every body.
+
+**In one line:** *Nexus lets models understand code **without reading the whole file first** — by answering in structure, not by dumping source.*
 
 ## Quick example (PoC)
 
@@ -166,7 +172,7 @@ Generated maps (JSON graphs, large briefings) can expose **architecture, paths, 
 
 ## Positioning
 
-Nexus is **not** a linter, type checker, or profiler. It is a **static, heuristic inference layer** optimised for **context-efficient** navigation — a form of **semantic code indexing for LLM workflows** (and for humans who want the same map).
+Nexus is **not** a linter, type checker, or profiler. It is a **static, heuristic inference layer** optimised for **context-efficient** navigation — a form of **semantic code indexing for LLM workflows** (and for humans who want the same map). The pitch is not “another AST tool”; it is **understanding before reading** — **meaning over text** for the first hop.
 
 ## Tutorial
 

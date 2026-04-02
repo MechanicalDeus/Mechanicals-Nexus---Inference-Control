@@ -2,6 +2,8 @@
 
 This file is the **entry point** for learning Nexus by example. It points to the full walkthrough (text + screenshots) in `docs/`.
 
+**What Nexus is for:** Models and humans often **burn tokens opening files** just to see how things connect. Nexus builds a **structural map** so you can **query meaning** — calls, writes, next files to open — **before** reading whole sources. *Stop reading code. Start querying structure.*
+
 ---
 
 ## Start here
