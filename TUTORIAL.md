@@ -8,11 +8,11 @@ This file is the **entry point** for learning Nexus by example. It points to the
 
 **[→ Full tutorial: CLI + Inference Console (one map, two surfaces)](docs/tutorial-nexus-cli-and-ui.md)**
 
-That guide covers:
+That guide is written as a **story**: first the **CLI output** (what you already get in the terminal), then **screenshots** that replay the **same internal pipeline** in the Inference Console — so you see *what the CLI was doing anyway*, laid out as table, brief, detail, mutation, and graph.
 
-- **CLI in the IDE** — run `nexus` / `nexus-grep` in a terminal (Cursor, VS Code, …): local analysis, **no LLM API call** for the scan, **bounded** briefs and `NEXT_OPEN` hints so you do not grep-hunt the whole tree.
-- **Inference Console** (optional GUI, `pip install -e ".[ui]"` then `nexus-console`) — same engine as the CLI; **Copy Brief** matches `nexus -q` for the same repo, query, and caps.
-- **Invariant** — one `InferenceGraph` per scan; terminal, GUI, and clipboard are **projections**, not a second analyzer.
+- **CLI in the IDE** — local run, **no LLM API** for the scan, **bounded** briefs and `NEXT_OPEN`.
+- **Inference Console** — optional GUI (`nexus-console`); **Copy Brief** = `nexus -q` stdout for the same inputs.
+- **Invariant** — one `InferenceGraph`; UI = X-ray of the CLI, not a second analyzer.
 
 ---
 

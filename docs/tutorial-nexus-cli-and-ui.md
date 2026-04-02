@@ -2,7 +2,13 @@
 
 **Repo hub:** [`TUTORIAL.md`](../TUTORIAL.md) (short index + links).
 
-This page is the **single walkthrough** for how Nexus works **whether you use the terminal or the Inference Console**. Screenshots include the **Inference Console** (GUI) and **integrated terminals / CLIs in an IDE** running `nexus -q`. Every GUI step has a **direct CLI equivalent** — same scan, same graph, same functions — so what you **see**, what you **print**, and what you **paste into an LLM** stay aligned.
+## The story this page tells
+
+When you run **`nexus -q "…"`**, Nexus does a fixed sequence of things: scan Python into an **`InferenceGraph`**, pick a **bounded slice** of symbols, then **format** that slice as a brief (plus optional traces). None of that is magic — it is the same code path whether text goes to **stdout** or to **pixels**.
+
+**This tutorial uses the Inference Console as an X-ray of the CLI.** Every screenshot is a *window into the same internals* you would otherwise only see as one scrolling terminal block. The UI does **not** replace the pipeline; it **surfaces** it: table = slice, lower pane = `to_llm_brief`, detail = one symbol’s `SymbolRecord`, Mutation = `trace_mutation`, Focus = one hop over existing edges, Copy = redirect to clipboard.
+
+Read it like a **short story**: first the **ending** (what lands in the terminal), then **seven beats** that replay the same run with the GUI lights on.
 
 **TL;DR**
 
@@ -35,43 +41,32 @@ Entry points: `nexus`, `nexus-grep`, `nexus-policy`, `nexus-console`.
 
 ---
 
-## The principle: from files to a map, then projections
-
-Classic search gives you **lines**. Nexus gives you a **map**: who calls whom, what might touch state, how confident we are, and suggested **next files to open** — then **caps** how much of that map you show at once so prompts stay bounded.
+## The pipeline (one sentence per stage)
 
 ```mermaid
 flowchart LR
   Py[Python_repo] --> Scan[attach_scan]
   Scan --> G[InferenceGraph]
-  G --> CLI[nexus_nexus_grep]
-  G --> UI[Inference_Console]
-  UI --> Clip[Copy_Brief_same_as_CLI]
+  G --> Slice[query_slice]
+  Slice --> Brief[to_llm_brief_etc]
+  Brief --> Out[stdout_or_UI]
 ```
 
-1. **Scan** — walk `.py` (respecting `.nexusignore` / `.nexusdeny`), build **`InferenceGraph`**.  
-2. **Query / slice** — heuristics (e.g. “mutation”, “flow”, “runtime”) pick a **small ordered list of symbols** (`--max-symbols`, default **12** in query mode).  
-3. **Project** — format that slice as a **brief**, **names-only**, **JSON slice**, **mutation trace**, or **1-hop graph** — all **views of the same graph**, not recomputed semantics.
+1. **Scan** — `attach` / scan: `.py` → **`InferenceGraph`**.  
+2. **Query** — `generic_query_symbol_slice`: heuristic filter + cap → **ordered symbol list**.  
+3. **Project** — `to_llm_brief`, `agent_qualified_names`, `trace_mutation`, edges → **text, table, graph, clipboard**.
 
-The **UI** calls the **same Python APIs** as the CLI (`generic_query_symbol_slice`, `to_llm_brief`, `agent_qualified_names`, `trace_mutation`, …). There is no “console-only” inference path.
+The CLI jumps straight from (1)→(3) in one process. The Console **pauses** between stages so you can *see* (2) as a table and (3) as panes.
 
 ---
 
-## CLI in the IDE: local, fast, bounded output
+## Prologue — the ending you already know (terminal)
 
-You can run Nexus **inside your editor’s terminal** (VS Code, Cursor, etc.) — same commands as in a standalone shell. **No LLM is invoked** to build the map or the brief; that work runs **on your machine**. You avoid burning **downstream context tokens** because you get a **capped** brief and **NEXT_OPEN** hints instead of pasting whole trees or huge `grep` dumps.
+Here is the same product **without** the Console: one command, one stream of text. Internally, Nexus has already built the graph, sliced it, and formatted the brief — you just see the **merged** result.
 
 ![Nexus CLI in an IDE terminal: bounded brief, NEXT_OPEN, mutation chains](../console%20tutorial/cli-ide-proof.png)
 
-**What this is *not*:** It does **not** call an LLM API to “understand” your code. Inference runs **locally** (Python + AST pass on your machine). So:
-
-| Claim | Meaning |
-|-------|---------|
-| **No API tokens for analysis** | Running `nexus` / `nexus-grep` **does not** bill your chat model — there is no model round-trip for the scan or query. |
-| **Fewer LLM *context* tokens later** | The output is already a **bounded brief** (`--max-symbols`), with **NEXT_OPEN** file:line hints and symbol cards. You paste **that** into a model instead of dumping whole files or walls of `grep` hits — so the **downstream** prompt stays small. |
-| **Fast** | One map build + one query is typically **seconds** on mid-sized repos (your mileage varies with size and disk). |
-| **No blind search** | You are not asked to `rg` half the tree and guess. Nexus returns **structured** next steps (which symbols, which paths, optional mutation chains). |
-
-Example commands from the screenshot (Nexus repo on Windows):
+**Inside this output (CLI):** repo line, stats, **`NEXT_OPEN`**, **`SAME_NAME`**, then **`## Mutation / …`** sections — each `###` block is one **`SymbolRecord`** serialized into text. **No LLM** runs here; this is local CPU. **No API tokens** for the analysis; you save **downstream** context because the brief is **capped** (`--max-symbols`).
 
 ```powershell
 Set-Location F:\Nexus; $env:PYTHONPATH = "F:\Nexus\src"
@@ -79,23 +74,96 @@ python -m nexus . -q "mutation flow" --max-symbols 8
 python -m nexus src/nexus -q "mutation flow" --max-symbols 6
 ```
 
-The second scopes to `src/nexus` only — often **cleaner** for demos and docs (fewer test-temp paths in the slice).
+The rest of this page **rewinds** that run in the GUI, frame by frame.
+
+*UI labels in the following screenshots are in German (**Ordner…** = choose folder, **Scan / Refresh** = rebuild map). The example repo is **TTRPG Studio**.*
 
 ---
 
-## CLI cheat sheet (matches the walkthrough below)
+## Act I — Beat 1: `attach` (build the graph)
 
-From your repo root (`.`):
+**CLI:** Every `nexus` / `nexus-grep` invocation resolves the path and runs **scan** before anything is printed.  
+**UI:** You choose the repo root and press **Scan / Refresh** — that single action is **`attach(repo)`** holding one **`InferenceGraph`** in memory until you refresh.
 
-| Goal | Command |
+Until this completes, there is no slice and no brief — same as the CLI waiting before the first byte of stdout.
+
+![Console: repo path set, ready to scan](../console%20tutorial/1.png)
+
+---
+
+## Act I — Beat 2: slice + `to_llm_brief` (what fills the terminal)
+
+**CLI:** After scan, `-q` runs **`generic_query_symbol_slice`** then **`format_graph_for_llm` / `to_llm_brief`**. Stdout = stats + **`NEXT_OPEN`** + symbol cards.  
+**UI:** **Query** + **max sym** runs the **same** functions. The **table** is the slice (same order and membership the brief is built from). The **lower pane** is the **same** brief text you would get from **`nexus -q`** with identical arguments.
+
+So: **the big scrolling block in the terminal** is the **concatenation** of what you see as **table + brief pane** — just laid out for humans in two panels instead of one stream.
+
+![Slice table and brief after query](../console%20tutorial/2.png)
+
+---
+
+## Act II — Beat 3: one symbol under the microscope
+
+**CLI:** Inside the brief, each hotspot is a `### qualified_name` block (reads, writes, calls, tags, mutation paths…).  
+**UI:** Click a row — the **detail** panel is that **same** symbol’s fields, not a summary. This is the **trust** view: *why* this row exists in the slice.
+
+![Selected symbol: ResolverEngine.commit_preview, full detail](../console%20tutorial/3.png)
+
+---
+
+## Act II — Beat 4: `trace_mutation` (same as the library call)
+
+**CLI:** No default subcommand prints this, but the engine exposes **`g.trace_mutation(key)`**.  
+**UI:** **Mutation** tab → substring → **trace_mutation** — **direct / indirect / transitive** buckets are the **same** dict the graph method returns.
+
+![Mutation: direct / indirect / transitive lists](../console%20tutorial/4.png)
+
+---
+
+## Act II — Beat 5: one hop over edges (no new graph logic)
+
+**CLI:** You would read **`calls` / `called_by`** or export JSON to see neighbors.  
+**UI:** **Focus Graph** draws **only** direct callers and callees for the selected symbol — data already on **`InferenceGraph.edges`** and the symbol lists. Fixed layout; **no** second traversal algorithm.
+
+![Focus graph — compact 1-hop view](../console%20tutorial/5b-focus-graph-clean.png)
+
+Same rules, busier slice (many callees):
+
+![Focus graph — many direct callees](../console%20tutorial/5.png)
+
+---
+
+## Act III — Beat 6: choose the projection (stdout modes)
+
+**CLI:** `--names-only`, full `-q` brief, or bounded JSON slice (console uses a **subset** of `to_json_dict`, not full-repo `--json`).  
+**UI:** **Copy Minimal / Copy Brief / Copy JSON** call the **same** formatting paths as those modes.
+
+![Detail + export buttons](../console%20tutorial/bottom%20textbox%28brief%29.png)
+
+---
+
+## Act III — Beat 7: the brief file = piped stdout
+
+**CLI:** `nexus . -q "…" --max-symbols 12 > brief.txt`  
+**UI:** **Copy Brief** → paste — **byte-identical** for same repo, query, caps.
+
+![Full brief pasted in an editor](../console%20tutorial/full%20text%20brief.png)
+
+**Closing line of the story:** the text in your editor is **not** a different “LLM edition.” It is **`to_llm_brief`** output — the same string the CLI would have written to fd 1.
+
+---
+
+## CLI cheat sheet (same story, keyboard only)
+
+| Beat | Command |
 |------|---------|
-| Thin slice + grep follow-up | `nexus-grep . -q "runtime resolver" --max-symbols 12` |
-| Full brief (what **Copy Brief** copies) | `nexus . -q "runtime resolver" --max-symbols 12` |
-| Minimal names | `nexus . -q "runtime resolver" --names-only --max-symbols 12` |
-| Policy-gated, bounded | `nexus-policy . -q "state"` |
-| Full graph export (sensitive) | `nexus . --json` — use rarely; see **SECURITY.md** |
+| Scan + brief | `nexus . -q "runtime resolver" --max-symbols 12` |
+| Names only | `nexus . -q "…" --names-only --max-symbols 12` |
+| Slice + grep | `nexus-grep . -q "…" --max-symbols 12` |
+| Policy wrapper | `nexus-policy . -q "state"` |
+| Full graph (rare, sensitive) | `nexus . --json` — see **SECURITY.md** |
 
-**Library** (same graph as CLI):
+**Library** (inspect the same graph interactively):
 
 ```python
 from nexus import attach
@@ -107,111 +175,17 @@ g = attach("./your_repo")
 
 ---
 
-## Walkthrough (screenshots = TTRPG Studio example)
+## Recap: two windows, one run
 
-*UI labels in the images are in German (**Ordner…** = choose folder, **Scan / Refresh** = rebuild map).*
-
-### Step 1 — Attach the repo (build the map)
-
-**Console:** Choose the project root, then **Scan / Refresh**.  
-**CLI:** Every `nexus` / `nexus-grep` invocation resolves the path and scans (default **fresh** — no silent cache).
-
-![Console: repo path set, ready to scan](../console%20tutorial/1.png)
-
-**Principle:** Until you scan, there is no graph. One attach → one `InferenceGraph` instance the UI holds; the CLI builds one per run.
-
----
-
-### Step 2 — Query: slice + balanced brief
-
-**Console:** Enter a heuristic query (e.g. `runtime resolver`), set **max sym** (e.g. 12), **Query**.  
-**CLI:** `nexus . -q "runtime resolver" --max-symbols 12`
-
-You get:
-
-- A **prioritized table** of symbols (same slice `nexus-grep` would use before grepping).  
-- A **balanced brief**: repo stats, how many primaries, **`NEXT_OPEN`** file:line hints, symbol cards.
-
-![Slice table and brief after query](../console%20tutorial/2.png)
-
-**Principle:** The brief is **bounded** — you do not dump the whole repo into the model. You ship **structure + top symbols + where to read next**.
-
----
-
-### Step 3 — Trust: one symbol, raw fields
-
-**Console:** Click a row → right pane shows **confidence**, **layer**, **reads / writes / calls**, **tags**, **mutation_paths**, etc.  
-**CLI:** The same fields appear inside the brief’s per-symbol blocks; you can also inspect `g.symbols[id].to_dict()` in code.
-
-![Selected symbol: ResolverEngine.commit_preview, full detail](../console%20tutorial/3.png)
-
-**Principle:** The UI is a **trust surface** — you see **why** Nexus thinks a symbol matters, not a paraphrase.
-
----
-
-### Step 4 — Mutation trace: who touches state `X`?
-
-**Console:** **Mutation** tab → substring (e.g. `delta`) → **trace_mutation**.  
-**CLI / library:** `g.trace_mutation("delta")` → `direct_writes`, `indirect_writes`, `transitive_writes`.
-
-![Mutation: direct / indirect / transitive lists](../console%20tutorial/4.png)
-
-**Principle:** Same string matching on write-hint lists as in `InferenceGraph.trace_mutation` in [`src/nexus/core/graph.py`](../src/nexus/core/graph.py) — no separate UI logic.
-
----
-
-### Step 5 — Focus graph: one hop of calls
-
-**Console:** **Focus Graph** tab + select a symbol on **Slice**. Green = **callers**, blue = **selection**, brown = **callees** — **one hop** only.  
-**CLI:** No separate command; the graph is built from `called_by` and `calls` edges already in the map.
-
-![Focus graph — compact 1-hop view](../console%20tutorial/5b-focus-graph-clean.png)
-
-![Focus graph — many callees (same rule, busier)](../console%20tutorial/5.png)
-
-**Principle:** **Projection**, not exploration — fixed layout, no drag-and-drop semantics, no custom traversal.
-
----
-
-### Step 6 — Exports: three ways to feed an LLM
-
-**Console:** **Copy Minimal**, **Copy Brief**, **Copy JSON**.  
-**CLI mapping:**
-
-| Button | CLI / API |
-|--------|-----------|
-| Copy Minimal | `nexus … --names-only` / `agent_qualified_names` (falls back message if special query mode) |
-| Copy Brief | `nexus … -q …` brief / `to_llm_brief` |
-| Copy JSON | Bounded slice: symbols in table + edges **between them only** — not `nexus . --json` full graph |
-
-![Detail + export buttons](../console%20tutorial/bottom%20textbox%28brief%29.png)
-
-**Principle:** Same **source graph**; you choose **token budget** (names vs brief vs structured JSON).
-
----
-
-### Step 7 — Proof: pasted brief = model context
-
-**Console:** **Copy Brief** → paste into an editor or chat.  
-**CLI:** Redirect: `nexus . -q "runtime resolver" --max-symbols 12 > brief.txt` — **same text** for same inputs.
-
-![Full brief pasted in an editor](../console%20tutorial/full%20text%20brief.png)
-
-**Principle:** **Invariant** — the bytes you paste are **`to_llm_brief`** output. The console **renders** them on screen **and** copies them; it does not invent a second “LLM version” of the map.
-
----
-
-## Recap: CLI vs UI
-
-| | **CLI** | **Inference Console** |
-|---|---------|------------------------|
-| **Input** | Path + flags + `-q` | Path + fields + **Query** |
-| **Map** | Built per invocation (default fresh) | Built on **Scan / Refresh** |
-| **Slice / brief** | stdout | Table + text pane |
-| **Trust** | Inside brief text | Detail panel per symbol |
-| **Mutation** | Library / your script | **Mutation** tab |
-| **Graph** | `--json` (full) or external tools | **Focus Graph** (1-hop only) |
-| **To LLM** | pipe / redirect | **Copy** buttons |
+| Stage | **CLI** | **Console** |
+|-------|---------|-------------|
+| Graph | Built before first output line | **Scan / Refresh** |
+| Slice | Implicit in brief / names-only | **Table** |
+| Brief | stdout | **Lower pane** + **Copy Brief** |
+| One symbol | `###` block in text | **Detail** panel |
+| Mutation | `g.trace_mutation` | **Mutation** tab |
+| Neighbors | edges / JSON | **Focus Graph** |
+| To file / model | `>` redirect, pipe | Clipboard |
 
 ---
 
@@ -227,14 +201,13 @@ You get:
 
 ---
 
-## Checklist (CLI or UI)
+## Checklist
 
-1. Install Nexus (`pip install -e .` or PyPI).  
-2. Optional: `pip install -e ".[ui]"` → `nexus-console`.  
-3. Point at a **repo root** → scan.  
-4. Run a **query** with a **symbol cap**.  
-5. Read **brief** + **NEXT_OPEN** → open real files.  
-6. Use **trust** / **mutation** / **focus** to narrow understanding.  
-7. **Copy** or **pipe** the same brief text your LLM should see.
+1. Run **`nexus -q`** once — notice stats, `NEXT_OPEN`, symbol blocks.  
+2. Open **nexus-console** on the same repo — **Scan**, same **query** and **max sym**.  
+3. Confirm **table + brief** match the mental model of the terminal output.  
+4. Click a row — see the **same** fields as inside a `###` block.  
+5. Try **Mutation** and **Focus** — same APIs as the library / edges.  
+6. **Copy Brief** and compare to **`nexus -q …`** stdout — should match.
 
-Welcome to **structural inference** — one map, many projections.
+Welcome to **structural inference** — one pipeline, **terminal or glass**: you choose the window.
