@@ -1,6 +1,6 @@
 # Nexus Inference Console — deep dive
 
-This document complements the **[quick tutorial](inference-console-tutorial.md)**. It explains *why* the console is shaped the way it is and how it stays aligned with the CLI and library.
+This document complements the **[quick tutorial](inference-console-tutorial.md)** and the **[unified CLI + UI tutorial](tutorial-nexus-cli-and-ui.md)**. It explains *why* the console is shaped the way it is and how it stays aligned with the CLI and library.
 
 ---
 

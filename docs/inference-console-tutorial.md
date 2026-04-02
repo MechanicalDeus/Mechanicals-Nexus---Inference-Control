@@ -1,5 +1,7 @@
 # Nexus Inference Console — quick tutorial
 
+**Also read:** the repo’s **[full CLI + UI tutorial](tutorial-nexus-cli-and-ui.md)** (same screenshots, terminal commands, and the “one map, two surfaces” idea).
+
 The **Nexus Inference Console** is a small PyQt UI on top of the same engine as `nexus` / `nexus-grep`: one **inference map** per scan, then **projections** (table, brief, mutation trace, focus graph) and **clipboard exports** for LLM workflows.
 
 ## Same facts for humans and for the LLM

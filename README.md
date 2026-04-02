@@ -68,6 +68,8 @@ Example mutation-chain fragment when analysing this repo (your project will diff
 
 `src.nexus.cli.main → src.nexus.scanner.attach → src.nexus.scanner.scan → src.nexus.scanner._scan_impl → src.nexus.scanner._tag_symbol`
 
+**Full tutorial (CLI + UI, one principle, screenshot walkthrough):** [`docs/tutorial-nexus-cli-and-ui.md`](docs/tutorial-nexus-cli-and-ui.md).
+
 More narrative walkthrough: [`docs/proof-of-concept.md`](docs/proof-of-concept.md).
 
 ## Efficiency: one scan, bounded prompts
@@ -108,8 +110,8 @@ pip install -e ".[ui]"
 nexus-console
 ```
 
-- **[Quick tutorial (with screenshots)](docs/inference-console-tutorial.md)**  
-- **[Deep dive (architecture & exports)](docs/inference-console-deep-dive.md)**
+- **[Tutorial: CLI + UI (principle + all screenshots)](docs/tutorial-nexus-cli-and-ui.md)**  
+- **[Console quick steps](docs/inference-console-tutorial.md)** · **[Deep dive](docs/inference-console-deep-dive.md)**
 
 ### Cursor rules (bundled in the package)
 
