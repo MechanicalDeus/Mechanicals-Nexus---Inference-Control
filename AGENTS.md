@@ -27,8 +27,27 @@ nexus . -q "mutation" --max-symbols 25
 nexus . -q "full mutation chain" --max-symbols 40
 nexus . -q "impact ClassName"
 nexus . -q "state" --names-only --max-symbols 50
+# Names-only with confidence/tags/layer/path (fewer follow-up turns than plain names)
+nexus . -q "mutation" --names-only --annotate --max-symbols 20
 nexus-grep . -q "mutation" --max-symbols 25
 nexus . --json > nexus-inference.json
+```
+
+**Slice behaviour (plain `-q`, not special modes):** default **`--max-symbols` is 12** if omitted. The textual brief adds **`NEXT_OPEN`** hints and folds **duplicate simple names** in the slice into one primary symbol plus compact **`SAME_NAME`** / `same_name_also` hints — see **`docs/token-efficiency.md`**.
+
+### Control header (recommended for agents)
+
+To make the agent aware of how Nexus is currently configured, you can ask Nexus to
+print a small **control header** before the actual answer:
+
+- `--control-header` prints a bounded `[NEXUS_CONFIG] … [/NEXUS_CONFIG]` block to **stderr**
+  (so `--json` on stdout stays valid JSON).
+- Or set `NEXUS_CONTROL_HEADER=1` to enable it for every invocation.
+
+Example:
+
+```bash
+nexus . -q "core system flow" --max-symbols 20 --control-header
 ```
 
 **Agent order on an unfamiliar codebase:** start with `nexus … --names-only` or `nexus-grep …` (structure → targeted name search in a few `.py` files), then open relevant files; do **not** start with broad `grep`/`rg`. Special queries (`impact`, `why`, …) stay on `nexus -q`, not `nexus-grep`.
@@ -38,7 +57,15 @@ nexus . --json > nexus-inference.json
 ```powershell
 $env:PYTHONPATH = "F:\Nexus\src"   # adjust to your Nexus checkout
 python -m nexus . "-q" "mutation" "--max-symbols" "20"
+python -m nexus . "-q" "mutation" "--names-only" "--annotate" "--max-symbols" "15"
 python -m nexus.cli_grep . "-q" "mutation" "--max-symbols" "25"
+```
+
+To enable control headers in PowerShell:
+
+```powershell
+$env:NEXUS_CONTROL_HEADER = "1"
+python -m nexus . "-q" "core system flow" "--max-symbols" "20"
 ```
 
 ## 2. Checklist: Nexus in a **new** repo
@@ -85,3 +112,21 @@ python -m nexus . "-q" "flow" "--names-only" "--max-symbols" "40"
 - For external help: **redacted excerpts** or manually scrubbed short briefs only — **no** raw full graphs.
 
 Example local path: `nexus <path> --json > ./exports/my-graph.json` (keep `exports/` **ignored**).
+
+## 7. Inference modes (fresh vs cached)
+
+Nexus supports an inference strategy switch:
+
+- **fresh** (default): rebuild map each invocation (no persistent cache)
+- **persistent / hybrid**: cache a full graph to a directory (explicit opt-in, security-sensitive)
+
+CLI:
+
+```bash
+nexus . -q "state" --mode fresh
+nexus . -q "state" --mode persistent --cache-dir ./.nexus-cache
+nexus . -q "state" --mode hybrid --cache-dir ./.nexus-cache
+```
+
+Treat cached modes as **security-sensitive** (see `SECURITY.md`) and ensure cache
+directories are ignored in VCS.

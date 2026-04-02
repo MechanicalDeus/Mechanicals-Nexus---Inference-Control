@@ -30,6 +30,12 @@ Nexus first restricts attention to **relevant symbols and files**, then searches
 nexus . -q "mutation" --max-symbols 5
 ```
 
+For **minimal prompts** with **confidence/tags** but no full symbol blocks:
+
+```bash
+nexus . -q "mutation" --names-only --annotate --max-symbols 10
+```
+
 Example **mutation chain** line you may see when scanning this repository (format is illustrative; your graph will differ):
 
 ```text

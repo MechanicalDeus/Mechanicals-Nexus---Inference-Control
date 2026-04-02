@@ -36,6 +36,8 @@ Showing 10 symbol(s).
 
 These are the **dimensions of the index built once** (on the order of tens of files, ~hundreds of symbols and edges) — **not** the size of the LLM prompt.
 
+**Query default cap:** If you omit `--max-symbols`, the heuristic `-q` slice defaults to **12** symbols (not 15). The brief also includes **`NEXT_OPEN`** (suggested file:line ranges) and **same-name folding** (one primary block per simple name, plus a compact **`SAME_NAME`** block / `same_name_also` when the slice contained duplicates).
+
 ### 2.2 Saving context: `--names-only` (instead of a wide text grep)
 
 Same filter, qualified names only:
@@ -45,6 +47,14 @@ python -m nexus . -q "mutation" --max-symbols 10 --names-only
 ```
 
 **Measured:** about **11 lines**, **~480 characters** total — a practical **orientation** step for the model.
+
+**Annotated names-only** (one compact line per primary symbol: `qualified_name | confidence | tags | layer | file:line`):
+
+```bash
+python -m nexus . -q "mutation" --max-symbols 10 --names-only --annotate
+```
+
+Use this when plain names-only saves tokens but models (or humans) still need **uncertainty and layer** without opening the full brief. Duplicates with the same simple name are still folded; the footer **`SAME_NAME`** lines list alternates when present.
 
 ### 2.3 Naive counterfactual: “everything that looks like a definition”
 
@@ -84,6 +94,8 @@ From an internal evaluation (legacy FastAPI / service tree):
 ### 3.2 TTRPG Studio
 
 No published raw JSON; the same **tiering** applies: with **hundreds of symbols**, wide grep or full-text context often grows faster than **capped** Nexus output with a hard `--max-symbols`.
+
+**Smoke scan (local checkout, representative):** one run on `F:\TTRPG Studio` reported on the order of **153** `.py` files indexed, **~2100** symbols, **~2900** call edges — again **CPU/local graph size**, not prompt size. Use `-q` + `--max-symbols` / `--names-only` / `--annotate` so what reaches the LLM stays bounded.
 
 ---
 
@@ -133,11 +145,14 @@ Think of the graph build as **fixed local overhead** and each prompt as **recurr
 ## 6. Reproduce it yourself
 
 ```bash
-# Header + bounded brief
+# Header + bounded brief (omit --max-symbols to use default cap of 12 in query mode)
 python -m nexus <path-to-repo> -q "mutation" --max-symbols 15
 
 # Minimal-token orientation
 python -m nexus <path-to-repo> -q "mutation" --names-only --max-symbols 25
+
+# Names + confidence/tags/layer/file:line (still compact)
+python -m nexus <path-to-repo> -q "mutation" --names-only --annotate --max-symbols 15
 
 # Slice → grep only a few files
 nexus-grep <path-to-repo> -q "YourConcreteSymbol" --max-symbols 20

@@ -33,7 +33,7 @@ Nexus fills a gap in agent workflows: **orientation and impact analysis** in Pyt
 ### Pipeline (short)
 
 - **Entry:** `attach(path)` / `scan(path)` → full graph for chosen options (`include_tests`, `transitive_depth`, …).
-- **CLI `nexus`:** JSON export or **LLM brief** (`to_llm_brief`), optional **`--names-only`** for minimal tokens.
+- **CLI `nexus`:** JSON export or **LLM brief** (`to_llm_brief`), optional **`--names-only`** for minimal tokens and **`--annotate`** for one-line names with **confidence / tags / layer / file:line**; query briefs add **`NEXT_OPEN`** and **same-name folding** to cut repetition.
 - **CLI `nexus-grep`:** No special queries; **small symbol set → search in few files**.
 
 ### Measurable efficiency

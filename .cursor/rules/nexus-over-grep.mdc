@@ -11,6 +11,12 @@ In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) by 
 
 **Rule:** The agent should **not search by itself**. It should send questions to Nexus (`nexus-grep` / `nexus -q`) and let Nexus return **where to read**.
 
+**Security / freshness:** default to **fresh rebuild** per query (no persistent cache). If a cached mode exists, it must be an explicit opt-in and treated as **security-sensitive**.
+
+**Control header (recommended):** enable control headers so the agent always sees the active Nexus policy before the answer:
+- CLI: `--control-header`
+- Env: `NEXUS_CONTROL_HEADER=1`
+
 **Tiering:** `nexus-grep` / `nexus --names-only` → **`read_file`** (slice) → if needed **`nexus -q`** with small `--max-symbols` → **`nexus --json`** only when a **full graph export** is required.
 
 **Canonical template:** Shipped with **`nexus-inference`** (Python package `nexus`, module **`nexus.cursor_rules`**). **Install into a target repo:** run **`nexus-cursor-rules install`** at the project root — writes this `.mdc` to **`<target-repo>/.cursor/rules/`** (Cursor loads rules from there). Print bundled directory: **`nexus-cursor-rules --path`**. Overwrite: **`nexus-cursor-rules install --force`**. Same via **`python -m nexus.cursor_rules`** with the same arguments. Optional global: `%USERPROFILE%\.cursor\rules\` (User Rules). When developing Nexus, source lives at **`src/nexus/cursor_rules/nexus-over-grep.mdc`**.
@@ -26,12 +32,13 @@ When you need to understand **Python code, calls, mutations, or architecture**, 
 - Grep returns **raw hit lines** → many tokens, little structure.
 - `nexus` returns **symbols, edges, layer, mutation paths, confidence** → more compact answers.
 - `nexus-grep` keeps output **small** where a full `nexus -q` report would be too large.
+- **`--names-only --annotate`:** one line per primary symbol (`qualified_name | confidence | tags | layer | file:line`). Plain `-q` briefs add **`NEXT_OPEN`** hints and fold duplicate simple names (**`SAME_NAME`** / `same_name_also`). Default query slice cap if `--max-symbols` is omitted: **12**.
 
 ## Default flow
 
 1. Choose repo root or package path (e.g. `.` or `src/mypkg`).
 2. **Unknown or large codebase:** orient with **few tokens first**, not broad `grep`/`rg`:
-   - `nexus <path> -q "<topic>" --names-only --max-symbols 40`, **or**
+   - `nexus <path> -q "<topic>" --names-only --max-symbols 40`, or **`--names-only --annotate`** for compact uncertainty metadata, **or**
    - **`nexus-grep <path> -q "<topic>" --max-symbols 25`** (Nexus slice → then name search only in relevant `.py`; without PATH: `python -m nexus.cli_grep <path> -q "..."`).
 3. If more context is needed: short brief: `nexus <path> -q "<topic>" --max-symbols 25`
 4. Full graph only when needed: `nexus <path> --json > graph.json`

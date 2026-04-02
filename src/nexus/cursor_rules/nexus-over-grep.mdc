@@ -7,9 +7,15 @@ alwaysApply: true
 
 ## Design goal (short)
 
-In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) as a first step is **token-expensive** and tends to produce low-signal raw hit lines. **Nexus** provides a **(re)built map** (symbols, edges, mutation hints) and a **query interface**.
+In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) as a first step is **token-expensive** and tends to produce low-signal raw hit lines. **Nexus** builds the map and exposes a **query interface**.
 
 **Rule:** The agent should **not search by itself**. It should send questions to Nexus and let Nexus return **where to read**.
+
+**Security / freshness:** default to **fresh rebuild** per query (no persistent cache). If a cached mode exists, it must be an explicit opt-in and treated as **security-sensitive**.
+
+**Control header (recommended):** enable control headers so the agent always sees the active Nexus policy before the answer:
+- CLI: `--control-header`
+- Env: `NEXUS_CONTROL_HEADER=1`
 
 **Tiering (default):** `nexus-grep <path> -q "..."` (wrapped search over the map; bounded via `--max-symbols`) → **`read_file`** (tiny slice) → STOP.  
 Escalate only when required: `nexus -q "impact ..."` / `nexus -q "why ..."` / `nexus --json` (explicit export need).
@@ -26,13 +32,14 @@ When you need to understand **Python code, calls, mutations, or architecture**, 
 
 - `nexus` returns **symbols, edges, layer, mutation paths, confidence** → more compact answers.
 - Map-query answers can be kept **bounded** via `--max-symbols` and `--names-only`.
+- **`--names-only --annotate`:** one line per primary symbol (`qualified_name | confidence | tags | layer | file:line`); plain `-q` briefs add **`NEXT_OPEN`** file:line hints and fold **duplicate simple names** (`SAME_NAME` / `same_name_also`). Default query slice cap if `--max-symbols` is omitted: **12**.
 
 ## Default flow
 
 1. Choose repo root or package path (e.g. `.` or `src/mypkg`).
 2. **Unknown or large codebase:** orient with **few tokens first** by querying the map:
    - `nexus-grep <path> -q "<topic>" --max-symbols 25`, or
-   - `nexus <path> -q "<topic>" --names-only --max-symbols 40`
+   - `nexus <path> -q "<topic>" --names-only --max-symbols 40`, or for names + confidence/tags without a full brief: `--names-only --annotate`
 3. If more context is needed: ask a *tighter* follow-up query (use identifiers from the first result), keep `--max-symbols` small.
 4. Full graph only when explicitly needed: `nexus <path> --json > graph.json`
 

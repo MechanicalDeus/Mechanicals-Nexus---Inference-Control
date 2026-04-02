@@ -21,6 +21,15 @@ if TYPE_CHECKING:
     from nexus.core.graph import InferenceGraph
 
 
+def _format_symbol_one_liner(s: SymbolRecord) -> str:
+    tags = ",".join(s.semantic_tags) if s.semantic_tags else "-"
+    layer = s.layer or "-"
+    return (
+        f"{s.qualified_name} | c={s.confidence:.2f} | tags={tags} | layer={layer} | "
+        f"{s.file}:{s.line_start}-{s.line_end}"
+    )
+
+
 def entry_point_heuristic_score(s: SymbolRecord) -> float:
     """
     Heuristik: hoher Score = eher öffentlicher Einstieg / Orchestrierung (Service,
@@ -119,7 +128,7 @@ def generic_query_symbol_slice(
     """
     callees_by_from = _callees_by_caller(graph)
     q = q_raw.lower().strip()
-    default_cap = 15
+    default_cap = 12
     cap = max_symbols if max_symbols is not None else default_cap
 
     syms = list(graph.symbols.values())
@@ -181,7 +190,7 @@ def generic_query_symbol_slice(
     if min_confidence is not None:
         syms = [s for s in syms if s.confidence >= min_confidence]
 
-    return syms[:cap]
+    return _diverse_symbol_pick(syms, cap=cap, per_file_cap=2)
 
 
 def agent_qualified_names(
@@ -206,7 +215,71 @@ def agent_qualified_names(
         max_symbols=max_symbols,
         min_confidence=min_confidence,
     )
-    return [s.qualified_name for s in syms]
+    primaries = _primary_symbols_in_order(syms)
+    out = [s.qualified_name for s in primaries]
+    foot = _same_name_footer_lines(syms)
+    if foot and foot[-1] == "":
+        foot = foot[:-1]
+    out.extend(foot)
+    return out
+
+
+def agent_symbol_lines(
+    graph: InferenceGraph,
+    *,
+    query: str,
+    annotate: bool = False,
+    max_symbols: int | None = None,
+    min_confidence: float | None = None,
+) -> list[str] | None:
+    """
+    Token-sparende Zeilenliste für Agenten.
+
+    - annotate=False: eine qualified_name pro Zeile
+    - annotate=True: stabile Einzeiler mit confidence/tags/layer/file:line (wenige Zusatz-Tokens,
+      aber reduziert typischerweise Folgefragen).
+    """
+    q_raw = query.strip()
+    if not q_raw:
+        return None
+    if detect_special_query_mode(q_raw):
+        return None
+    syms = generic_query_symbol_slice(
+        graph,
+        q_raw,
+        max_symbols=max_symbols,
+        min_confidence=min_confidence,
+    )
+    primaries = _primary_symbols_in_order(syms)
+    if not annotate:
+        lines = [s.qualified_name for s in primaries]
+    else:
+        lines = [_format_symbol_one_liner(s) for s in primaries]
+    foot = _same_name_footer_lines(syms)
+    if foot and foot[-1] == "":
+        foot = foot[:-1]
+    lines.extend(foot)
+    return lines
+
+
+def _next_open_lines(syms: list[SymbolRecord], *, k: int = 3) -> list[str]:
+    picked: list[SymbolRecord] = []
+    seen_files: set[str] = set()
+    for s in top_entry_point_symbols(syms, k=len(syms)):
+        if s.file in seen_files:
+            continue
+        seen_files.add(s.file)
+        picked.append(s)
+        if len(picked) >= k:
+            break
+    if not picked:
+        return []
+    lines: list[str] = []
+    lines.append("NEXT_OPEN (recommended file slices):")
+    for s in picked:
+        lines.append(f"  - {s.file}:{s.line_start}-{s.line_end}  ({s.qualified_name})")
+    lines.append("")
+    return lines
 
 
 def _mutation_score(s: SymbolRecord) -> tuple[int, int, int, int]:
@@ -219,8 +292,16 @@ def _mutation_score(s: SymbolRecord) -> tuple[int, int, int, int]:
 
 
 def _query_rank_key(s: SymbolRecord) -> tuple[float, int, int, int, int]:
+    tags = set(s.semantic_tags or [])
+    penalty = 0.0
+    if "unknown-import" in tags:
+        penalty += 0.35
+    if "dynamic-call" in tags:
+        penalty += 0.25
+    if "ambiguous-call" in tags:
+        penalty += 0.15
     return (
-        -s.confidence,
+        -(s.confidence - penalty),
         -len(s.writes),
         -len(s.indirect_writes),
         -len(s.transitive_writes),
@@ -228,7 +309,97 @@ def _query_rank_key(s: SymbolRecord) -> tuple[float, int, int, int, int]:
     )
 
 
-def _format_symbol_block(s: SymbolRecord, callees_by_from: dict[str, list[str]]) -> list[str]:
+def _diverse_symbol_pick(
+    syms: list[SymbolRecord],
+    *,
+    cap: int,
+    per_file_cap: int,
+) -> list[SymbolRecord]:
+    """
+    Greedy pick, but avoid spending the whole budget on a single hot file.
+
+    Assumes `syms` is already sorted by desirability.
+    """
+    if cap <= 0:
+        return []
+    picked: list[SymbolRecord] = []
+    per_file: dict[str, int] = defaultdict(int)
+    for s in syms:
+        if len(picked) >= cap:
+            break
+        if per_file[s.file] >= per_file_cap:
+            continue
+        per_file[s.file] += 1
+        picked.append(s)
+    if len(picked) >= cap:
+        return picked
+    # Fill remaining slots ignoring per-file cap.
+    seen_ids = {s.id for s in picked}
+    for s in syms:
+        if len(picked) >= cap:
+            break
+        if s.id in seen_ids:
+            continue
+        picked.append(s)
+        seen_ids.add(s.id)
+    return picked
+
+
+def _group_symbols_by_name_ordered(syms: list[SymbolRecord]) -> dict[str, list[SymbolRecord]]:
+    """Preserve scan order within each name group (matches global rank order)."""
+    by_name: dict[str, list[SymbolRecord]] = defaultdict(list)
+    for s in syms:
+        by_name[s.name].append(s)
+    return by_name
+
+
+def _primary_symbols_in_order(syms: list[SymbolRecord]) -> list[SymbolRecord]:
+    """One symbol per simple name: first in slice order wins (best-ranked for that name)."""
+    seen: set[str] = set()
+    out: list[SymbolRecord] = []
+    for s in syms:
+        if s.name in seen:
+            continue
+        seen.add(s.name)
+        out.append(s)
+    return out
+
+
+def _same_name_alternatives(
+    syms: list[SymbolRecord],
+    *,
+    max_alts_per_name: int = 6,
+) -> dict[str, list[str]]:
+    """For each name with >1 symbol in the slice, alternate qualified names (not the primary)."""
+    by_name = _group_symbols_by_name_ordered(syms)
+    alts: dict[str, list[str]] = {}
+    for name, group in by_name.items():
+        if len(group) <= 1:
+            continue
+        alts[name] = [s.qualified_name for s in group[1 : 1 + max_alts_per_name]]
+    return alts
+
+
+def _same_name_footer_lines(syms: list[SymbolRecord]) -> list[str]:
+    """Compact token lines for names that collided in the slice."""
+    alts = _same_name_alternatives(syms)
+    if not alts:
+        return []
+    lines: list[str] = ["SAME_NAME (also in this slice; blocks show primary only):"]
+    for name in sorted(alts.keys()):
+        primary_qn = next(s.qualified_name for s in syms if s.name == name)
+        rest = ", ".join(alts[name])
+        lines.append(f"  {name}: primary={primary_qn} | also {rest}")
+    lines.append("")
+    return lines
+
+
+def _format_symbol_block(
+    s: SymbolRecord,
+    callees_by_from: dict[str, list[str]],
+    *,
+    same_name_also: list[str] | None = None,
+) -> list[str]:
     lines: list[str] = []
     lines.append(f"### {s.qualified_name} ({s.kind})")
     lines.append(format_confidence_line(s))
@@ -258,6 +429,8 @@ def _format_symbol_block(s: SymbolRecord, callees_by_from: dict[str, list[str]])
         lines.append(f"  inherits: {', '.join(s.inherits_from)}")
     if s.semantic_tags:
         lines.append(f"  tags: {', '.join(s.semantic_tags)}")
+    if same_name_also:
+        lines.append(f"  same_name_also: {', '.join(same_name_also)}")
     if s.mutation_paths:
         for i, path in enumerate(s.mutation_paths[:5], 1):
             row = format_mutation_chain_row(i, path, s)
@@ -278,8 +451,8 @@ def format_graph_for_llm(
     q_raw = query or ""
     q = q_raw.lower()
     query_mode = bool(q.strip())
-    default_cap = 15
-    cap = max_symbols if max_symbols is not None else (default_cap if query_mode else None)
+    default_cap_query = 12
+    cap = max_symbols if max_symbols is not None else (default_cap_query if query_mode else None)
 
     if query_mode:
         spec = detect_special_query_mode(q_raw)
@@ -356,34 +529,59 @@ def format_graph_for_llm(
         lines.append(
             "NEXUS_IGNORE (plaintext not mapped): " + ", ".join(redacted_paths)
         )
-    lines.append(f"Showing {len(syms)} symbol(s).")
+    if query_mode:
+        primaries = _primary_symbols_in_order(syms)
+        folded = len(syms) - len(primaries)
+        if folded > 0:
+            lines.append(
+                f"Showing {len(primaries)} primary symbol(s) "
+                f"({folded} same-name alternates folded; see same_name_also / SAME_NAME block)."
+            )
+        else:
+            lines.append(f"Showing {len(primaries)} symbol(s).")
+    else:
+        lines.append(f"Showing {len(syms)} symbol(s).")
     lines.append("")
+    if query_mode:
+        lines.extend(_next_open_lines(_primary_symbols_in_order(syms), k=3))
+        lines.extend(_same_name_footer_lines(syms))
 
-    entry = [s for s in syms if "entrypoint" in s.semantic_tags]
+    syms_for_sections = _primary_symbols_in_order(syms) if query_mode else syms
+    entry = [s for s in syms_for_sections if "entrypoint" in s.semantic_tags]
     mutators = [
         s
-        for s in syms
+        for s in syms_for_sections
         if s not in entry
         and (s.writes or s.indirect_writes or s.transitive_writes)
     ]
-    helpers = [s for s in syms if s not in entry and s not in mutators]
+    helpers = [s for s in syms_for_sections if s not in entry and s not in mutators]
+    alts_map = _same_name_alternatives(syms) if query_mode else {}
 
     if query_mode and (entry or mutators or helpers):
         if entry:
             lines.append("## Entry points")
             lines.append("")
             for s in entry:
-                lines.extend(_format_symbol_block(s, callees_by_from))
+                also = alts_map.get(s.name)
+                lines.extend(
+                    _format_symbol_block(s, callees_by_from, same_name_also=also)
+                )
         if mutators:
             lines.append("## Mutation / state-touching symbols")
             lines.append("")
             for s in mutators:
-                lines.extend(_format_symbol_block(s, callees_by_from))
+                also = alts_map.get(s.name)
+                lines.extend(
+                    _format_symbol_block(s, callees_by_from, same_name_also=also)
+                )
         if helpers:
             lines.append("## Other symbols (in this slice)")
             lines.append("")
             for s in helpers:
-                lines.extend(_format_symbol_block(s, callees_by_from))
+                also = alts_map.get(s.name)
+                lines.extend(
+                    _format_symbol_block(s, callees_by_from, same_name_also=also)
+                )
     else:
         for s in syms:
             lines.extend(_format_symbol_block(s, callees_by_from))

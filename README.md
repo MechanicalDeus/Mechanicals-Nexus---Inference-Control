@@ -44,6 +44,20 @@ Deeper, still bounded:
 nexus . -q "mutation" --max-symbols 5
 ```
 
+**Defaults (query mode, `-q`):** If you omit `--max-symbols`, Nexus caps the heuristic slice at **12** symbols. The brief then adds **`NEXT_OPEN`** (up to three suggested `file:line` slices) and collapses **same simple name** duplicates into one primary block plus a compact **`SAME_NAME`** summary / `same_name_also` line — fewer tokens, less repetition.
+
+**Minimal tokens, still interpretable:**
+
+```bash
+nexus . -q "mutation" --names-only --max-symbols 10
+```
+
+**Names + confidence/tags/layer/path in one line per symbol** (slightly larger than plain names-only, fewer follow-up questions):
+
+```bash
+nexus . -q "mutation" --names-only --annotate --max-symbols 10
+```
+
 Example mutation-chain fragment when analysing this repo (your project will differ):
 
 `src.nexus.cli.main → src.nexus.scanner.attach → src.nexus.scanner.scan → src.nexus.scanner._scan_impl → src.nexus.scanner._tag_symbol`

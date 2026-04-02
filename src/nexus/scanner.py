@@ -529,11 +529,59 @@ def attach(
     include_tests: bool = True,
     follow_imports: bool = False,
     transitive_depth: int = 12,
+    mode: "InferenceMode" = "fresh",
+    cache_dir: str | Path | None = None,
 ) -> InferenceGraph:
-    """Alias für :func:`scan` — API-Idee „Nexus an das Repo anbinden“."""
-    return scan(
+    """Alias für :func:`scan` — API-Idee „Nexus an das Repo anbinden“.
+
+    Modes:
+    - fresh: rebuild the map on each call (no cache)
+    - persistent: reuse a cached full graph if present (may be stale)
+    - hybrid: reuse cached graph only if a cheap repo fingerprint still matches
+    """
+    from nexus.inference_modes import CacheKey, InferenceMode, load_cached_graph, repo_fingerprint, save_cached_graph
+
+    _ = follow_imports
+    root = Path(path).resolve()
+    repo_root = root if root.is_dir() else root.parent
+    key = CacheKey(repo_root=str(repo_root), include_tests=include_tests, transitive_depth=transitive_depth)
+
+    if mode not in ("fresh", "persistent", "hybrid"):
+        raise ValueError(f"Unknown mode: {mode!r}")
+
+    if mode == "fresh":
+        return scan(
+            path,
+            include_tests=include_tests,
+            follow_imports=follow_imports,
+            transitive_depth=transitive_depth,
+        )
+
+    if cache_dir is None:
+        raise ValueError("mode requires cache_dir (security: explicit opt-in)")
+    cache_dir_p = Path(cache_dir).resolve()
+
+    cached, meta = load_cached_graph(cache_dir_p, key)
+    if cached is not None:
+        if mode == "persistent":
+            return cached
+        # hybrid
+        fp_now = repo_fingerprint(repo_root, include_tests=include_tests)
+        if meta and meta.get("fingerprint") == fp_now:
+            return cached
+
+    g = scan(
         path,
         include_tests=include_tests,
         follow_imports=follow_imports,
         transitive_depth=transitive_depth,
     )
+    meta_out = {
+        "repo_root": str(repo_root),
+        "include_tests": include_tests,
+        "transitive_depth": transitive_depth,
+    }
+    if mode == "hybrid":
+        meta_out["fingerprint"] = repo_fingerprint(repo_root, include_tests=include_tests)
+    save_cached_graph(cache_dir_p, key, graph=g, meta=meta_out)
+    return g

@@ -29,6 +29,27 @@ That tension is part of why Nexus distinguishes **`.nexusdeny`** (hard, out-of-t
 
 Generated inference data must **not** be committed to version control or pasted into public issues/PRs unless you have explicitly cleared that with your security policy.
 
+## Control headers (safe-by-default observability)
+
+Nexus can optionally emit a small, bounded control header to help agents stay aware
+of the active inference policy (mode, cache status, ignore/deny presence) **without**
+dumping map contents:
+
+- CLI: `--control-header`
+- Env: `NEXUS_CONTROL_HEADER=1`
+
+The header is printed to **stderr** and uses redacted identifiers (no absolute paths).
+
+## Cached modes are security-sensitive
+
+If you enable cached inference modes (e.g. `--mode persistent|hybrid --cache-dir …`),
+the cache directory will contain a serialized inference graph (structure + symbol index).
+Treat it like a generated map export:
+
+- keep it out of version control (use `.gitignore`)
+- avoid uploading it as CI artifacts unless explicitly approved
+- do not paste it into issues/PRs
+
 ## Excluding paths from scans (`.nexusdeny` / `.nexusignore` / `.nexus-skip`)
 
 ### `.nexusdeny` — outside the mapped tree (hard deny)

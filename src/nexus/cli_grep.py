@@ -8,6 +8,12 @@ import sys
 from pathlib import Path
 
 from nexus import attach
+from nexus import __version__ as nexus_version
+from nexus.control_header import (
+    collect_control_config,
+    control_header_enabled,
+    emit_control_header,
+)
 from nexus.output.llm_format import (
     generic_query_symbol_slice,
     top_entry_point_symbols,
@@ -121,7 +127,7 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=None,
         metavar="N",
-        help="Cap symbols from Nexus before grepping (default: same as nexus query mode, 15).",
+        help="Cap symbols from Nexus before grepping (default: same as nexus query mode, 12).",
     )
     parser.add_argument(
         "--min-confidence",
@@ -149,6 +155,26 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Do not print the top 3 ENTRY CANDIDATE lines (heuristic entry points).",
     )
+    parser.add_argument(
+        "--mode",
+        choices=("fresh", "persistent", "hybrid"),
+        default="fresh",
+        help=(
+            "Inference strategy. fresh rebuilds the map each call (no cache). "
+            "persistent/hybrid require --cache-dir and may store sensitive structure."
+        ),
+    )
+    parser.add_argument(
+        "--cache-dir",
+        default=None,
+        metavar="PATH",
+        help="Cache directory for persistent/hybrid modes (explicit opt-in).",
+    )
+    parser.add_argument(
+        "--control-header",
+        action="store_true",
+        help="Emit a small [NEXUS_CONFIG] header to stderr before the answer.",
+    )
     args = parser.parse_args(argv)
 
     q_raw = args.query.strip()
@@ -162,7 +188,19 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     root = Path(args.path).resolve()
-    g = attach(root)
+    if args.mode != "fresh" and not args.cache_dir:
+        parser.error("--mode persistent/hybrid requires --cache-dir")
+    if control_header_enabled(args.control_header):
+        cfg = collect_control_config(
+            repo_root=root,
+            mode=args.mode,
+            include_tests=True,
+            transitive_depth=12,
+            cache_dir=args.cache_dir,
+        )
+        cfg["version"] = nexus_version
+        emit_control_header(cfg)
+    g = attach(root, mode=args.mode, cache_dir=args.cache_dir)
     repo_root = Path(g.repo_root).resolve()
 
     syms = generic_query_symbol_slice(

@@ -40,6 +40,7 @@ nexus_export.json
 nexus_output/
 .cache/nexus/
 .nexus-cache/
+.tmp_nexus_cache/
 
 # Optional: full export directories
 exports/
@@ -47,3 +48,6 @@ exports/
 # Local briefing / query dumps (often contain absolute paths)
 nexus-package-brief.txt
 *-package-brief.txt
+
+# Local one-off analyses
+ttrpg-studio-nexus-analyse.md
