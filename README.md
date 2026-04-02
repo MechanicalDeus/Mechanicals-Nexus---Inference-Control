@@ -68,7 +68,7 @@ Example mutation-chain fragment when analysing this repo (your project will diff
 
 `src.nexus.cli.main → src.nexus.scanner.attach → src.nexus.scanner.scan → src.nexus.scanner._scan_impl → src.nexus.scanner._tag_symbol`
 
-**Full tutorial (CLI + UI, one principle, screenshot walkthrough):** [`docs/tutorial-nexus-cli-and-ui.md`](docs/tutorial-nexus-cli-and-ui.md).
+**Full tutorial (CLI + UI, one principle, screenshot walkthrough):** [`docs/tutorial-nexus-cli-and-ui.md`](docs/tutorial-nexus-cli-and-ui.md). **CLI in the IDE** (local run, bounded brief — no API usage for the scan): [same doc → CLI in the IDE](docs/tutorial-nexus-cli-and-ui.md#cli-in-the-ide-local-fast-bounded-output).
 
 More narrative walkthrough: [`docs/proof-of-concept.md`](docs/proof-of-concept.md).
 

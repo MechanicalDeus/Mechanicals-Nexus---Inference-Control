@@ -1,6 +1,6 @@
 # Nexus tutorial: one map, two surfaces (CLI + UI)
 
-This page is the **single walkthrough** for how Nexus works **whether you use the terminal or the Inference Console**. The screenshots come from the **Nexus Inference Console**; every step has a **direct CLI equivalent** — same scan, same graph, same functions — so what you **see**, what you **print**, and what you **paste into an LLM** stay aligned.
+This page is the **single walkthrough** for how Nexus works **whether you use the terminal or the Inference Console**. Screenshots include the **Inference Console** (GUI) and **integrated terminals / CLIs in an IDE** running `nexus -q`. Every GUI step has a **direct CLI equivalent** — same scan, same graph, same functions — so what you **see**, what you **print**, and what you **paste into an LLM** stay aligned.
 
 **TL;DR**
 
@@ -51,6 +51,33 @@ flowchart LR
 3. **Project** — format that slice as a **brief**, **names-only**, **JSON slice**, **mutation trace**, or **1-hop graph** — all **views of the same graph**, not recomputed semantics.
 
 The **UI** calls the **same Python APIs** as the CLI (`generic_query_symbol_slice`, `to_llm_brief`, `agent_qualified_names`, `trace_mutation`, …). There is no “console-only” inference path.
+
+---
+
+## CLI in the IDE: local, fast, bounded output
+
+You can run Nexus **inside your editor’s terminal** (VS Code, Cursor, etc.) — same commands as in a standalone shell. **No LLM is invoked** to build the map or the brief; that work runs **on your machine**. You avoid burning **downstream context tokens** because you get a **capped** brief and **NEXT_OPEN** hints instead of pasting whole trees or huge `grep` dumps.
+
+![Nexus CLI in an IDE terminal: bounded brief, NEXT_OPEN, mutation chains](../console%20tutorial/cli-ide-proof.png)
+
+**What this is *not*:** It does **not** call an LLM API to “understand” your code. Inference runs **locally** (Python + AST pass on your machine). So:
+
+| Claim | Meaning |
+|-------|---------|
+| **No API tokens for analysis** | Running `nexus` / `nexus-grep` **does not** bill your chat model — there is no model round-trip for the scan or query. |
+| **Fewer LLM *context* tokens later** | The output is already a **bounded brief** (`--max-symbols`), with **NEXT_OPEN** file:line hints and symbol cards. You paste **that** into a model instead of dumping whole files or walls of `grep` hits — so the **downstream** prompt stays small. |
+| **Fast** | One map build + one query is typically **seconds** on mid-sized repos (your mileage varies with size and disk). |
+| **No blind search** | You are not asked to `rg` half the tree and guess. Nexus returns **structured** next steps (which symbols, which paths, optional mutation chains). |
+
+Example commands from the screenshot (Nexus repo on Windows):
+
+```powershell
+Set-Location F:\Nexus; $env:PYTHONPATH = "F:\Nexus\src"
+python -m nexus . -q "mutation flow" --max-symbols 8
+python -m nexus src/nexus -q "mutation flow" --max-symbols 6
+```
+
+The second scopes to `src/nexus` only — often **cleaner** for demos and docs (fewer test-temp paths in the slice).
 
 ---
 

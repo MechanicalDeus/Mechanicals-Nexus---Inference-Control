@@ -102,6 +102,7 @@ Tests: `tests/test_ui_projections.py` (projections; PyQt optional for import smo
 | [5.png](../console%20tutorial/5.png) | Focus graph (busy) |
 | [bottom textbox(brief).png](../console%20tutorial/bottom%20textbox%28brief%29.png) | Exports + brief context |
 | [full text brief.png](../console%20tutorial/full%20text%20brief.png) | **Copy Brief** pasted in an editor — proof of LLM-facing text |
+| [cli-ide-proof.png](../console%20tutorial/cli-ide-proof.png) | **CLI in IDE terminal** — same brief pipeline, local / no scan API tokens |
 
 ---
 
