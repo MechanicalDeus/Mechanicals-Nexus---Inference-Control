@@ -1,0 +1,37 @@
+---
+description: Nexus Policy v2 (scope-gating + staged caps); prefer nexus-policy wrapper
+alwaysApply: true
+---
+
+## Nexus Query Policy v2 (kanonisch)
+
+**Produktziel:** Nexus soll **inference-safe retrieval** liefern: nicht nur bessere Treffer, sondern aktiv verhindern, dass man in Trefferlisten-/Output-Hölle gerät.
+
+### Default-Verhalten (Stage 1)
+
+- **Scope zuerst**: nur Project-Code (primary) – nicht `node_modules/`, `venv/`, `dist/`, `build/`, `__pycache__/`.
+- **Output hart begrenzen**: names-only, 1 Zeile pro Symbol, **K=5** (bei high-risk **K=3**), Budget-Footer an.
+- **Guidance statt Spam**: bei Noisy-Queries Alternativen vorschlagen; niemals ungefragt verbose werden.
+
+### Eskalation (streng)
+
+- **Stage 2**: erst **K erhöhen** (im gleichen Scope).
+- **Nie automatisch über Stage 2 hinaus.**
+- **Stage 3 nur explizit** (darf Scope öffnen).
+
+### Kanonisches Profil
+
+Die kanonische Policy liegt in:
+
+- `src/nexus/policy/default_profile.v2.yaml`
+
+### Empfohlener Aufruf (PowerShell)
+
+Statt `nexus -q ...` bei Orientierung standardmäßig:
+
+`python -m nexus.cli_policy . "-q" "deine query"`
+
+oder (wenn installiert):
+
+`nexus-policy . "-q" "deine query"`
+

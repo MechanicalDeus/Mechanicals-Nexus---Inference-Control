@@ -1,0 +1,145 @@
+version: 2
+name: safe-default-v2
+
+limits:
+  # Worst-case guardrails (stage output is truncated if exceeded).
+  max_output_chars: 6000
+  max_output_lines: 80
+
+stages:
+  "1":
+    names_only: true
+    annotate: true
+    k_default: 5
+    k_high_risk: 3
+    allow_scope_expand: false
+    include_budget_footer: true
+    include_control_header: false
+  "2":
+    names_only: true
+    annotate: true
+    k_default: 10
+    k_high_risk: 6
+    allow_scope_expand: false
+    include_budget_footer: true
+    include_control_header: false
+  "3":
+    # Stage 3 is explicit only (never auto-escalate to 3).
+    names_only: true
+    annotate: true
+    k_default: 20
+    k_high_risk: 12
+    allow_scope_expand: true
+    include_budget_footer: true
+    include_control_header: false
+
+scope:
+  # Tier order matters: earlier tiers are searched first.
+  tiers:
+    - primary_core
+    - primary_adjacent
+    - secondary_tests
+    - secondary_vendor
+
+  primary_core_dir_names:
+    - src
+    - app
+    - backend
+    - server
+    - api
+    - services
+
+  primary_adjacent_dir_names:
+    - core
+    - libs
+    - lib
+    - packages
+    - modules
+
+  secondary_tests_dir_names:
+    - tests
+    - test
+
+  secondary_vendor_dir_names:
+    - vendor
+    - third_party
+    - third-party
+
+  excluded_dir_names:
+    - .git
+    - .hg
+    - .svn
+    - __pycache__
+    - .mypy_cache
+    - .pytest_cache
+    - .ruff_cache
+    - .tox
+    - .venv
+    - venv
+    - env
+    - node_modules
+    - dist
+    - build
+    - out
+    - coverage
+
+risk:
+  noisy_keywords:
+    - state
+    - data
+    - handler
+    - process
+    - manager
+    - service
+    - util
+    - utils
+    - common
+    - config
+    - def
+    - class
+    - import
+
+  # Repo-shape features influence risk for the same query token(s).
+  repo_shape_high_risk_dir_names:
+    - node_modules
+    - client
+    - frontend
+    - web
+    - dist
+    - build
+    - generated
+
+intent:
+  # Simple keyword triggers. Classifier returns confidences, not hard labels.
+  entrypoint:
+    keywords:
+      - entrypoint
+      - start
+      - run
+      - launch
+      - boot
+      - server start
+      - run server
+      - __main__
+      - main.py
+      - uvicorn
+      - fastapi
+  api_routes:
+    keywords:
+      - api
+      - route
+      - routes
+      - router
+      - endpoint
+      - endpoints
+      - apirouter
+      - include_router
+  websocket:
+    keywords:
+      - websocket
+      - websockets
+      - ws
+      - web socket
+      - websocket_endpoint
+      - app.websocket
+

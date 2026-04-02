@@ -30,6 +30,98 @@ def _format_symbol_one_liner(s: SymbolRecord) -> str:
     )
 
 
+def _reason_one_liner(s: SymbolRecord, q: str) -> str:
+    """
+    Extremely compact rationale for why this symbol is surfaced.
+
+    This is a ranker aid for humans/agents (selection speed), not extra output breadth.
+    Keep it stable and short.
+    """
+    ql = q.lower()
+    fp = s.file.replace("\\", "/").lower()
+    n = s.name.lower()
+
+    if any(k in ql for k in ("entrypoint", "start", "run", "__main__", "uvicorn", "fastapi")):
+        if n in ("main", "run") or "__main__" in fp or fp.endswith("/main.py") or "/cli" in fp:
+            return "entrypoint signature"
+
+    if any(k in ql for k in ("websocket", "ws")):
+        if "websocket" in n or "websocket" in fp:
+            return "websocket-related"
+
+    if any(k in ql for k in ("api", "route", "router", "endpoint")):
+        if "router" in n or "route" in n or "router" in fp or "api" in fp:
+            return "router/endpoint"
+
+    w = len(s.writes) + len(s.indirect_writes) + len(s.transitive_writes)
+    if w >= 6:
+        return "high mutation centrality"
+    if w > 0 and any(k in ql for k in ("mutat", "write", "change", "state", "zustand", "commit", "delta")):
+        return "mutation hits"
+
+    if len(s.called_by) >= 8:
+        return "hot callsite"
+    if len(s.calls) >= 12:
+        return "fanout (calls)"
+
+    if entry_point_heuristic_score(s) >= 6.0:
+        return "orchestrator-shaped"
+
+    return "heuristic match"
+
+
+def agent_symbol_lines_with_reasons(
+    graph: InferenceGraph,
+    *,
+    query: str,
+    annotate: bool = True,
+    max_symbols: int | None = None,
+    min_confidence: float | None = None,
+) -> list[str] | None:
+    """
+    Like :func:`agent_symbol_lines`, but appends a short ``reason=...`` field to annotated lines.
+    """
+    lines = agent_symbol_lines(
+        graph,
+        query=query,
+        annotate=annotate,
+        max_symbols=max_symbols,
+        min_confidence=min_confidence,
+    )
+    if lines is None or not annotate:
+        return lines
+
+    # For reasons we need the primaries again (stable with the same slicer).
+    q_raw = query.strip()
+    if not q_raw or detect_special_query_mode(q_raw):
+        return None
+
+    syms = generic_query_symbol_slice(
+        graph,
+        q_raw,
+        max_symbols=max_symbols,
+        min_confidence=min_confidence,
+    )
+    primaries = _primary_symbols_in_order(syms)
+    reasons = [_reason_one_liner(s, q_raw) for s in primaries]
+
+    out: list[str] = []
+    r_i = 0
+    for line in lines:
+        if line.startswith("SAME_NAME"):
+            out.append(line)
+            continue
+        if line.startswith("  "):
+            out.append(line)
+            continue
+        if r_i < len(reasons):
+            out.append(f"{line} | reason={reasons[r_i]}")
+            r_i += 1
+        else:
+            out.append(line)
+    return out
+
+
 def entry_point_heuristic_score(s: SymbolRecord) -> float:
     """
     Heuristik: hoher Score = eher öffentlicher Einstieg / Orchestrierung (Service,

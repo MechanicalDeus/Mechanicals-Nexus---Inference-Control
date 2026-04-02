@@ -22,12 +22,14 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = []
+# Policy profiles (safe-default wrapper) use YAML (safe_load only).
+dependencies = ["PyYAML>=6.0"]
 
 [project.scripts]
 nexus = "nexus.cli:main"
 nexus-grep = "nexus.cli_grep:main"
 nexus-cursor-rules = "nexus.cursor_rules_cli:main"
+nexus-policy = "nexus.cli_policy:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
@@ -45,6 +47,7 @@ packages = ["src/nexus"]
 # Cursor rules must ship inside the wheel (not only .py).
 [tool.hatch.build.targets.wheel.force-include]
 "src/nexus/cursor_rules/nexus-over-grep.mdc" = "nexus/cursor_rules/nexus-over-grep.mdc"
+"src/nexus/policy/default_profile.v2.yaml" = "nexus/policy/default_profile.v2.yaml"
 
 [tool.hatch.build.targets.sdist]
 include = [
