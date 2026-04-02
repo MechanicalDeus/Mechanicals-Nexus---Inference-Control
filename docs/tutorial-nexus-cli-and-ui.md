@@ -1,5 +1,7 @@
 # Nexus tutorial: one map, two surfaces (CLI + UI)
 
+**Repo hub:** [`TUTORIAL.md`](../TUTORIAL.md) (short index + links).
+
 This page is the **single walkthrough** for how Nexus works **whether you use the terminal or the Inference Console**. Screenshots include the **Inference Console** (GUI) and **integrated terminals / CLIs in an IDE** running `nexus -q`. Every GUI step has a **direct CLI equivalent** — same scan, same graph, same functions — so what you **see**, what you **print**, and what you **paste into an LLM** stay aligned.
 
 **TL;DR**

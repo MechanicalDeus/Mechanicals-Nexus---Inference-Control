@@ -61,6 +61,7 @@ include = [
   "extras",
   "pyproject.toml",
   "README.md",
+  "TUTORIAL.md",
   "SECURITY.md",
   "LICENSE",
   "AGENTS.md",

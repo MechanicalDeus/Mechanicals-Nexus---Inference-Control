@@ -68,7 +68,7 @@ Example mutation-chain fragment when analysing this repo (your project will diff
 
 `src.nexus.cli.main → src.nexus.scanner.attach → src.nexus.scanner.scan → src.nexus.scanner._scan_impl → src.nexus.scanner._tag_symbol`
 
-**Full tutorial (CLI + UI, one principle, screenshot walkthrough):** [`docs/tutorial-nexus-cli-and-ui.md`](docs/tutorial-nexus-cli-and-ui.md). **CLI in the IDE** (local run, bounded brief — no API usage for the scan): [same doc → CLI in the IDE](docs/tutorial-nexus-cli-and-ui.md#cli-in-the-ide-local-fast-bounded-output).
+**Tutorial hub:** **[`TUTORIAL.md`](TUTORIAL.md)** (links to the full guide, screenshots, and related docs).
 
 More narrative walkthrough: [`docs/proof-of-concept.md`](docs/proof-of-concept.md).
 
@@ -110,7 +110,7 @@ pip install -e ".[ui]"
 nexus-console
 ```
 
-- **[Tutorial: CLI + UI (principle + all screenshots)](docs/tutorial-nexus-cli-and-ui.md)**  
+- **[`TUTORIAL.md`](TUTORIAL.md)** (start here) → **[full walkthrough](docs/tutorial-nexus-cli-and-ui.md)**  
 - **[Console quick steps](docs/inference-console-tutorial.md)** · **[Deep dive](docs/inference-console-deep-dive.md)**
 
 ### Cursor rules (bundled in the package)
@@ -167,6 +167,21 @@ Generated maps (JSON graphs, large briefings) can expose **architecture, paths, 
 ## Positioning
 
 Nexus is **not** a linter, type checker, or profiler. It is a **static, heuristic inference layer** optimised for **context-efficient** navigation — a form of **semantic code indexing for LLM workflows** (and for humans who want the same map).
+
+## Tutorial
+
+Guided walkthrough: **CLI** (including in your IDE terminal), optional **Inference Console**, screenshots, and why **CLI / GUI / pasted brief** share the **same** inference map.
+
+| | |
+|--|--|
+| **Entry point** | **[`TUTORIAL.md`](TUTORIAL.md)** |
+| **Full guide** | **[`docs/tutorial-nexus-cli-and-ui.md`](docs/tutorial-nexus-cli-and-ui.md)** |
+| **CLI in the IDE** (local, bounded output) | [Section in full guide](docs/tutorial-nexus-cli-and-ui.md#cli-in-the-ide-local-fast-bounded-output) |
+| **Console** quick steps | [`docs/inference-console-tutorial.md`](docs/inference-console-tutorial.md) |
+| **Architecture** (session, exports) | [`docs/inference-console-deep-dive.md`](docs/inference-console-deep-dive.md) |
+| **Screenshot assets** | [`console tutorial/`](console tutorial/) |
+
+---
 
 ## Development
 
