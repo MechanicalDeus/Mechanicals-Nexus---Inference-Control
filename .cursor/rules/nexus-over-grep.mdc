@@ -7,7 +7,9 @@ alwaysApply: true
 
 ## Design goal (short)
 
-In **large Python repos**, **broad `grep`/`rg`** as a first step for LLM agents is often **token-expensive** (many hit lines, little structure). **Nexus** provides an **inference map** (symbols, edges, mutation hints). **`nexus-grep`** is the **lean** tier: relevant **slice** first, then **text search only in the matching `.py` files** — **grep** is used **inside this pipeline**, not as blind scanning of half the codebase.
+In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) by the agent is usually **token-expensive** and low-signal. **Nexus** builds (or rebuilds) a **map** (symbols, edges, mutation hints) and exposes a **query interface**.
+
+**Rule:** The agent should **not search by itself**. It should send questions to Nexus (`nexus-grep` / `nexus -q`) and let Nexus return **where to read**.
 
 **Tiering:** `nexus-grep` / `nexus --names-only` → **`read_file`** (slice) → if needed **`nexus -q`** with small `--max-symbols` → **`nexus --json`** only when a **full graph export** is required.
 
@@ -17,7 +19,7 @@ In **large Python repos**, **broad `grep`/`rg`** as a first step for LLM agents 
 
 On a **reference machine** the same logic can be **global**: `%USERPROFILE%\.cursor\rules\nexus-python-context.mdc` (same content as this file; adjust paths to your Nexus checkout if needed).
 
-When you need to understand **Python code, calls, mutations, or architecture**, prefer the **`nexus`** / **`nexus-grep`** CLI first, not `grep`/`rg` across huge trees.
+When you need to understand **Python code, calls, mutations, or architecture**, use **`nexus-grep` / `nexus -q`** first. Do **not** use raw `grep`/`rg`/Select-String for “orientation”.
 
 ## Why
 
@@ -44,9 +46,11 @@ The model **drives context acquisition** (hypothesis → tool → evidence → r
 4. **Structure/chains only if needed:** `nexus -q "…"` with **small** `--max-symbols` (e.g. 15–25).
 5. **Full graph** only for explicit need or hard architecture questions: `nexus <path> --json > graph.json`
 
-**`rg`/Select-String:** after the steps above, **only targeted** (known names, few files).
+**Raw text search (`rg`/Select-String/grep):** allowed only for **non-Python** targets (config/logs) or when explicitly instructed; for Python code search use **`nexus-grep`** (wrapped).
 
 **`nexus-grep`** does not replace special modes: for `impact …`, `why …`, deep mutation chains use `nexus -q "…"` as below.
+
+Note: the implementation may use additional internal helpers, but the agent-facing behavior is: **query the map (`nexus-grep` / `nexus -q`)**.
 
 ---
 
