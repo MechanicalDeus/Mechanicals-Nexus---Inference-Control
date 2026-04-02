@@ -2,6 +2,8 @@
 
 A **local** full-repo scan builds a graph in memory **once per process**. After that, each agent turn can rely on **bounded** Nexus output (`--names-only`, `nexus-grep`, small `--max-symbols`) instead of pasting huge grep dumps or whole files into the model. Below: **reproducible numbers** from this repository plus **reference scans** from larger legacy codebases.
 
+**Why slice at all?** The **full** inference map (especially a **`--json` export**) for a real codebase is often **orders of magnitude larger** than the Nexus package on disk — and **vastly** larger than what belongs in **one** model context. Symbols × edges × paths add up fast. **Query mode**, **`--max-symbols`**, **same-name folding**, and **`--names-only`** exist so you ship **a card hand**, not the **whole deck**.
+
 ---
 
 ## 1. Core economics

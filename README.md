@@ -56,7 +56,7 @@ Deeper, still bounded:
 nexus . -q "mutation" --max-symbols 5
 ```
 
-**Defaults (query mode, `-q`):** If you omit `--max-symbols`, Nexus caps the heuristic slice at **12** symbols. The brief then adds **`NEXT_OPEN`** (up to three suggested `file:line` slices) and collapses **same simple name** duplicates into one primary block plus a compact **`SAME_NAME`** summary / `same_name_also` line — fewer tokens, less repetition.
+**Defaults (query mode, `-q`):** If you omit `--max-symbols`, Nexus caps the heuristic slice at **12** symbols. The brief then adds **`NEXT_OPEN`** (up to three suggested `file:line` slices) and collapses **same simple name** duplicates into one primary block plus a compact **`SAME_NAME`** summary / `same_name_also` line — fewer tokens, less repetition. **Full maps** (`--json`) can be **huge** next to the tool or a single prompt; **slicing** is how you keep context human- and model-sized (see **[`docs/token-efficiency.md`](docs/token-efficiency.md)**).
 
 **Minimal tokens, still interpretable:**
 
