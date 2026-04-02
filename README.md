@@ -38,6 +38,12 @@ Instead of only raw matches, you get **structured reasoning paths** and **briefi
 nexus-grep . -q "mutation" --max-symbols 10
 ```
 
+Safe-by-default wrapper (scope gating + staged caps):
+
+```bash
+nexus-policy . -q "state"
+```
+
 Deeper, still bounded:
 
 ```bash
@@ -91,7 +97,7 @@ pip install -e .
 # or: pipx install -e .
 ```
 
-Python **3.10+**. Entry points: `nexus`, `nexus-grep`, `nexus-cursor-rules`.
+Python **3.10+**. Entry points: `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`.
 
 ### Cursor rules (bundled in the package)
 
@@ -126,6 +132,17 @@ Use **`--json` / saved exports only when necessary** — they can be **security-
 4. **`nexus . --json`** — full graph export **only** if you need it and can keep it **private**.
 
 Agent-oriented checklist: [`AGENTS.md`](AGENTS.md). Executive summary: [`NEXUS-REPORT.md`](NEXUS-REPORT.md).
+
+## Safety features (what keeps output bounded)
+
+Nexus is designed to be **token-efficient**, but also to reduce “oops” moments in agent workflows:
+
+- **Bounded slices**: query mode defaults to a small heuristic cap (12 symbols if `--max-symbols` is omitted).
+- **Names-only modes**: `--names-only` (and `--annotate`) produce one line per symbol instead of verbose briefs.
+- **Same-name folding**: duplicates are collapsed into a primary block plus a compact `SAME_NAME` summary.
+- **Safe wrapper (`nexus-policy`)**: applies **scope gating** + **risk-based caps** + **staged retrieval** and enforces a hard output bound (chars + lines). Stage 3 is **explicit only** (never automatic).
+- **Control headers**: optional bounded `[NEXUS_CONFIG]` header (`--control-header` / `NEXUS_CONTROL_HEADER=1`) on stderr for observability without dumping map content.
+- **Governance files**: `.nexusdeny` / `.nexusignore` / `.nexus-skip` prevent sensitive subtrees from being discovered or inferred (details in `SECURITY.md`).
 
 ## Security: inference maps
 

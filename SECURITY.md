@@ -40,6 +40,18 @@ dumping map contents:
 
 The header is printed to **stderr** and uses redacted identifiers (no absolute paths).
 
+## `nexus-policy` is a safety wrapper (bounded retrieval)
+
+`nexus-policy` is a CLI wrapper that applies a **policy profile** to make exploration more “inference-safe”:
+
+- **Scope gating**: search starts in project-code scopes (e.g. `src/`, `app/`) instead of opening the entire tree.
+- **Risk-based caps**: generic/high-noise queries reduce K (fewer candidates) and print suggested alternative queries.
+- **Staged retrieval**: stage 1 is conservative, stage 2 increases K without widening scope; **stage 3 is explicit only**.
+- **Hard output bounds**: output is capped by **characters and lines** to prevent runaway “hit list” spam.
+
+This helps reduce accidental over-exposure in agent workflows, but it does **not** replace governance controls:
+use `.nexusdeny` / `.nexusignore` / `.nexus-skip` to prevent sensitive subtrees from being discovered or inferred.
+
 ## Cached modes are security-sensitive
 
 If you enable cached inference modes (e.g. `--mode persistent|hybrid --cache-dir …`),

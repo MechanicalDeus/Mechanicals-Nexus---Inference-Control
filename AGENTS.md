@@ -23,6 +23,7 @@ Use this file as the **reference** when working in **any Python repo** and you n
 From the **target repo root** (or `src/<package>`):
 
 ```bash
+nexus-policy . -q "state"
 nexus . -q "mutation" --max-symbols 25
 nexus . -q "full mutation chain" --max-symbols 40
 nexus . -q "impact ClassName"
@@ -56,6 +57,7 @@ nexus . -q "core system flow" --max-symbols 20 --control-header
 
 ```powershell
 $env:PYTHONPATH = "F:\Nexus\src"   # adjust to your Nexus checkout
+python -m nexus.cli_policy . "-q" "state"
 python -m nexus . "-q" "mutation" "--max-symbols" "20"
 python -m nexus . "-q" "mutation" "--names-only" "--annotate" "--max-symbols" "15"
 python -m nexus.cli_grep . "-q" "mutation" "--max-symbols" "25"
@@ -94,6 +96,15 @@ python -m nexus . "-q" "flow" "--names-only" "--max-symbols" "40"
 
 - Not Python, pure string search in config/logs → `grep` / editor search is fine.
 - Very small file, known location → open the file directly.
+
+## 4.1 When to prefer `nexus-policy`
+
+Use **`nexus-policy`** when you want “safe by default” exploration:
+
+- applies **scope gating** (project-code first)
+- enforces **hard output caps** (chars + lines)
+- reduces **high-noise** queries by lowering K and printing suggestions
+- auto-escalates only from **stage 1 → stage 2** (never stage 3)
 
 ## 5. Where is the Cursor template?
 
