@@ -145,6 +145,8 @@ The expensive part for LLM workflows is **not** the local AST pass — it is **r
 
 **Empirical agent metrics** (Cursor usage dashboards, screenshots, and how to read them): see **[§ Metrics](#metrics)** below and the full write-up **[`docs/usage-metrics.md`](docs/usage-metrics.md)**.
 
+**Case study (two repos, zero file opens):** **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** — cross-checkout comparison via **`nexus.cli_opc`** only; **~110k** session tokens vs **tens of MB** of naive `.py` text.
+
 ## Metrics
 
 Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **Input**, **Output** — **not** local AST time. Use this section as a **quick index**; narrative + honesty constraints live in **[`docs/usage-metrics.md`](docs/usage-metrics.md)**.
@@ -154,6 +156,7 @@ Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **I
 | **Small checkout** (~**7 MB**, this repo) | Build-leaning sessions **with** vs **without** Nexus | Totals differ; **fresh Input** almost flat — **tiny graph**, not a stress test for orientation. |
 | **Large checkout** (~**7 GB**, **TTRPG Studio**, **N=1**) | **Same analysis-only prompt**, Nexus on vs off | **Fair** anchor for **analysis**: **~43%** lower **Total**, **~25%** lower **Input**; big **Cache Read** delta — **[details](docs/usage-metrics.md#controlled-benchmark-ttrpg-studio-same-task-with-vs-without-nexus)**. |
 | **Gallery** | **Build without Nexus** (high totals) vs **analysis with Nexus** (lower totals) | Dashboard ratios **~7×–15×** are **real** but **confound task type** with retrieval — **not** a controlled “Nexus multiplier” for analysis. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)**. |
+| **Cross-repo case study** | **Two** local Python trees compared **without opening** their source/docs in the agent — **Nexus-only** orientation | **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** + screenshot **`cursor-cross-repo-orientation-110k.png`** — **N=1**, illustrates **representation shift** vs naive full-text ingest. |
 
 ### Controlled benchmark — large Python checkout (TTRPG Studio)
 
@@ -199,7 +202,7 @@ pip install -e .
 # or: pipx install -e .
 ```
 
-Python **3.10+**. Continuous integration runs **3.10** and **3.12** on **Ubuntu** and **Windows** (see `.github/workflows/ci.yml`). After install, use these **commands**: **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`**. The pip/PyPI **distribution** name is **`nexus-inference`** — there is **no** `nexus-inference` shell command.
+Python **3.10+**. Continuous integration runs **3.10** and **3.12** on **Ubuntu** and **Windows** (see `.github/workflows/ci.yml`). After install, use these **commands**: **`nexus-opc`** (opcode ISA / fixed pipelines), **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`**. The pip/PyPI **distribution** name is **`nexus-inference`** — there is **no** `nexus-inference` shell command.
 
 ### Nexus Inference Console (optional GUI)
 
@@ -211,6 +214,7 @@ nexus-console
 ```
 
 - **[`TUTORIAL.md`](TUTORIAL.md)** (start here) → **[full walkthrough](docs/tutorial-nexus-cli-and-ui.md)**  
+- **[Opcode ISA (`nexus-opc`)](docs/tutorial-nexus-opc-isa.md)** — deterministic CLI for agents  
 - **[Console quick steps](docs/inference-console-tutorial.md)** · **[Deep dive](docs/inference-console-deep-dive.md)**
 
 ### Cursor rules (bundled in the package)
@@ -250,9 +254,9 @@ Use **`--json` / saved exports only when necessary** — they can be **security-
 
 ## Usage flow (agents & humans)
 
-1. **`nexus-grep`** — find a small, relevant symbol/file slice.  
+1. **`nexus-opc locate`** (or **`nexus-grep`**) — small, relevant symbol/file slice without inventing flags.  
 2. **Open only those files** in the editor or prompt.  
-3. **`nexus -q`** — impact, mutation chains, etc., with a tight `--max-symbols`.  
+3. **`nexus -q`** — impact, mutation chains, etc., with a tight **`--max-symbols`** (when opcodes are not enough).  
 4. **`nexus . --json`** — full graph export **only** if you need it and can keep it **private**.
 
 Agent-oriented checklist: [`AGENTS.md`](AGENTS.md). Executive summary: [`NEXUS-REPORT.md`](NEXUS-REPORT.md).
@@ -286,10 +290,12 @@ Guided walkthrough: **CLI** (including in your IDE terminal), optional **Inferen
 |--|--|
 | **Entry point** | **[`TUTORIAL.md`](TUTORIAL.md)** |
 | **Full guide** | **[`docs/tutorial-nexus-cli-and-ui.md`](docs/tutorial-nexus-cli-and-ui.md)** |
+| **Opcode ISA** (`nexus-opc`, agents) | [`docs/tutorial-nexus-opc-isa.md`](docs/tutorial-nexus-opc-isa.md) |
 | **CLI in the IDE** (local, bounded output) | [Section in full guide](docs/tutorial-nexus-cli-and-ui.md#cli-in-the-ide-local-fast-bounded-output) |
 | **Console** quick steps | [`docs/inference-console-tutorial.md`](docs/inference-console-tutorial.md) |
 | **Architecture** (session, exports) | [`docs/inference-console-deep-dive.md`](docs/inference-console-deep-dive.md) |
-| **Screenshot assets** | [`console tutorial/`](console tutorial/) |
+| **Console screenshots (current UI)** | [`docs/ui-screenshots/`](docs/ui-screenshots/) |
+| **CLI IDE proof + metrics PNGs** | [`console tutorial/`](console tutorial/) (see [`docs/tutorial-nexus-cli-extended.md`](docs/tutorial-nexus-cli-extended.md#0-other-assets-in-console-tutorial)) |
 | **Usage metrics** (agent token dashboards) | **[§ Metrics](#metrics)** · [`docs/usage-metrics.md`](docs/usage-metrics.md) · [`docs/assets/usage-metrics/`](docs/assets/usage-metrics/) |
 | **Scaling argument** (amortized graph vs text search) | [`docs/nexus-scaling-law.md`](docs/nexus-scaling-law.md) |
 
