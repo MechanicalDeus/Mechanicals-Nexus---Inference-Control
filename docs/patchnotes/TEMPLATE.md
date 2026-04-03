@@ -5,7 +5,7 @@
 ## Meta
 
 - **Datum:** YYYY-MM-DD
-- **Bezug Version:** z. B. `nexus-inference` 0.1.0 (siehe `pyproject.toml`)
+- **Bezug Version:** z. B. `nexus-inference` 0.1.1 (siehe `pyproject.toml`)
 - **Scope:** CLI / Library / UI / Benchmark / Docs
 
 ## Zusammenfassung

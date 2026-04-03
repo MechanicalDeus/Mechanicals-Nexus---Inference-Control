@@ -2,7 +2,7 @@
 
 This document summarizes **purpose, value, and positioning** of Nexus — as an **overview** for decisions and as a **pitch** for teams using LLM agents or structured code analysis.
 
-**Status:** **`0.1.0`** on the **`0.x`** line (see `pyproject.toml`) — inference-facing CLI and projections may still **evolve** within minors; breaking or notable changes are tracked in **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)**, **[`CHANGELOG.md`](CHANGELOG.md)**, and **[Releases](https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control/releases)** (**Contract impact** where relevant). The living entry point for install, limits, and links is **[`README.md`](README.md)**.
+**Status:** **`0.1.1`** on the **`0.x`** line (see `pyproject.toml`) — inference-facing CLI and projections may still **evolve** within minors; breaking or notable changes are tracked in **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)**, **[`CHANGELOG.md`](CHANGELOG.md)**, and **[Releases](https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control/releases)** (**Contract impact** where relevant). The living entry point for install, limits, and links is **[`README.md`](README.md)**.
 
 ---
 

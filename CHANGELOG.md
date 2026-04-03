@@ -8,6 +8,27 @@ The **package version** is defined in **`pyproject.toml`**. For **install paths*
 
 ---
 
+## [0.1.1] — 2026-04-04
+
+Patch release: **Inference Console** reachable from the main **`nexus`** CLI for quick starts in **cmd** / PowerShell.
+
+### Added
+
+- **`nexus ui`** and **`nexus console`** — same entry as **`nexus-console`** (`nexus.ui.app`); `nexus --help` epilog documents both.
+
+### Contract impact
+
+| Topic | Notes for `0.1.1` |
+|-------|-------------------|
+| **New subcommands** | `ui` / `console` are reserved as first argv token (before the query CLI runs). No change to query flags or JSON shape. |
+| **Optional dependency** | PyQt6 still only via **`nexus-inference[ui]`**; without it, the new commands print the same install hint as `nexus-console`. |
+
+### Links
+
+- Compare: `v0.1.0…v0.1.1` (tag when published).
+
+---
+
 ## [0.1.0] — 2026-04-03
 
 First **packaged milestone** for **nexus-inference**: structural inference over Python trees, CLI + agent-oriented outputs, opcode ISA, and Cursor/agent docs. This is still **`0.x`**: heuristics, ranking, and projection details may evolve; treat **JSON / perspective outputs** as integration surfaces and read **patchnotes** when upgrading.
