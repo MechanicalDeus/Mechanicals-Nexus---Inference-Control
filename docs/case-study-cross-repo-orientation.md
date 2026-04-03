@@ -86,9 +86,9 @@ One Cursor usage row for this style of session showed approximately:
 
 That pattern matches **large recycled context** (rules, prior turns, tool outputs), not “Nexus printed megatokens.” The qualitative claim stands: **structural retrieval avoids shipping whole-repo text to the model.**
 
-Canonical copy (repo): [`docs/assets/usage-metrics/cursor-cross-repo-orientation-110k.png`](assets/usage-metrics/cursor-cross-repo-orientation-110k.png)
+Canonical copy (repo): [`docs/assets/usage-metrics/cursor-cross-repo-orientation-110k.svg`](assets/usage-metrics/cursor-cross-repo-orientation-110k.svg) (SVG placeholder; replace with `.png` when a dashboard export is committed)
 
-![Cursor usage breakdown — cross-repo Nexus orientation session (~110k total, Cache Read dominant)](assets/usage-metrics/cursor-cross-repo-orientation-110k.png)
+![Cursor usage breakdown — cross-repo Nexus orientation session (~110k total, Cache Read dominant)](assets/usage-metrics/cursor-cross-repo-orientation-110k.svg)
 
 ---
 

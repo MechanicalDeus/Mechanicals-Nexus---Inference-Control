@@ -1,14 +1,16 @@
 # Agent usage metrics (Cursor): with vs without Nexus
 
-This page documents **screenshots of real agent sessions** (Cursor usage / token dashboard) and a **longitudinal table of usage rows** (**§ Longitudinal usage rows (Apr 1–3, 2026)**). For **programmatic** per-invocation telemetry from the `nexus` CLI (`[NEXUS_METRICS]` on stderr), see **[`token-efficiency.md`](token-efficiency.md)** §2.5 and **[`patchnotes/README.md`](patchnotes/README.md)**. **Canonical copies for GitHub / the website** live under **[`docs/assets/usage-metrics/`](assets/usage-metrics/)** (stable filenames, no spaces). Optional local exports may still sit in **[`usage metrics/`](../usage%20metrics/)** at the repo root under the original names.
+This page documents **screenshots of real agent sessions** (Cursor usage / token dashboard) and a **longitudinal table of usage rows** (**§ Longitudinal usage rows (Apr 1–3, 2026)**). For **programmatic** per-invocation telemetry from the `nexus` CLI (`[NEXUS_METRICS]` on stderr), see **[`token-efficiency.md`](token-efficiency.md)** §2.5 and **[`patchnotes/README.md`](patchnotes/README.md)**.
 
-| Asset (in `docs/assets/usage-metrics/`) | Meaning |
+**Figures in the repo:** **[`docs/assets/usage-metrics/`](assets/usage-metrics/)** ships **SVG placeholders** (stable basenames, no broken image icons on GitHub). To attach real dashboard captures, drop **`*.png`** files with the names below and switch the matching `![…](…)` links from `.svg` to `.png` (see **[`assets/usage-metrics/README.md`](assets/usage-metrics/README.md)**). Optional local exports may still sit in **[`usage metrics/`](../usage%20metrics/)** at the repo root under the original names.
+
+| Asset basename (`.svg` in repo; optional `.png` replacement) | Meaning |
 |------------------------------------------|---------|
-| `without-nexus-1.png` … `without-nexus-5.png` | Five separate sessions: **implementation / build-style** agent work **without** Nexus-style tiering (no rule / no `nexus-grep` / `nexus -q` first) — **not** the same task type as the “with Nexus” gallery rows below. |
-| `with-nexus-1.png`, `with-nexus-2.png` | Two sessions **with** Nexus in the loop (**analysis-orientation**: structural queries first, bounded slices, then targeted reads). |
-| `nexus-self-scan.png` | **This repository** analyzed **with Nexus in the agent loop** (session type labeled like a *Nexus scan* in Cursor). Shows that even a structured workflow still accrues **attributed** model tokens — often with **Cache Read** dominating. |
-| `ttrpg-studio-with-nexus.png`, `ttrpg-studio-without-nexus.png` | **Controlled A/B** on a **large** local Python checkout (**TTRPG Studio**): **same analysis-only task** prompt, **with** vs **without** Nexus-style retrieval first (**N=1**). This is the **fair** “Nexus on analysis” benchmark in this doc. Canonical copies here; originals: `rpg studio scan with nexus.png`, `rpg studio scan without nexus.png` in [`usage metrics/`](../usage%20metrics/). |
-| `cursor-cross-repo-orientation-110k.png` | **Cross-repo case study** (two local checkouts, **no source files opened** in the agent — Nexus `map`/`locate`/`grep` only): session total **~110k** tokens with **Cache Read** dominant. Narrative + **measured disk / `.py` sizes** (2026-04-03): **[`case-study-cross-repo-orientation.md`](case-study-cross-repo-orientation.md)**. |
+| `without-nexus-1` … `without-nexus-5` | Five separate sessions: **implementation / build-style** agent work **without** Nexus-style tiering (no rule / no `nexus-grep` / `nexus -q` first) — **not** the same task type as the “with Nexus” gallery rows below. |
+| `with-nexus-1`, `with-nexus-2` | Two sessions **with** Nexus in the loop (**analysis-orientation**: structural queries first, bounded slices, then targeted reads). |
+| `nexus-self-scan` | **This repository** analyzed **with Nexus in the agent loop** (session type labeled like a *Nexus scan* in Cursor). Shows that even a structured workflow still accrues **attributed** model tokens — often with **Cache Read** dominating. |
+| `ttrpg-studio-with-nexus`, `ttrpg-studio-without-nexus` | **Controlled A/B** on a **large** local Python checkout (**TTRPG Studio**): **same analysis-only task** prompt, **with** vs **without** Nexus-style retrieval first (**N=1**). This is the **fair** “Nexus on analysis” benchmark in this doc. Originals: `rpg studio scan with nexus.png`, `rpg studio scan without nexus.png` in [`usage metrics/`](../usage%20metrics/). |
+| `cursor-cross-repo-orientation-110k` | **Cross-repo case study** (two local checkouts, **no source files opened** in the agent — Nexus `map`/`locate`/`grep` only): session total **~110k** tokens with **Cache Read** dominant. Narrative + **measured disk / `.py` sizes** (2026-04-03): **[`case-study-cross-repo-orientation.md`](case-study-cross-repo-orientation.md)**. |
 
 Original root filenames (same content as above, where applicable): `works without nexus .png`, …, `works WITH nexus 2.png`; self-scan source: **`analyzed nexus.png`**; TTRPG pair: **`rpg studio scan with nexus.png`**, **`rpg studio scan without nexus.png`** — all under [`usage metrics/`](../usage%20metrics/).
 
@@ -79,9 +81,9 @@ This pair is **not** the gallery above: **one** deliberate **A/B** on the same *
 
 **How this sits next to the gallery:** the **five “without”** gallery runs (~**0.85M–1.7M**) are **build** sessions **without** Nexus, not analysis tasks comparable to the **~110k–147k** “with Nexus” analysis rows. **Do not** blend those bands into one “Nexus saves 10×” story. The Studio pair is the **controlled** datapoint for **analysis**.
 
-![TTRPG Studio — with Nexus (controlled run)](assets/usage-metrics/ttrpg-studio-with-nexus.png)
+![TTRPG Studio — with Nexus (controlled run)](assets/usage-metrics/ttrpg-studio-with-nexus.svg)
 
-![TTRPG Studio — without Nexus (controlled run)](assets/usage-metrics/ttrpg-studio-without-nexus.png)
+![TTRPG Studio — without Nexus (controlled run)](assets/usage-metrics/ttrpg-studio-without-nexus.svg)
 
 ---
 
@@ -107,7 +109,7 @@ This is a **different slice** than the **gallery** above (which mixes **build-wi
 
 **How to read it:** **Cache Read** is again the bulk — consistent with the model **reusing or reloading a large conversational / tool context window**, even when **orientation** is guided by Nexus instead of raw repo grepping. Totals here are **far below** the **~0.85M–1.7M** **build-without-Nexus** gallery rows (different task type), but **not zero**: agents still pay for reasoning, summaries, and whatever context the host attaches to the thread.
 
-![Cursor usage — Nexus self-repo scan session](assets/usage-metrics/nexus-self-scan.png)
+![Cursor usage — Nexus self-repo scan session](assets/usage-metrics/nexus-self-scan.svg)
 
 ---
 
@@ -192,29 +194,29 @@ The same log shows **both modes on April 1**:
 
 ### Without Nexus (five runs — **build** sessions, no Nexus tiering)
 
-![Usage metrics — without Nexus (run 1)](assets/usage-metrics/without-nexus-1.png)
+![Usage metrics — without Nexus (run 1)](assets/usage-metrics/without-nexus-1.svg)
 
-![Usage metrics — without Nexus (run 2)](assets/usage-metrics/without-nexus-2.png)
+![Usage metrics — without Nexus (run 2)](assets/usage-metrics/without-nexus-2.svg)
 
-![Usage metrics — without Nexus (run 3)](assets/usage-metrics/without-nexus-3.png)
+![Usage metrics — without Nexus (run 3)](assets/usage-metrics/without-nexus-3.svg)
 
-![Usage metrics — without Nexus (run 4)](assets/usage-metrics/without-nexus-4.png)
+![Usage metrics — without Nexus (run 4)](assets/usage-metrics/without-nexus-4.svg)
 
-![Usage metrics — without Nexus (run 5)](assets/usage-metrics/without-nexus-5.png)
+![Usage metrics — without Nexus (run 5)](assets/usage-metrics/without-nexus-5.svg)
 
 ### With Nexus (two runs — **analysis** sessions, Nexus first)
 
-![Usage metrics — with Nexus (run 1)](assets/usage-metrics/with-nexus-1.png)
+![Usage metrics — with Nexus (run 1)](assets/usage-metrics/with-nexus-1.svg)
 
-![Usage metrics — with Nexus (run 2)](assets/usage-metrics/with-nexus-2.png)
+![Usage metrics — with Nexus (run 2)](assets/usage-metrics/with-nexus-2.svg)
 
 ### Nexus on Nexus (self-scan, one session capture)
 
-See **§ Self-scan** (heading above) for numbers and the full-size image `nexus-self-scan.png`.
+See **§ Self-scan** (heading above) for numbers and the figure `nexus-self-scan.svg` (or `nexus-self-scan.png` if you replace the placeholder).
 
 ### TTRPG Studio (controlled A/B, one pair)
 
-See **§ Controlled benchmark: TTRPG Studio** for numbers. Images: `ttrpg-studio-with-nexus.png`, `ttrpg-studio-without-nexus.png` (also inlined in that section).
+See **§ Controlled benchmark: TTRPG Studio** for numbers. Figures: `ttrpg-studio-with-nexus.svg`, `ttrpg-studio-without-nexus.svg` (also inlined in that section).
 
 ---
 

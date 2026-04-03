@@ -226,6 +226,6 @@ For honest **before/after** metrics in your setup: compare **character counts** 
 
 ## 7. Empirical session totals (screenshots)
 
-For **before/after style** evidence from real Cursor agent sessions (totals and **Cache Read** breakdowns), see **[`usage-metrics.md`](usage-metrics.md)** — PNGs under [`docs/assets/usage-metrics/`](assets/usage-metrics/), methodology and caveats in that page (including a **self-scan** of the Nexus repo with Nexus, §“Self-scan”).
+For **before/after style** evidence from real Cursor agent sessions (totals and **Cache Read** breakdowns), see **[`usage-metrics.md`](usage-metrics.md)** — figures under [`docs/assets/usage-metrics/`](assets/usage-metrics/) (committed **SVG placeholders**; optional **PNG** replacements), methodology and caveats in that page (including a **self-scan** of the Nexus repo with Nexus, §“Self-scan”).
 
 **Why the win grows with repo size (architecture, not hype):** **[`nexus-scaling-law.md`](nexus-scaling-law.md)** — informal “scaling law” (amortized scan + bounded queries vs unstructured search in **N**).

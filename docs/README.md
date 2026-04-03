@@ -64,5 +64,5 @@ Short **map** of `docs/`: audience, purpose, link. **Maintainers:** add new topi
 | Path | Contents |
 |------|----------|
 | [`assets/`](assets/) | Readme banner, diagrams, screenshots |
-| [`assets/usage-metrics/`](assets/usage-metrics/) | Metrics screenshots |
+| [`assets/usage-metrics/`](assets/usage-metrics/) | Usage-metrics figures (SVG placeholders; optional PNG exports) |
 | [`ui-screenshots/`](ui-screenshots/) | Current console UI |
