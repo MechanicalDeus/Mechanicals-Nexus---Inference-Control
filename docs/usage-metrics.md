@@ -4,10 +4,10 @@ This page documents **screenshots of real agent sessions** (Cursor usage / token
 
 | Asset (in `docs/assets/usage-metrics/`) | Meaning |
 |------------------------------------------|---------|
-| `without-nexus-1.png` … `without-nexus-5.png` | Five separate runs **without** Nexus-style tiering: orientation via **broad search and file reads** (no rule / no `nexus-grep` / `nexus -q` first). |
-| `with-nexus-1.png`, `with-nexus-2.png` | Two runs **with** Nexus in the loop (structural queries first, bounded slices, then targeted reads). |
+| `without-nexus-1.png` … `without-nexus-5.png` | Five separate sessions: **implementation / build-style** agent work **without** Nexus-style tiering (no rule / no `nexus-grep` / `nexus -q` first) — **not** the same task type as the “with Nexus” gallery rows below. |
+| `with-nexus-1.png`, `with-nexus-2.png` | Two sessions **with** Nexus in the loop (**analysis-orientation**: structural queries first, bounded slices, then targeted reads). |
 | `nexus-self-scan.png` | **This repository** analyzed **with Nexus in the agent loop** (session type labeled like a *Nexus scan* in Cursor). Shows that even a structured workflow still accrues **attributed** model tokens — often with **Cache Read** dominating. |
-| `ttrpg-studio-with-nexus.png`, `ttrpg-studio-without-nexus.png` | **Controlled A/B** on a **large** local Python checkout (**TTRPG Studio**): **same** task prompt, sessions run **with** vs **without** Nexus-style retrieval first. Canonical copies here; originals: `rpg studio scan with nexus.png`, `rpg studio scan without nexus.png` in [`usage metrics/`](../usage%20metrics/). |
+| `ttrpg-studio-with-nexus.png`, `ttrpg-studio-without-nexus.png` | **Controlled A/B** on a **large** local Python checkout (**TTRPG Studio**): **same analysis-only task** prompt, **with** vs **without** Nexus-style retrieval first (**N=1**). This is the **fair** “Nexus on analysis” benchmark in this doc. Canonical copies here; originals: `rpg studio scan with nexus.png`, `rpg studio scan without nexus.png` in [`usage metrics/`](../usage%20metrics/). |
 
 Original root filenames (same content as above, where applicable): `works without nexus .png`, …, `works WITH nexus 2.png`; self-scan source: **`analyzed nexus.png`**; TTRPG pair: **`rpg studio scan with nexus.png`**, **`rpg studio scan without nexus.png`** — all under [`usage metrics/`](../usage%20metrics/).
 
@@ -22,18 +22,23 @@ These captures **do not** all answer the same question. Treat them as **layers**
 | Layer | Checkout / scale | What the rows represent | Takeaway |
 |-------|------------------|-------------------------|----------|
 | **Small tree** | **This repo** (Nexus checkout, on the order of **~7 MB** on disk) | Usage rows from **build-leaning** agent work (**with** vs **without** Nexus in the loop). Example: **~169k** vs **~95k** total; **fresh Input** only **~8.7k** vs **~7.7k** — almost flat. | **Expected:** the **inference graph is tiny**, so Nexus barely reduces **search-shaped** load; the session is **not** a fair stress test for orientation. Good for honesty: *this is where it does not need to shine.* |
-| **Large tree (controlled)** | **TTRPG Studio** (local checkout on the order of **~7 GB**) | **Same analysis-style task wording**, **Nexus on** vs **off** for retrieval first (**N=1**). See **§ Controlled benchmark** for numbers. | **Scaling:** totals and **Cache Read** move — **~43%** lower total and **~25%** lower **Input** in the captured pair — without relying on **10×** outlier sessions. |
-| **Gallery (exploratory)** | Various / mixed | Open-ended agent sessions **without** Nexus tiering vs **with** Nexus; often **long** exploration. | **Wide spread** (~**7×–15×** style ratios vs the highest “without” totals) — **real**, but **not** a controlled A/B on one repo + one prompt. |
+| **Large tree (controlled)** | **TTRPG Studio** (local checkout on the order of **~7 GB**) | **Same analysis-only task** wording, **Nexus on** vs **off** for retrieval first (**N=1**). See **§ Controlled benchmark** for numbers. | **Fair apples-to-apples** anchor for “Nexus on **analysis**”: **~43%** lower total and **~25%** lower **Input** in the captured pair. |
+| **Gallery (mixed task types)** | Various / mixed | **High-token “without Nexus” rows (~0.85M–1.7M)** are **build / implementation** sessions without Nexus tiering. **“With Nexus” gallery rows (~110k–147k)** are **analysis-orientation** with Nexus — **different job** than the build runs, not only a different tool. | Ratios on the order of **~7×–15×** are **real numbers on the dashboard**, but they **confound task type with retrieval mode**. **Do not** treat them as a controlled “Nexus multiplier” for analysis. |
 
-**Still open (optional next capture):** a **pure analysis** pair on the large checkout — **no** build/edit steps — with the **same** stop condition, to isolate orientation tokens further.
+**Fair vs unfair comparison (explicit):**
+
+| Comparison | Fair for “Nexus on analysis”? | What it actually mixes |
+|------------|------------------------------|-------------------------|
+| **~314k vs ~180k** (TTRPG Studio, **same** analysis prompt, with vs without Nexus) | **Yes** | Same task; only retrieval policy differs. |
+| **~1.6M vs ~110k** (gallery: build **without** Nexus vs analysis **with** Nexus) | **No** | **Build / implementation churn** vs **read-heavy analysis** — not a single variable. |
 
 ---
 
-## Summary numbers (from the captured runs)
+## Gallery numbers (build without Nexus vs analysis with Nexus)
 
-These are **rounded** totals read off the dashboards (not a statistical study).
+These are **rounded** totals read off the dashboards (not a statistical study). **Read the labels:** the **high** “without Nexus” captures are **build / implementation** sessions; the **low** “with Nexus” captures are **analysis-orientation** sessions. The gap is **not** a clean experimental effect of “Nexus off vs on” for one task.
 
-**Without Nexus** (five separate runs shown in the screenshots):
+**Without Nexus** (five runs in the screenshots — **build-style** work, no Nexus tiering):
 
 | Approx. total tokens |
 |---------------------|
@@ -43,27 +48,22 @@ These are **rounded** totals read off the dashboards (not a statistical study).
 | ~1.387M |
 | ~1.663M |
 
-**With Nexus** (two runs shown):
+**With Nexus** (two runs in the screenshots — **analysis-style** work, Nexus first):
 
 | Approx. total tokens |
 |---------------------|
 | ~110k |
 | ~147k |
 
-**Rough ratios** (same order as above, pairing the “with” runs illustratively against the spread of “without”):
+**If you naïvely divide** the “with” totals into the “without” totals, you get ratios on the order of **~7×–15×**. That arithmetic is **misleading as a product claim**: it compares **different task types** (build churn vs analysis) as much as it compares retrieval policy. **For a defensible “Nexus on analysis” statement, use the TTRPG Studio A/B** in the next section (**~1.75×** total, **~43%** reduction in the captured pair), not the gallery spread.
 
-- ~110k vs ~954k → on the order of **~12%** of the larger total (~**8×** fewer tokens).
-- ~110k vs ~852k → ~**13%** (~**7–8×**).
-- ~147k vs ~1.38M → ~**10–11%** (~**9×**).
-- ~147k vs ~1.66M → **under ~9%** (~**11×+**).
-
-So in **these** examples, totals are not “a bit lower” — they sit in a **different band**, often **roughly one order of magnitude** less than the high “without Nexus” runs. **Do not** merge that band with the **TTRPG** row in the table above: different **tasks**, **repos**, and **session shapes**. The Studio pair is the **conservative, same-prompt** anchor; the gallery is the **“exploration hell”** regime.
+**Defensible benchmark for analysis:** only the **TTRPG Studio** pair (same analysis task, same large checkout, **N=1**). The gallery stays **illustrative** (“what sessions can look like”), not a controlled multiplier.
 
 ---
 
 ## Controlled benchmark: TTRPG Studio (same task, with vs without Nexus)
 
-This pair is **not** the open-ended gallery above: **one** deliberate **A/B** on the same **large** checkout, **same** agent task wording, **Nexus on** vs **Nexus off** for orientation. Still **N=1** (no variance across repetitions) — but it answers the “small repo vs huge repo” question: here the map is large enough that retrieval discipline can show up in the dashboard.
+This pair is **not** the gallery above: **one** deliberate **A/B** on the same **large** checkout, **same analysis-only** agent prompt, **Nexus on** vs **Nexus off** for orientation. Still **N=1** (no variance across repetitions). This is the **only** capture in this document that **isolates** retrieval policy for **analysis** on a large tree.
 
 **Rows read off the screenshots** (Cursor usage table, **Included** / **auto**; tooltip breakdowns):
 
@@ -74,7 +74,7 @@ This pair is **not** the open-ended gallery above: **one** deliberate **A/B** on
 
 **Rough read:** total session tokens **~43% lower** in the “with Nexus” capture (**~1.75×** fewer total tokens: **~314k → ~180k**); **fresh Input** **~25% lower**. The largest **absolute** gap is **Cache Read** (**~130k** fewer in the “with” row in this capture) — consistent with **less wide context recycled** across turns while the agent orients. **Output** differs only slightly; the story is **context volume**, not answer length.
 
-**How this sits next to the gallery:** the **five “without”** gallery runs sit around **~0.85M–1.7M** totals — a different **task mix** and often **longer** open exploration. The Studio pair is **deliberately narrower**: one **large** tree, **one** prompt design, **N=1**. It reads as **more conservative and more defensible** for skeptical readers than quoting only **10×** outliers.
+**How this sits next to the gallery:** the **five “without”** gallery runs (~**0.85M–1.7M**) are **build** sessions **without** Nexus, not analysis tasks comparable to the **~110k–147k** “with Nexus” analysis rows. **Do not** blend those bands into one “Nexus saves 10×” story. The Studio pair is the **controlled** datapoint for **analysis**.
 
 ![TTRPG Studio — with Nexus (controlled run)](assets/usage-metrics/ttrpg-studio-with-nexus.png)
 
@@ -84,7 +84,7 @@ This pair is **not** the open-ended gallery above: **one** deliberate **A/B** on
 
 ## Self-scan: Nexus repository analyzed with Nexus (Cursor)
 
-This is a **different slice** than the open-ended “with vs without” comparison above: one **deliberate** workflow where the **Nexus checkout** was inspected **using Nexus** (`nexus-grep` / `nexus -q`, repo map on the CPU) inside Cursor. The usage table still shows **model-attributed** tokens for that chat — **not** the local AST cost (see **[`cursor-metrics-nexus.md`](cursor-metrics-nexus.md)**).
+This is a **different slice** than the **gallery** above (which mixes **build-without-Nexus** and **analysis-with-Nexus** rows): one **deliberate** workflow where the **Nexus checkout** was inspected **using Nexus** (`nexus-grep` / `nexus -q`, repo map on the CPU) inside Cursor. The usage table still shows **model-attributed** tokens for that chat — **not** the local AST cost (see **[`cursor-metrics-nexus.md`](cursor-metrics-nexus.md)**).
 
 **Observed rows** (same day, two consecutive entries; **Included** / **auto**):
 
@@ -102,7 +102,7 @@ This is a **different slice** than the open-ended “with vs without” comparis
 | Output | ~2.2k |
 | Cache Write | 0 |
 
-**How to read it:** **Cache Read** is again the bulk — consistent with the model **reusing or reloading a large conversational / tool context window**, even when **orientation** is guided by Nexus instead of raw repo grepping. Totals here are **far below** the **~0.85M–1.7M** “without Nexus” exploration runs in the gallery, but **not zero**: agents still pay for reasoning, summaries, and whatever context the host attaches to the thread.
+**How to read it:** **Cache Read** is again the bulk — consistent with the model **reusing or reloading a large conversational / tool context window**, even when **orientation** is guided by Nexus instead of raw repo grepping. Totals here are **far below** the **~0.85M–1.7M** **build-without-Nexus** gallery rows (different task type), but **not zero**: agents still pay for reasoning, summaries, and whatever context the host attaches to the thread.
 
 ![Cursor usage — Nexus self-repo scan session](assets/usage-metrics/nexus-self-scan.png)
 
@@ -110,7 +110,9 @@ This is a **different slice** than the open-ended “with vs without” comparis
 
 ## How to read this honestly
 
-**Strong claim supported by the screenshots:** In this workflow and these tasks, **total session tokens dropped dramatically** when Nexus shaped retrieval; the **Cache Read** component suggests **less repeated wide context**, not merely shorter answers.
+**Strong, defensible claim:** On a **large** checkout, for **the same analysis-only prompt**, the captured **TTRPG Studio** pair shows **lower** totals and **lower** fresh **Input** when Nexus shapes retrieval first — with a large **Cache Read** delta consistent with **less wide context** being recycled across turns.
+
+**Gallery claim (qualified):** The **~7×–15×** style gap between **build-without-Nexus** rows and **analysis-with-Nexus** rows is **real on the dashboard** but **not** a fair **single-variable** experiment. Use the gallery as **illustration** of how heavy **implementation** sessions without structural tiering can get — **not** as a peer to the Studio A/B.
 
 **What this is *not*:** A **universal** proof for every repository, model, agent policy, or task mix. Different prompts, tools, and follow-up counts will move the numbers.
 
@@ -118,16 +120,16 @@ This is a **different slice** than the open-ended “with vs without” comparis
 
 **Practical wording for README or posts:**
 
-- *These runs are strong empirical evidence that Nexus can slash model context use in agent loops that otherwise lean on broad repo reading.*
-- *The mechanism is plausible: orientation moves from **text absorption** to **CPU-side structural queries** (`nexus-grep`, `nexus -q`, `--perspective`, `nexus-policy`).*
-- *Totals still include reasoning, edits, and intentional reads; Nexus targets **search-shaped** context.*
-- *When communicating: keep the **gallery** (often **~7×–15×** vs the worst “without” rows) **and** add the **Studio** pair as a **conservative, same-prompt** datapoint — not a replacement, a **second axis** (outliers vs controlled large tree).*
+- *For **analysis** tasks, cite the **TTRPG Studio** controlled pair (**~43%** lower total / **~1.75×** in the capture) as the **primary** quantitative anchor.*
+- *The **gallery** shows **build-without-Nexus** vs **analysis-with-Nexus** — useful context, **not** an apples-to-apples multiplier.*
+- *The mechanism remains plausible: orientation moves from **text absorption** to **CPU-side structural queries** (`nexus-grep`, `nexus -q`, `--perspective`, `nexus-policy`).*
+- *Totals still include reasoning, edits, and intentional reads; Nexus targets **search-shaped** context in the orientation phase.*
 
 ---
 
 ## Screenshot gallery
 
-### Without Nexus (five runs)
+### Without Nexus (five runs — **build** sessions, no Nexus tiering)
 
 ![Usage metrics — without Nexus (run 1)](assets/usage-metrics/without-nexus-1.png)
 
@@ -139,7 +141,7 @@ This is a **different slice** than the open-ended “with vs without” comparis
 
 ![Usage metrics — without Nexus (run 5)](assets/usage-metrics/without-nexus-5.png)
 
-### With Nexus (two runs)
+### With Nexus (two runs — **analysis** sessions, Nexus first)
 
 ![Usage metrics — with Nexus (run 1)](assets/usage-metrics/with-nexus-1.png)
 
@@ -171,5 +173,6 @@ That loop is what the “WITH nexus” sessions are meant to reflect: **query th
 ## See also
 
 - **[`token-efficiency.md`](token-efficiency.md)** — caps, amortization, and why **totals alone** do not tell the whole story (§1.1).  
+- **[`nexus-scaling-law.md`](nexus-scaling-law.md)** — why structural retrieval’s **relative** advantage tends to **grow with repository size** (informal argument, caveats).  
 - **[`cursor-metrics-nexus.md`](cursor-metrics-nexus.md)** — why some dashboard lines may look surprising when work moves off the model.  
 - **[`nexus-agent-cursor.md`](nexus-agent-cursor.md)** — agent loop, rules, recommended tiering.

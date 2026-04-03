@@ -88,6 +88,8 @@ The expensive part for LLM workflows is **not** the local AST pass — it is **r
 
 **Reproducible numbers** (this repo + reference legacy scans), log-style before/after, and full **amortization** discussion: **[`docs/token-efficiency.md`](docs/token-efficiency.md)**.
 
+**Why savings grow with repo size** (informal architecture note, not a formal proof): **[`docs/nexus-scaling-law.md`](docs/nexus-scaling-law.md)**.
+
 **Empirical agent metrics** (Cursor usage dashboards, screenshots, and how to read them): see **[§ Metrics](#metrics)** below and the full write-up **[`docs/usage-metrics.md`](docs/usage-metrics.md)**.
 
 ## Metrics
@@ -97,12 +99,12 @@ Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **I
 | Layer | What it shows | Headline |
 |-------|----------------|----------|
 | **Small checkout** (~**7 MB**, this repo) | Build-leaning sessions **with** vs **without** Nexus | Totals differ; **fresh Input** almost flat — **tiny graph**, not a stress test for orientation. |
-| **Large checkout** (~**7 GB**, **TTRPG Studio**, **N=1**) | **Same analysis prompt**, Nexus on vs off | **~43%** lower **Total**, **~25%** lower **Input**; big **Cache Read** delta — **[details + tooltips](docs/usage-metrics.md#controlled-benchmark-ttrpg-studio-same-task-with-vs-without-nexus)**. |
-| **Exploratory gallery** | Open-ended agent work without tiering vs Nexus-first | Often **~7×–15×** vs the worst “without” rows — **real**, but **not** same-prompt A/B. |
+| **Large checkout** (~**7 GB**, **TTRPG Studio**, **N=1**) | **Same analysis-only prompt**, Nexus on vs off | **Fair** anchor for **analysis**: **~43%** lower **Total**, **~25%** lower **Input**; big **Cache Read** delta — **[details](docs/usage-metrics.md#controlled-benchmark-ttrpg-studio-same-task-with-vs-without-nexus)**. |
+| **Gallery** | **Build without Nexus** (high totals) vs **analysis with Nexus** (lower totals) | Dashboard ratios **~7×–15×** are **real** but **confound task type** with retrieval — **not** a controlled “Nexus multiplier” for analysis. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)**. |
 
 ### Controlled benchmark — large Python checkout (TTRPG Studio)
 
-Same task wording, **with Nexus** vs **without** (one captured pair). **~314k** vs **~180k** total tokens; **Cache Read** carries most of the gap.
+**Same analysis-only task** wording, **with Nexus** vs **without** (one captured pair). **~314k** vs **~180k** total tokens; **Cache Read** carries most of the gap. This is the **primary** quantitative anchor in this repo for “Nexus on analysis.”
 
 | With Nexus | Without Nexus |
 |------------|----------------|
@@ -114,9 +116,9 @@ Same task wording, **with Nexus** vs **without** (one captured pair). **~314k** 
 
 ![Nexus repo — session usage (self-scan example)](docs/assets/usage-metrics/nexus-self-scan.png)
 
-### Gallery — exploratory sessions (illustrative)
+### Gallery — build vs analysis (illustrative, not apples-to-apples)
 
-**Without** Nexus (broad reads / search-shaped context) vs **with** Nexus (structural queries first). Full set: **[`docs/assets/usage-metrics/`](docs/assets/usage-metrics/)** · **[`docs/usage-metrics.md`](docs/usage-metrics.md#screenshot-gallery)**.
+**Without** Nexus: **build / implementation** sessions (high totals). **With** Nexus: **analysis-orientation** sessions (lower totals). Comparing them yields large ratios that **mix task type and tool policy** — see **[`docs/usage-metrics.md`](docs/usage-metrics.md#gallery-numbers-build-without-nexus-vs-analysis-with-nexus)**. Full images: **[`docs/assets/usage-metrics/`](docs/assets/usage-metrics/)** · **[gallery](docs/usage-metrics.md#screenshot-gallery)**.
 
 | Without Nexus (example) | With Nexus (example) |
 |-------------------------|----------------------|
@@ -236,6 +238,7 @@ Guided walkthrough: **CLI** (including in your IDE terminal), optional **Inferen
 | **Architecture** (session, exports) | [`docs/inference-console-deep-dive.md`](docs/inference-console-deep-dive.md) |
 | **Screenshot assets** | [`console tutorial/`](console tutorial/) |
 | **Usage metrics** (agent token dashboards) | **[§ Metrics](#metrics)** · [`docs/usage-metrics.md`](docs/usage-metrics.md) · [`docs/assets/usage-metrics/`](docs/assets/usage-metrics/) |
+| **Scaling argument** (amortized graph vs text search) | [`docs/nexus-scaling-law.md`](docs/nexus-scaling-law.md) |
 
 ---
 

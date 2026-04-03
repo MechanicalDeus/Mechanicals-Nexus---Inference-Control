@@ -35,7 +35,7 @@ So **amortization** here is not only “fewer tokens” — it is **reallocation
 
 When you measure, add a **purpose tag** if you can (even rough): *orientation / search*, *reasoning*, *source read*, *output* — so “before/after” reflects **what** changed, not only the scalar total.
 
-**Cursor dashboard snapshots:** real agent sessions (with vs without Nexus) are summarized in **[`usage-metrics.md`](usage-metrics.md)** — including a **measurement map** (small checkout vs large checkout vs exploratory gallery) so **~7×–15×** style ratios are not confused with a **single** controlled benchmark.
+**Cursor dashboard snapshots:** real agent sessions are summarized in **[`usage-metrics.md`](usage-metrics.md)** — including a **measurement map** and an explicit **fair vs unfair** table. The **~7×–15×** style gaps in the gallery **confound** **build-without-Nexus** sessions with **analysis-with-Nexus** sessions; the **TTRPG Studio** pair is the **controlled analysis** benchmark (**N=1**).
 
 ---
 
@@ -193,3 +193,5 @@ For honest **before/after** metrics in your setup: compare **character counts** 
 ## 7. Empirical session totals (screenshots)
 
 For **before/after style** evidence from real Cursor agent sessions (totals and **Cache Read** breakdowns), see **[`usage-metrics.md`](usage-metrics.md)** — PNGs under [`docs/assets/usage-metrics/`](assets/usage-metrics/), methodology and caveats in that page (including a **self-scan** of the Nexus repo with Nexus, §“Self-scan”).
+
+**Why the win grows with repo size (architecture, not hype):** **[`nexus-scaling-law.md`](nexus-scaling-law.md)** — informal “scaling law” (amortized scan + bounded queries vs unstructured search in **N**).
