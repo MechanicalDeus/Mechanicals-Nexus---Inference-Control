@@ -35,6 +35,16 @@ The crop below is a **real example**: **11:03 AM** shows **0** tokens (Nexus-bac
 
 **Do not over-read the screenshot:** red marks are **editorial highlights** on the crop, not part of the product UI.
 
+### Retrieved data — the numbers after they land
+
+The view labeled **retrieved data** (or equivalent **settled** usage export) shows **actual measured values** for the same kind of sessions — after estimates have been reconciled. Below is a real extract from **Apr 3**: every row is **Included** / **auto**, with token counts now **filled in** across the board.
+
+![Usage table — retrieved data with concrete token counts](../console%20tutorial/retrieved%20data.png)
+
+**Locale:** The screenshot uses a **dot as thousands separator** (typical DE-style formatting). For example, **24.753** is on the order of **25k** tokens, **423.516** on the order of **424k** — not decimal fractions.
+
+**How this pairs with the earlier crop:** The **11:03 AM** session that showed **0** in the live table appears here with a **small but non-zero** total — a concrete illustration of **Notice 2** (minimal values **backfilled** after retrieval). The block still spans **tens to low hundreds of thousands** of tokens per row, i.e. **far below** million-token **exploratory** runs, while proving that **“0” in the dashboard was provisional**, not a permanent absence of attributed usage.
+
 ---
 
 ## 2. Where work happens (and what Cursor measures)
@@ -107,3 +117,4 @@ Assets live under [`console tutorial/`](../console%20tutorial/) (see also [`TUTO
 | `Token cost analysis.png` | Usage / cost overview |
 | `Token cost analysis2.png` | Second usage view |
 | `cursor-usage-estimation-example.png` | Zero vs. non-zero row; estimation / backfill caveat |
+| `retrieved data.png` | Settled “retrieved data” — full token counts (Notice 2 in practice) |
