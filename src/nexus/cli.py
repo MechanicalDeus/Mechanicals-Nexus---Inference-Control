@@ -148,12 +148,18 @@ def main(argv: list[str] | None = None) -> int:
         from nexus.cli_matrix import main as matrix_main
 
         return matrix_main(argv[1:])
+    if argv and argv[0] in ("ui", "console"):
+        from nexus.ui.app import main as ui_main
+
+        # Use full sys.argv so QApplication sees argv[0] (program name) like nexus-console.
+        return ui_main(None)
 
     parser = argparse.ArgumentParser(
         prog="nexus",
         description="Structural inference map for Python (symbols, calls, mutations, confidence).",
         epilog=(
             "Subcommands: "
+            "nexus ui | nexus console — Inference Console (GUI; requires pip install 'nexus-inference[ui]'). "
             "nexus focus [PATH] -s REF — canonical focus payload JSON "
             "(nexus.focus_payload/v1; same as Inference Console „Copy Focus (LLM)“). "
             "nexus matrix {rain|focus|chain} … — semantic terminal projection (optional: pip install rich)."

@@ -184,6 +184,8 @@ Requires **Python 3.10+**. CI runs **3.10** and **3.12** on **Ubuntu** and **Win
 
 After install, these entry points are available: **`nexus-opc`**, **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`**. The **pip distribution** name is **`nexus-inference`** — that is **not** a shell command.
 
+**GUI quick start (same as `nexus-console`):** `nexus ui` or `nexus console` — works in **cmd.exe** / PowerShell once **`nexus-inference[ui]`** is installed.
+
 ### From PyPI
 
 When the package is on the index:
@@ -229,7 +231,8 @@ From a clone:
 
 ```bash
 pip install -e ".[ui]"
-nexus-console
+nexus ui
+# same: nexus-console
 ```
 
 - **[`TUTORIAL.md`](TUTORIAL.md)** (start here) → **[full walkthrough](docs/tutorial-nexus-cli-and-ui.md)**  

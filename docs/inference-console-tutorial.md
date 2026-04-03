@@ -21,8 +21,8 @@ If you run the **same** repo, **same** query, and **same** `max_symbols` / `min 
 
 ```bash
 python -m pip install "nexus-inference[ui] @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
-nexus-console
-# or: python -m nexus.ui
+nexus ui
+# same: nexus console | nexus-console | python -m nexus.ui
 ```
 
 From a clone: `pip install -e ".[ui]"`. Without `[ui]`, PyQt6 is missing and the entry point prints an install hint. See **[README → Installation](../README.md#installation)**.
