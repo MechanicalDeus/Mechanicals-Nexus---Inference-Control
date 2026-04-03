@@ -39,6 +39,8 @@ metrics = ["tiktoken>=0.5"]
 # PyQt6: GPLv3 or commercial (Riverbank). See docs/licensing.md before redistributing the GUI.
 ui = ["PyQt6>=6.5"]
 dev-ui = ["pytest-qt>=4.4"]
+# Terminal: ``nexus matrix rain`` (Rich Live). focus/chain degrade to plain text without rich.
+matrix = ["rich>=13.7"]
 
 [project.urls]
 Homepage = "https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control"

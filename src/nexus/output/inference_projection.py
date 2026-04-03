@@ -12,6 +12,19 @@ from typing import Any
 from nexus.core.graph import InferenceGraph
 from nexus.core.models import SymbolRecord
 
+# Kanonischer Export: UI, CLI ``nexus focus``, LLM — eine Struktur.
+FOCUS_PAYLOAD_SCHEMA = "nexus.focus_payload/v1"
+_MAX_FOCUS_RELATION_ITEMS = 40
+
+
+def _tags_short(symbol: SymbolRecord, *, max_tags: int = 3) -> str:
+    tags = list(symbol.semantic_tags)
+    if not tags:
+        return ""
+    head = tags[:max_tags]
+    suf = "…" if len(tags) > max_tags else ""
+    return ", ".join(head) + suf
+
 
 def build_table_rows(slice_: list[SymbolRecord]) -> list[dict[str, Any]]:
     """Tabellenzeilen für die Slice-Ansicht (Qt-frei, nur Daten)."""
@@ -19,11 +32,18 @@ def build_table_rows(slice_: list[SymbolRecord]) -> list[dict[str, Any]]:
     for s in slice_:
         rows.append(
             {
+                "kind": s.kind,
                 "name": s.qualified_name,
                 "confidence": s.confidence,
                 "layer": s.layer,
+                "file": s.file,
+                "line_start": s.line_start,
+                "tags_short": _tags_short(s),
+                "tags_list": list(s.semantic_tags[:5]),
                 "writes_count": len(s.writes),
+                "reads_count": len(s.reads),
                 "calls_count": len(s.calls),
+                "influence_score": len(s.calls) + len(s.writes),
                 "_symbol": s,
             }
         )
@@ -99,6 +119,112 @@ def build_json_slice(
         "repo": graph.repo_root,
         "symbols": symbols_out,
         "edges": edges_out,
+    }
+
+
+def _relation_pair_entries(graph: InferenceGraph, refs: list[str]) -> list[dict[str, str]]:
+    return [
+        {"raw": r, "display": graph.resolve_display_ref(r)}
+        for r in refs[:_MAX_FOCUS_RELATION_ITEMS]
+    ]
+
+
+def build_focus_reason_entries(
+    graph: InferenceGraph,
+    symbol: SymbolRecord,
+) -> list[dict[str, str]]:
+    """Eine Zeile pro Kategorie (Reihenfolge: Eintritt → Wirkung → Weiterleitung → passiv)."""
+    out: list[dict[str, str]] = []
+    if symbol.called_by:
+        r0 = symbol.called_by[0]
+        out.append(
+            {"type": "called_by", "raw": r0, "target": graph.resolve_display_ref(r0)}
+        )
+    if symbol.writes:
+        w0 = symbol.writes[0]
+        out.append({"type": "writes", "raw": w0, "target": graph.resolve_display_ref(w0)})
+    if symbol.calls:
+        c0 = symbol.calls[0]
+        out.append({"type": "calls", "raw": c0, "target": graph.resolve_display_ref(c0)})
+    if symbol.reads:
+        r0 = symbol.reads[0]
+        out.append({"type": "reads", "raw": r0, "target": graph.resolve_display_ref(r0)})
+    return out
+
+
+def build_inference_chain(
+    graph: InferenceGraph,
+    symbol: SymbolRecord,
+    *,
+    max_up: int = 4,
+    include_first_call: bool = True,
+) -> list[str]:
+    """
+    Minimaler Bedeutungspfad: ``called_by[0]`` nach oben (ältester zuerst), dann Zentrum,
+    optional erster ``calls``-Slot als ein Schritt „vorwärts“ (nur ``resolve_display_ref``).
+
+    Keine neue Inferenz: nur vorhandene Graph-Felder, begrenzte Tiefe.
+    """
+    ancestors: list[str] = []
+    cur: SymbolRecord | None = symbol
+    for _ in range(max(0, max_up)):
+        if cur is None or not cur.called_by:
+            break
+        pid = cur.called_by[0]
+        parent = graph.symbols.get(pid)
+        if parent is not None:
+            ancestors.append(parent.qualified_name)
+            cur = parent
+        else:
+            ancestors.append(graph.resolve_display_ref(pid))
+            break
+    chain = list(reversed(ancestors))
+    chain.append(symbol.qualified_name)
+    if include_first_call and symbol.calls:
+        chain.append(graph.resolve_display_ref(symbol.calls[0]))
+    return chain
+
+
+def build_focus_payload(graph: InferenceGraph, symbol: SymbolRecord) -> dict[str, Any]:
+    """
+    Kanonische „Focus“-Struktur für UI, CLI und LLM (keine neue Inferenz, nur Projektion).
+
+    Schema ``nexus.focus_payload/v1``: bestehende Schlüssel bleiben stabil; neue Felder
+    (``primary_reason``, ``influence_breakdown``, ``inference_chain``) sind rein additiv.
+    """
+    reason_entries = build_focus_reason_entries(graph, symbol)
+    n_calls = len(symbol.calls)
+    n_writes = len(symbol.writes)
+    inf_total = n_calls + n_writes
+    primary = reason_entries[0] if reason_entries else None
+    return {
+        "schema": FOCUS_PAYLOAD_SCHEMA,
+        "repo_root": graph.repo_root,
+        "symbol": symbol.qualified_name,
+        "symbol_id": symbol.id,
+        "kind": symbol.kind,
+        "layer": symbol.layer,
+        "confidence": round(symbol.confidence, 4),
+        "file": symbol.file,
+        "line_start": symbol.line_start,
+        "line_end": symbol.line_end,
+        "influence": inf_total,
+        "influence_breakdown": {
+            "total": inf_total,
+            "calls": n_calls,
+            "writes": n_writes,
+        },
+        "tags": list(symbol.semantic_tags),
+        "primary_reason": primary,
+        "reason": reason_entries,
+        "inference_chain": build_inference_chain(graph, symbol),
+        "relations": {
+            "called_by": _relation_pair_entries(graph, list(symbol.called_by)),
+            "writes": _relation_pair_entries(graph, list(symbol.writes)),
+            "calls": _relation_pair_entries(graph, list(symbol.calls)),
+            "reads": _relation_pair_entries(graph, list(symbol.reads)),
+        },
+        "focus_graph": build_focus_graph(graph, symbol),
     }
 
 

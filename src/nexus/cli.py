@@ -100,11 +100,64 @@ def _validate_perspective_cli(args: argparse.Namespace, parser: argparse.Argumen
             )
 
 
+def _cli_focus(argv: list[str]) -> int:
+    """Unterbefehl ``nexus focus`` — kanonischer Focus-Payload (JSON)."""
+    from nexus.output.inference_projection import build_focus_payload
+
+    fp = argparse.ArgumentParser(
+        prog="nexus focus",
+        description=(
+            "Emit canonical focus payload JSON for one symbol (UI / CLI / LLM parity). "
+            "Same structure as the Inference Console „Copy Focus (LLM)“."
+        ),
+    )
+    fp.add_argument(
+        "path",
+        nargs="?",
+        default=".",
+        help="Repository root or single .py file (default: .)",
+    )
+    fp.add_argument(
+        "--symbol",
+        "-s",
+        required=True,
+        metavar="REF",
+        help="Symbol id (symbol:…) or exact qualified_name.",
+    )
+    args = fp.parse_args(argv)
+    root = Path(args.path)
+    g = attach(root)
+    sym = g.resolve_symbol_ref(args.symbol)
+    if sym is None:
+        sys.stderr.write(f"nexus focus: symbol not found: {args.symbol!r}\n")
+        return 2
+    out = json.dumps(build_focus_payload(g, sym), indent=2, ensure_ascii=False)
+    sys.stdout.write(out)
+    if not out.endswith("\n"):
+        sys.stdout.write("\n")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     _configure_stdio_utf8()
+    if argv is None:
+        argv = sys.argv[1:]
+    if argv and argv[0] == "focus":
+        return _cli_focus(argv[1:])
+    if argv and argv[0] == "matrix":
+        from nexus.cli_matrix import main as matrix_main
+
+        return matrix_main(argv[1:])
+
     parser = argparse.ArgumentParser(
         prog="nexus",
         description="Structural inference map for Python (symbols, calls, mutations, confidence).",
+        epilog=(
+            "Subcommands: "
+            "nexus focus [PATH] -s REF — canonical focus payload JSON "
+            "(nexus.focus_payload/v1; same as Inference Console „Copy Focus (LLM)“). "
+            "nexus matrix {rain|focus|chain} … — semantic terminal projection (optional: pip install rich)."
+        ),
     )
     parser.add_argument(
         "path",

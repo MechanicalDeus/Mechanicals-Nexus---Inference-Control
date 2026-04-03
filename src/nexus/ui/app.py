@@ -13,6 +13,9 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
     app = QApplication(sys.argv if argv is None else argv)
+    from nexus.ui import theme
+
+    app.setStyleSheet(theme.application_stylesheet())
     from nexus.ui.main_window import MainWindow
 
     w = MainWindow()

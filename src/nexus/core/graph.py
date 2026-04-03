@@ -26,6 +26,33 @@ class InferenceGraph:
     def get_symbol(self, symbol_id: str) -> SymbolRecord | None:
         return self.symbols.get(symbol_id)
 
+    def symbol_by_qualified_name(self, qualified_name: str) -> SymbolRecord | None:
+        qn = qualified_name.strip()
+        if not qn:
+            return None
+        return next((s for s in self.symbols.values() if s.qualified_name == qn), None)
+
+    def resolve_symbol_ref(self, ref: str) -> SymbolRecord | None:
+        """Symbol-ID oder exakter ``qualified_name`` → Record; sonst ``None``."""
+        r = ref.strip()
+        if not r:
+            return None
+        if r in self.symbols:
+            return self.symbols[r]
+        return self.symbol_by_qualified_name(r)
+
+    def resolve_display_ref(self, ref: str) -> str:
+        """Kante/Slot-String: echte Symbol-ID oder ``qualified_name`` → Anzeige; sonst unverändert."""
+        if not ref:
+            return ref
+        if ref in self.symbols:
+            return self.symbols[ref].qualified_name
+        if not ref.startswith("symbol:"):
+            sid = f"symbol:{ref}"
+            if sid in self.symbols:
+                return self.symbols[sid].qualified_name
+        return ref
+
     def find_by_name(self, name: str) -> list[SymbolRecord]:
         return [s for s in self.symbols.values() if s.name == name]
 

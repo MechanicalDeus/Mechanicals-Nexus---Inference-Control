@@ -1,6 +1,6 @@
 # Agent usage metrics (Cursor): with vs without Nexus
 
-This page documents **screenshots of real agent sessions** (Cursor usage / token dashboard). For **programmatic** per-invocation telemetry from the `nexus` CLI (`[NEXUS_METRICS]` on stderr), see **[`token-efficiency.md`](token-efficiency.md)** §2.5 and **[`patchnotes/README.md`](patchnotes/README.md)**. **Canonical copies for GitHub / the website** live under **[`docs/assets/usage-metrics/`](assets/usage-metrics/)** (stable filenames, no spaces). Optional local exports may still sit in **[`usage metrics/`](../usage%20metrics/)** at the repo root under the original names.
+This page documents **screenshots of real agent sessions** (Cursor usage / token dashboard) and a **longitudinal table of usage rows** (**§ Longitudinal usage rows (Apr 1–3, 2026)**). For **programmatic** per-invocation telemetry from the `nexus` CLI (`[NEXUS_METRICS]` on stderr), see **[`token-efficiency.md`](token-efficiency.md)** §2.5 and **[`patchnotes/README.md`](patchnotes/README.md)**. **Canonical copies for GitHub / the website** live under **[`docs/assets/usage-metrics/`](assets/usage-metrics/)** (stable filenames, no spaces). Optional local exports may still sit in **[`usage metrics/`](../usage%20metrics/)** at the repo root under the original names.
 
 | Asset (in `docs/assets/usage-metrics/`) | Meaning |
 |------------------------------------------|---------|
@@ -124,6 +124,64 @@ This is a **different slice** than the **gallery** above (which mixes **build-wi
 - *The **gallery** shows **build-without-Nexus** vs **analysis-with-Nexus** — useful context, **not** an apples-to-apples multiplier.*
 - *The mechanism remains plausible: orientation moves from **text absorption** to **CPU-side structural queries** (`nexus-grep`, `nexus -q`, `--perspective`, `nexus-policy`).*
 - *Totals still include reasoning, edits, and intentional reads; Nexus targets **search-shaped** context in the orientation phase.*
+
+---
+
+## Longitudinal usage rows (Apr 1–3, 2026): two token populations
+
+This subsection records a **manual transcription** of many **Cursor usage / billing table rows** (**Included** / **auto**, product-reported **total tokens** per row). The UI locale was **German**: **`Mio.` = millions**, **`.` = thousands separator** (e.g. `102.719` → **~102.7k**, `1,2 Mio.` → **~1.2M**). Rows are **not** paired A/B tasks; they mix **sessions, task types, and workflow** (including adoption of **Nexus-first** Cursor rules and tiered retrieval around **Apr 1, 2026**).
+
+### What the list is a proxy for
+
+Interpreting the pattern (mechanism, not accounting):
+
+| Read | Meaning |
+|------|--------|
+| **High band (~1.0M–3.9M per row)** | **Exploration-shaped** work: wide context, many turns pulling large tool/file context, **Cache Read**–heavy sessions — “traverse until oriented.” |
+| **Low/mid band (~10k–400k per row)** | **Navigation-shaped** work: smaller recycled context per turn — “already know where to look; confirm and edit.” |
+
+This aligns with **moving orientation to CPU-side structure** (`nexus-grep`, `nexus -q`, `--agent-mode`, `nexus-policy`) **before** the model absorbs half a tree. It is **not** a proof that every low row “is Nexus” or every high row “is not”; **task difficulty**, **model**, **chat length**, and **retries** still move the needle.
+
+### Representative numbers from the captured rows
+
+**Upper tail (examples from the same export, Apr 2–3):**
+
+| Approx. total | Example timestamp (local) |
+|---------------|---------------------------|
+| **~3.9M** | Apr 2, ~09:59 AM |
+| **~3.1M** | Apr 2, ~05:52 PM |
+| **~2.4M** | Apr 3, ~06:08 PM |
+| **~2.3M** | Apr 1, ~04:40 PM |
+| **~2.1M** | Several rows (Apr 1–3) |
+| **~1.2M–1.9M** | Repeatedly across Apr 1–3 |
+
+**Lower tail (same export, non‑zero):**
+
+| Approx. total | Example timestamp (local) |
+|---------------|---------------------------|
+| **~12k** | Apr 1, ~07:02 PM (`12.212`) |
+| **~13k** | Apr 1, ~11:36 PM (`13.400`) |
+| **~18k–30k** | Frequent (e.g. Apr 1 ~08:57 PM, ~09:41 PM; Mar 30 cluster ~16k–43k) |
+| **~50k–300k** | Very common once the workflow stabilizes (many rows Apr 1–3) |
+
+**Middle band (~400k–1M)** also appears often — still below the worst megaspikes but far above the “tight loop” rows.
+
+### April 1, 2026 — not a single cutoff, but a mixed transition day
+
+The same log shows **both modes on April 1**:
+
+| Window (local) | Pattern |
+|----------------|--------|
+| **~04:05 PM – ~05:03 PM** | **Cluster of megaspikes**: e.g. **~628k**, **~1.2M**, **~2.1M**, **~1.1M**, **~1.4M**, **~2.3M**, **~1.6M**, **~2.1M**, plus **~0.59M** — classic **heavy exploration / long context** band. |
+| **Same calendar day** | **Many concurrent smaller rows** (**~12k–300k** and mid hundreds of thousands), not rare exceptions. |
+
+**Takeaway:** April 1 is best read as **coexistence and migration** (new **agent policy / Nexus-first habit** gaining share), **not** as “before midnight = only millions, after = only 100k.” For external claims, prefer **correlates with adoption of tiered retrieval** over **proven by calendar date**.
+
+### How to cite this block
+
+- **Strong:** “Usage tables show **two populations** — megaspike sessions vs. much smaller totals — consistent with **less search-shaped context** when orientation is structural.”  
+- **Careful:** “**Not** a controlled experiment; **N=1 export**, mixed tasks; **Apr 1** is **mixed**, not a sharp boundary.”  
+- **Quantitative anchor for product posts:** still lead with the **TTRPG Studio** A/B in **§ Controlled benchmark**; use this longitudinal section as **supporting narrative**, not a second multiplier claim.
 
 ---
 
