@@ -88,7 +88,7 @@ The expensive part for LLM workflows is **not** the local AST pass — it is **r
 
 **Reproducible numbers** (this repo + reference legacy scans), log-style before/after, and full **amortization** discussion: **[`docs/token-efficiency.md`](docs/token-efficiency.md)**.
 
-**Empirical agent metrics (optional):** Screenshots of Cursor usage dashboards comparing sessions **with** vs **without** Nexus show **large** total-token gaps (often **~7×–15×** in the captured runs), with **Cache Read** as the dominant line — consistent with **less wide context re-injected** each turn. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)** for the write-up and embedded images (**[`docs/assets/usage-metrics/`](docs/assets/usage-metrics/)**), plus **honest limits** (strong evidence for that workflow; not a universal benchmark across all repos/tasks).
+**Empirical agent metrics (optional):** Screenshots of Cursor usage dashboards comparing sessions **with** vs **without** Nexus show **large** total-token gaps in **open-ended** exploration (often on the order of **~7×–15×** vs the highest “without Nexus” rows in the gallery), with **Cache Read** as the dominant line — consistent with **less wide context re-injected** each turn. The same doc adds two **honest anchors**: (1) **Nexus-on-Nexus** on this **small** checkout (**~55k–~169k** per row, still Cache-read-heavy — here **fresh Input** barely moves; tiny graph); (2) a **controlled** **large-checkout** pair (**TTRPG Studio**, **N=1**): **~43%** lower total tokens and **~25%** lower **Input** in the captured analysis task — a **conservative, same-prompt** complement to the more extreme gallery sessions. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)** and **`docs/assets/usage-metrics/`**.
 
 ## Mental model
 
