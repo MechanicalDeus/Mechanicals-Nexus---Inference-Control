@@ -141,13 +141,17 @@ From an internal evaluation of a **Python service tree** (FastAPI-style layout).
 | Symbols | **496** |
 | Graph edges | **392** |
 
+**Same checkout, filesystem (2026-04-03, `F:\Aether VPN`, Windows):** **~605 MB** total on disk (all files, recursive); **82** `*.py` files and **~507 KB** `.py` bytes using the same path-segment excludes as **[`case-study-cross-repo-orientation.md`](case-study-cross-repo-orientation.md)** (`.git`, `venv`, `.venv`, `__pycache__`, `node_modules`, `dist`, `build`). **Total clone ≫ `.py` text** — assets, clients, vendor trees, etc.
+
 **Message:** The **one-time** scan produces a graph of this size — that is **CPU work**, not token budget. What reaches the LLM is controlled by **brief length** and **names-only**. **Do not** use this subsection to claim “the Aether VPN repo is ~7 MB” or to build a **cross-repo disk-size league table** without explicit counting rules.
 
 ### 3.2 TTRPG Studio
 
 No published raw JSON; the same **tiering** applies: with **hundreds of symbols**, wide grep or full-text context often grows faster than **capped** Nexus output with a hard `--max-symbols`.
 
-**Smoke scan (local checkout, representative):** one run on `F:\TTRPG Studio` reported on the order of **153** `.py` files indexed, **~2100** symbols, **~2900** call edges — again **CPU/local graph size**, not prompt size. Use `-q` + `--max-symbols` / `--names-only` / `--annotate` so what reaches the LLM stays bounded.
+**Filesystem (2026-04-03, `F:\TTRPG Studio`, Windows):** **~7.1 GB** total on disk (all files, recursive); **4524** `*.py` files and **~65 MB** `.py` bytes with the same path-segment excludes as the **[cross-repo case study](case-study-cross-repo-orientation.md)**. That **`.py` mass** is the right order of magnitude for “naive ingest all Python source” horror stories — **not** the same as **graph size** for a given scan root.
+
+**Smoke scan (local checkout, representative):** one run on `F:\TTRPG Studio` reported on the order of **153** `.py` files indexed, **~2100** symbols, **~2900** call edges — a **narrower scan scope** (e.g. a single package subtree), **not** “all **4524** `.py` files” above. Again: **CPU/local graph size**, not prompt size. Use `-q` + `--max-symbols` / `--names-only` / `--annotate` so what reaches the LLM stays bounded.
 
 ---
 

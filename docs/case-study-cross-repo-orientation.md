@@ -42,15 +42,33 @@ From a Nexus development checkout:
 
 ---
 
+## Measured checkout sizes (same machine as the session)
+
+**When:** **2026-04-03** · **OS:** Windows · **Roots:** author’s local paths below.
+
+**Method:** PowerShell recursive file walk. **Total** = sum of **all files** under the root. **`.py`†** = all `*.py` files whose path does **not** contain any of these **path segments:** `.git`, `venv`, `.venv`, `__pycache__`, `node_modules`, `dist`, `build` (developer-oriented slice, not “every byte in the product”).
+
+| Checkout | Root | Total on disk (all files) | `.py` files† | `.py` total size† |
+|----------|------|---------------------------|--------------|-------------------|
+| **Nexus** (this product repo) | `F:\Nexus` | **~13.0 MB** | **243** | **~396 KB** |
+| **Aether VPN** | `F:\Aether VPN` | **~605 MB** | **82** | **~507 KB** |
+| **TTRPG Studio** | `F:\TTRPG Studio` | **~7.1 GB** | **4524** | **~65 MB** |
+
+**Takeaway:** **Total clone size** and **“.py text you might naively paste”** are different axes. Aether VPN is **not** a “~7 MB repo” — that older shorthand in metrics copy referred to the **Nexus** checkout at a different time; this snapshot shows **Nexus ~13 MB**, **Aether ~605 MB**, **TTRPG ~7.1 GB** total, with **~65 MB** of `.py` alone on TTRPG after the excludes above.
+
+**Nexus graph counts vs filesystem:** An inference run may still index **fewer** `.py` files than the table (ignore/deny rules, scan root, `app/` vs repo root). Example: [`token-efficiency.md`](token-efficiency.md) §3.2 cites **~153** `.py` indexed for one **TTRPG** smoke run — a **narrower scope** than “every `*.py` under `F:\TTRPG Studio`” in the table.
+
+---
+
 ## Scale contrast (why “not nice optimization”)
 
-**Clarification (important):** Elsewhere in this repository, **~7 MB on disk** refers to the **Nexus** checkout in usage-metric examples ([`usage-metrics.md`](usage-metrics.md), [`README.md`](../README.md)), **not** to Aether VPN.
+**Cross-reference:** Use the **measured table** above for **disk** and **`.py` footprint**; do not equate them with **prompt** size.
 
-**TTRPG Studio** (local checkout in this narrative): **tens of MB of `.py` source alone** is a fair order of magnitude for naive full-text orientation — thousands of `.py` files when counted broadly (typical dev ignores like `venv` / `.venv` excluded in that style of count). If the model had to **ingest all of that as prompt text**, token cost scales **roughly with raw bytes** (order-of-magnitude **÷3–5 characters per token** for code) → on the order of **millions of tokens** before reasoning, and **not** repeatable as a single context window.
+**TTRPG Studio:** **~65 MB** of `.py` in the measured slice is a concrete order of magnitude for **naive full-text orientation** of Python source alone — still on the order of **millions of tokens** if ingested wholesale (very rough **÷3–5 characters per token** for code), **before** reasoning, and **not** repeatable as a single context window.
 
-**Aether VPN:** This case study used that checkout for **structural** comparison alongside TTRPG. **Do not** infer a clean “small vs large repo” story from a **.py-only byte pair**: the **full Aether VPN tree on disk can be much larger** than any narrow count of backend `.py` text (assets, clients, data, vendor code, etc.). A side-by-side **Aether vs TTRPG** table of “approx. `.py` bytes” was **misleading** and has been removed.
+**Aether VPN:** **~605 MB** total on disk vs **~507 KB** `.py` in the same counting rules shows how **non-Python / vendor / asset** mass dominates **clone size** while the **Python map** stays comparatively small.
 
-**Nexus path:** Each query returns a **small structured slice**; the session’s **total** Cursor-reported tokens (~**110k** in one captured row, with **Cache Read** dominating) covered **orientation + synthesis + rules + history** — not “tens of MB of `.py` in the prompt.”
+**Nexus path:** Each query returns a **small structured slice**; the session’s **total** Cursor-reported tokens (~**110k** in one captured row, with **Cache Read** dominating) covered **orientation + synthesis + rules + history** — not “**~65 MB** of `.py` in the prompt.”
 
 Interpretation: the win is not merely “compression” of text — it is a **representation shift**: **query a graph-shaped index**, then open files **only when deliberately targeted** (this run: **zero** such opens in the two subject repos).
 
