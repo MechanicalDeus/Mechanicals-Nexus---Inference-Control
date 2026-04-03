@@ -44,16 +44,13 @@ From a Nexus development checkout:
 
 ## Scale contrast (why “not nice optimization”)
 
-Rough **on-disk Python** footprint (`.py` files; paths like `venv` / `.venv` excluded in the count used for the narrative):
+**Clarification (important):** Elsewhere in this repository, **~7 MB on disk** refers to the **Nexus** checkout in usage-metric examples ([`usage-metrics.md`](usage-metrics.md), [`README.md`](../README.md)), **not** to Aether VPN.
 
-| Checkout | Approx. `.py` files | Approx. `.py` bytes |
-|----------|---------------------|---------------------|
-| Aether VPN | ~90+ | ~0.7 MB |
-| TTRPG Studio | thousands | ~tens of MB of `.py` alone |
+**TTRPG Studio** (local checkout in this narrative): **tens of MB of `.py` source alone** is a fair order of magnitude for naive full-text orientation — thousands of `.py` files when counted broadly (typical dev ignores like `venv` / `.venv` excluded in that style of count). If the model had to **ingest all of that as prompt text**, token cost scales **roughly with raw bytes** (order-of-magnitude **÷3–5 characters per token** for code) → on the order of **millions of tokens** before reasoning, and **not** repeatable as a single context window.
 
-**Naive mental model:** If the model had to **ingest all source as prompt text** to orient, token cost scales **roughly with raw bytes** (order-of-magnitude **÷3–5 characters per token** for code) — i.e. **millions** of tokens for the larger tree, **before** reasoning — and is **not** repeatable as a single context window.
+**Aether VPN:** This case study used that checkout for **structural** comparison alongside TTRPG. **Do not** infer a clean “small vs large repo” story from a **.py-only byte pair**: the **full Aether VPN tree on disk can be much larger** than any narrow count of backend `.py` text (assets, clients, data, vendor code, etc.). A side-by-side **Aether vs TTRPG** table of “approx. `.py` bytes” was **misleading** and has been removed.
 
-**Nexus path:** Each query returns a **small structured slice**; the session’s **total** Cursor-reported tokens (~**110k** in one captured row, with **Cache Read** dominating) covered **orientation + synthesis + rules + history** — not “70 MB of code in the prompt.”
+**Nexus path:** Each query returns a **small structured slice**; the session’s **total** Cursor-reported tokens (~**110k** in one captured row, with **Cache Read** dominating) covered **orientation + synthesis + rules + history** — not “tens of MB of `.py` in the prompt.”
 
 Interpretation: the win is not merely “compression” of text — it is a **representation shift**: **query a graph-shaped index**, then open files **only when deliberately targeted** (this run: **zero** such opens in the two subject repos).
 
@@ -79,7 +76,7 @@ Canonical copy (repo): [`docs/assets/usage-metrics/cursor-cross-repo-orientation
 
 - **Heuristic map:** Missing edges, noisy tags, and query sensitivity still apply — see [`README.md`](../README.md) “Repo health & known limitations.”
 - **Session total ≠ Nexus stdout only:** Dashboard **Total** includes the **whole** agent conversation, not just CLI output.
-- **Cross-repo counts:** Re-run `Get-ChildItem` / `find` with your own ignore rules if you need audit-grade file statistics.
+- **Cross-repo / size claims:** File and byte counts depend on **roots and ignore rules**; **total clone size ≠ “Python scanned” size**. Do not treat ad-hoc `.py` totals as comparable across products without defining scope.
 
 ---
 

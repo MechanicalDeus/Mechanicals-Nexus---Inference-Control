@@ -131,9 +131,9 @@ Tokenizer choice must match **your** deployment model for **absolute** budgets; 
 
 Nexus was used for **structure and mutation orientation** in **two** larger Python projects (including an **Aether VPN** backend and **TTRPG Studio** areas) — **without** publishing raw graph exports (see `SECURITY.md`).
 
-### 3.1 Typical index size (Aether VPN, representative snapshot)
+### 3.1 Typical index size (Aether VPN backend snapshot — scan scope, not full repo)
 
-From an internal evaluation (legacy FastAPI / service tree):
+From an internal evaluation of a **Python service tree** (FastAPI-style layout). These numbers describe **what the scanner ingested under that root**, **not** the **total on-disk size** of the whole product repository (which can include large non-Python trees, clients, assets, etc.).
 
 | Metric | Order of magnitude |
 |--------|-------------------|
@@ -141,7 +141,7 @@ From an internal evaluation (legacy FastAPI / service tree):
 | Symbols | **496** |
 | Graph edges | **392** |
 
-**Message:** The **one-time** scan produces a graph of this size — that is **CPU work**, not token budget. What reaches the LLM is controlled by **brief length** and **names-only**.
+**Message:** The **one-time** scan produces a graph of this size — that is **CPU work**, not token budget. What reaches the LLM is controlled by **brief length** and **names-only**. **Do not** use this subsection to claim “the Aether VPN repo is ~7 MB” or to build a **cross-repo disk-size league table** without explicit counting rules.
 
 ### 3.2 TTRPG Studio
 

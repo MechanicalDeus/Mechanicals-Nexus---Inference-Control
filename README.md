@@ -134,7 +134,7 @@ The expensive part for LLM workflows is **not** the local AST pass — it is **r
 
 **Empirical agent metrics** (Cursor usage dashboards, screenshots, and how to read them): see **[§ Metrics](#metrics)** below and the full write-up **[`docs/usage-metrics.md`](docs/usage-metrics.md)**.
 
-**Case study (two repos, zero file opens):** **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** — cross-checkout comparison via **`nexus.cli_opc`** only; **~110k** session tokens vs **tens of MB** of naive `.py` text.
+**Case study (two repos, zero file opens):** **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** — cross-checkout comparison via **`nexus.cli_opc`** only; **~110k** session tokens vs **naive full-`.py` ingest** at **TTRPG-scale** (tens of MB of source — **not** a claim about total disk size of every checkout in the study; see the doc for caveats).
 
 ## Metrics
 
@@ -145,7 +145,7 @@ Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **I
 | **Small checkout** (~**7 MB**, this repo) | Build-leaning sessions **with** vs **without** Nexus | Totals differ; **fresh Input** almost flat — **tiny graph**, not a stress test for orientation. |
 | **Large checkout** (~**7 GB**, **TTRPG Studio**, **N=1**) | **Same analysis-only prompt**, Nexus on vs off | **Fair** anchor for **analysis**: **~43%** lower **Total**, **~25%** lower **Input**; big **Cache Read** delta — **[details](docs/usage-metrics.md#controlled-benchmark-ttrpg-studio-same-task-with-vs-without-nexus)**. |
 | **Gallery** | **Build without Nexus** (high totals) vs **analysis with Nexus** (lower totals) | Dashboard ratios **~7×–15×** are **real** but **confound task type** with retrieval — **not** a controlled “Nexus multiplier” for analysis. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)**. |
-| **Cross-repo case study** | **Two** local Python trees compared **without opening** their source/docs in the agent — **Nexus-only** orientation | **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** + screenshot **`cursor-cross-repo-orientation-110k.png`** — **N=1**, illustrates **representation shift** vs naive full-text ingest. |
+| **Cross-repo case study** | **Two** local Python trees compared **without opening** their source/docs in the agent — **Nexus-only** orientation | **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** + screenshot **`cursor-cross-repo-orientation-110k.png`** — **N=1**, **representation shift** vs naive ingest; **no** fair “repo size” league table between subjects. |
 
 ### Controlled benchmark — large Python checkout (TTRPG Studio)
 
