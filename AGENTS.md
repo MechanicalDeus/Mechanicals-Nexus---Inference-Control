@@ -6,6 +6,15 @@ Use this file as the **reference** when working in **any Python repo** and you n
 
 **Patch notes (this repo):** **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)** — dated reports on metrics keys, perspectives, and CLI (e.g. `agent_compact`, `--compact-fields`, `--agent-mode`); template for new entries in the same folder.
 
+## Working in the Nexus checkout (this repository)
+
+When the open project **is** the Nexus source tree, agents should treat **inference as the default retriever** — not a pile of blind `read_file` calls. This matches the enforced Cursor rule **`.cursor/rules/nexus-checkout-cli-default.mdc`**.
+
+1. **Orient on `src/nexus` with Nexus (ISA first):** For *where does X live?* / *how is Y wired?*, prefer **`python -m nexus.cli_opc locate -q "<topic or identifier>" src/nexus`** from the repo root (or **`nexus-opc locate …`** on `PATH`; set `PYTHONPATH=<checkout>/src` if the package is not installed). Use **`python -m nexus.cli_opc --dry-run locate …`** to print the resolved **`argv`**. **Fallback** when you need flags/opcodes the ISA does not wrap, or `cli_opc` is unavailable: **`python -m nexus src/nexus --agent-mode -q "…"`**, **`python -m nexus.cli_grep src/nexus -q "…" --max-symbols 20`**, or **`python -m nexus.cli_policy …`** — see **`.cursor/rules/nexus-checkout-cli-default.mdc`** and **`docs/cli-perspective.md`**. Then **`read_file`** only at paths (and slices) Nexus returns — do not open `pyproject.toml`, `cli.py`, and random modules “just to be sure” first.
+2. **Skip Nexus when already precise:** If the path, symbol, or line is explicit, read or edit directly.
+3. **Trivial shell tasks:** e.g. start the Inference Console (**`python -m nexus.ui`** or **`nexus-console`**), run **`extras/nexus_benchmark.py`** — execute immediately; no pre-reading source unless the command fails and you need the error message’s hint.
+4. **Opcode reference (Cursor checkout):** Full walkthrough **[`docs/tutorial-nexus-opc-isa.md`](docs/tutorial-nexus-opc-isa.md)**; skill **`.cursor/skills/nexus-opc-isa/SKILL.md`**; slash helpers **`/nx`** (Retriever-Reminder), **`/nx-map`**, **`/nx-locate`**, … in **`.cursor/commands/`**. Opcodes: `map`, `locate`, `explain`, `focus`, `grep`, `policy`, `bench`, `compare`, `catalog`, **`stats`**. Optional **run log + ROI:** `--opc-log-append` / `NEXUS_OPC_LOG_APPEND`, `--opc-roi-score`, **`--opc-run-id`**; aggregate with **`nexus-opc stats <file.jsonl>`**. Machine-readable list: **`python -m nexus.cli_opc catalog --json`**.
+
 ## Other repos: one-time setup per project
 
 1. **Install Nexus** (usable everywhere):  

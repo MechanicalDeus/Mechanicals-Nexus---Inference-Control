@@ -2,6 +2,8 @@
 
 **Repo hub:** [`TUTORIAL.md`](../TUTORIAL.md) (short index + links).
 
+**Screenshots:** Inference Console images use **`docs/ui-screenshots/`** (current UI). For a **longer CLI-focused walkthrough** with every shot plus **`console tutorial/`** extras (CLI IDE proof, metrics), see **[tutorial-nexus-cli-extended.md](tutorial-nexus-cli-extended.md)**.
+
 ## Why this exists (core claim)
 
 Most workflows treat the LLM like a **human with an editor**: open a file, read the buffer, infer relationships, open the next file. That forces the **model** to **search by reading text** — expensive and noisy.
@@ -94,7 +96,7 @@ python -m nexus src/nexus -q "mutation flow" --max-symbols 6
 
 The rest of this page **rewinds** that run in the GUI, frame by frame.
 
-*UI labels in the following screenshots are in German (**Ordner…** = choose folder, **Scan / Refresh** = rebuild map). The example repo is **TTRPG Studio**.*
+*UI labels in the following screenshots are in German (**Ordner…** = choose folder, **Scan / Refresh** = rebuild map, **Darstellung** = theme). The example repo is **TTRPG Studio**.*
 
 ---
 
@@ -105,7 +107,7 @@ The rest of this page **rewinds** that run in the GUI, frame by frame.
 
 Until this completes, there is no slice and no brief — same as the CLI waiting before the first byte of stdout.
 
-![Console: repo path set, ready to scan](../console%20tutorial/1.png)
+![Console: repo path set, ready to scan](ui-screenshots/Shot%201.png)
 
 ---
 
@@ -116,7 +118,7 @@ Until this completes, there is no slice and no brief — same as the CLI waiting
 
 So: **the big scrolling block in the terminal** is the **concatenation** of what you see as **table + brief pane** — just laid out for humans in two panels instead of one stream.
 
-![Slice table and brief after query](../console%20tutorial/2.png)
+![Slice table and brief after query](ui-screenshots/Shot%202.png)
 
 ---
 
@@ -125,7 +127,9 @@ So: **the big scrolling block in the terminal** is the **concatenation** of what
 **CLI:** Inside the brief, each hotspot is a `### qualified_name` block (reads, writes, calls, tags, mutation paths…).  
 **UI:** Click a row — the **detail** panel is that **same** symbol’s fields, not a summary. This is the **trust** view: *why* this row exists in the slice.
 
-![Selected symbol: ResolverEngine.commit_preview, full detail](../console%20tutorial/3.png)
+![Selected symbol — inspector / trust (1)](ui-screenshots/Shot%203-1.png)
+
+![Selected symbol — inspector (2)](ui-screenshots/Shot%203-2.png)
 
 ---
 
@@ -134,7 +138,7 @@ So: **the big scrolling block in the terminal** is the **concatenation** of what
 **CLI:** No default subcommand prints this, but the engine exposes **`g.trace_mutation(key)`**.  
 **UI:** **Mutation** tab → substring → **trace_mutation** — **direct / indirect / transitive** buckets are the **same** dict the graph method returns.
 
-![Mutation: direct / indirect / transitive lists](../console%20tutorial/4.png)
+![Mutation: direct / indirect / transitive lists](ui-screenshots/Shot%204-1.png)
 
 ---
 
@@ -143,11 +147,11 @@ So: **the big scrolling block in the terminal** is the **concatenation** of what
 **CLI:** You would read **`calls` / `called_by`** or export JSON to see neighbors.  
 **UI:** **Focus Graph** draws **only** direct callers and callees for the selected symbol — data already on **`InferenceGraph.edges`** and the symbol lists. Fixed layout; **no** second traversal algorithm.
 
-![Focus graph — compact 1-hop view](../console%20tutorial/5b-focus-graph-clean.png)
+![Focus graph — compact 1-hop view](ui-screenshots/Shot%205-1.png)
 
 Same rules, busier slice (many callees):
 
-![Focus graph — many direct callees](../console%20tutorial/5.png)
+![Focus graph — many direct callees](ui-screenshots/Shot%205-2.png)
 
 ---
 
@@ -156,7 +160,7 @@ Same rules, busier slice (many callees):
 **CLI:** `--names-only`, full `-q` brief, or bounded JSON slice (console uses a **subset** of `to_json_dict`, not full-repo `--json`).  
 **UI:** **Copy Minimal / Copy Brief / Copy JSON** call the **same** formatting paths as those modes.
 
-![Detail + export buttons](../console%20tutorial/bottom%20textbox%28brief%29.png)
+![Detail + export buttons](ui-screenshots/Shot%206.png)
 
 ---
 
@@ -165,7 +169,7 @@ Same rules, busier slice (many callees):
 **CLI:** `nexus . -q "…" --max-symbols 12 > brief.txt`  
 **UI:** **Copy Brief** → paste — **byte-identical** for same repo, query, caps.
 
-![Full brief pasted in an editor](../console%20tutorial/full%20text%20brief.png)
+![Full brief pasted in an editor](ui-screenshots/Shot%207.png)
 
 **Closing line of the story:** the text in your editor is **not** a different “LLM edition.” It is **`to_llm_brief`** output — the same string the CLI would have written to fd 1.
 
@@ -223,8 +227,10 @@ g = attach("./your_repo")
 | Doc | Content |
 |-----|---------|
 | [Inference Console quick tutorial](inference-console-tutorial.md) | UI-only steps + checklist |
+| [Extended CLI tutorial](tutorial-nexus-cli-extended.md) | All new screenshots + deep CLI / PowerShell |
 | [Inference Console deep dive](inference-console-deep-dive.md) | `ConsoleSession`, `projections/`, exports, security |
 | [CLI perspectives](cli-perspective.md) | `--perspective` contract, flags, examples |
+| [Opcode ISA (`nexus-opc`)](tutorial-nexus-opc-isa.md) | Fixed pipelines for agents / Cursor |
 | [Proof of concept](proof-of-concept.md) | Narrative PoC |
 | [Token efficiency](token-efficiency.md) | Caps, amortization, numbers |
 | [Usage metrics (screenshots)](usage-metrics.md) | Real Cursor totals with vs without Nexus |

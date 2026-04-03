@@ -10,7 +10,7 @@ This page is a **fixed explanation anchor**: no marketing, just **roles**, **dat
 |------|------|
 | **You** | Goal + repo open in Cursor. |
 | **Cursor agent** (Composer / Agent mode) | LLM + tools: can run **terminal commands**, **read files**, edit — depending on your Cursor version and settings. |
-| **Nexus** (CLI on **your** machine) | Commands **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, optional **`nexus-console`**: build an **inference map** from `.py`, return **bounded** text (brief, names, policy slice). Install the **`nexus-inference`** package; there is no `nexus-inference` executable. |
+| **Nexus** (CLI on **your** machine) | Commands **`nexus-opc`** (fixed **opcode** pipelines — see **[`tutorial-nexus-opc-isa.md`](tutorial-nexus-opc-isa.md)**), **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, optional **`nexus-console`**: build an **inference map** from `.py`, return **bounded** text (brief, names, policy slice). Install the **`nexus-inference`** package; there is no `nexus-inference` executable. |
 | **Your codebase** | Files on disk; Nexus reads them during a run; the agent reads **specific** paths when needed. |
 
 The **model does not “have” Nexus inside the weights**. Nexus runs as a **subprocess** when the agent (or you) invokes the CLI. The model only sees **whatever is returned** (terminal capture) or what you paste.
@@ -30,7 +30,7 @@ flowchart LR
   A --> U
 ```
 
-1. **Agent** chooses a **Nexus command** (often `nexus-grep` or `nexus-policy` first, then `nexus -q` with small `--max-symbols`, or the **canonical** `nexus --perspective …` path — same vocabulary as the library and Inference Console; see **`docs/cli-perspective.md`**).  
+1. **Agent** chooses a **Nexus command** — preferably **`nexus-opc locate`** / **`nexus-opc grep`** / **`nexus-opc policy`** so flags are not invented; then **`nexus -q`** with small **`--max-symbols`** for **`impact` / `why` / mutation** narratives, or **`nexus --perspective …`** when opcodes do not fit (same vocabulary as the library and Inference Console; see **`docs/cli-perspective.md`** and **`docs/tutorial-nexus-opc-isa.md`**).  
 2. **Shell** runs on the **workspace** (usually repo root). Nexus **scans** and prints a **short** structured answer.  
 3. **Agent** uses **`NEXT_OPEN`** / symbol paths from the output to **open only those files** (or slices), instead of searching the whole tree with `rg`.  
 4. Repeat with a **tighter `-q`** or another subpath until the task is done.

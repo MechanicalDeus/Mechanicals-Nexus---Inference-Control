@@ -1,6 +1,6 @@
 # Nexus Inference Console — deep dive
 
-This document complements the **[quick tutorial](inference-console-tutorial.md)** and the **[unified CLI + UI tutorial](tutorial-nexus-cli-and-ui.md)**. It explains *why* the console is shaped the way it is and how it stays aligned with the CLI and library.
+This document complements the **[quick tutorial](inference-console-tutorial.md)**, the **[unified CLI + UI tutorial](tutorial-nexus-cli-and-ui.md)**, and the **[extended CLI tutorial](tutorial-nexus-cli-extended.md)**. It explains *why* the console is shaped the way it is and how it stays aligned with the CLI and library.
 
 ---
 
@@ -90,19 +90,20 @@ Tests: `tests/test_ui_projections.py` (projections; PyQt optional for import smo
 
 ---
 
-## Screenshots (same set as the tutorial)
+## Screenshots (Inference Console + CLI proof)
+
+**Canonical Inference Console shots** live under **`docs/ui-screenshots/`** (same filenames as the tutorials). **`console tutorial/`** holds **`cli-ide-proof.png`** (IDE terminal) and **Cursor/metrics** PNGs — see **[tutorial-nexus-cli-extended.md §0](tutorial-nexus-cli-extended.md#0-other-assets-in-console-tutorial)**.
 
 | File | Idea |
 |------|------|
-| [1.png](../console%20tutorial/1.png) | Console ready, repo attached |
-| [2.png](../console%20tutorial/2.png) | Query → slice + brief |
-| [3.png](../console%20tutorial/3.png) | Trust / detail |
-| [4.png](../console%20tutorial/4.png) | Mutation trace |
-| [5b-focus-graph-clean.png](../console%20tutorial/5b-focus-graph-clean.png) | Focus graph (clean) |
-| [5.png](../console%20tutorial/5.png) | Focus graph (busy) |
-| [bottom textbox(brief).png](../console%20tutorial/bottom%20textbox%28brief%29.png) | Exports + brief context |
-| [full text brief.png](../console%20tutorial/full%20text%20brief.png) | **Copy Brief** pasted in an editor — proof of LLM-facing text |
-| [cli-ide-proof.png](../console%20tutorial/cli-ide-proof.png) | **CLI in IDE terminal** — same brief pipeline, local / no scan API tokens |
+| [Shot 1.png](ui-screenshots/Shot%201.png) | Console ready, repo attached, **Darstellung** |
+| [Shot 2.png](ui-screenshots/Shot%202.png) | Query → slice + brief |
+| [Shot 3-1.png](ui-screenshots/Shot%203-1.png) · [Shot 3-2.png](ui-screenshots/Shot%203-2.png) | Trust / inspector / perspectives |
+| [Shot 4-1.png](ui-screenshots/Shot%204-1.png) … [Shot 4-4.png](ui-screenshots/Shot%204-4.png) | Mutation trace (tabs) |
+| [Shot 5-1.png](ui-screenshots/Shot%205-1.png) · [Shot 5-2.png](ui-screenshots/Shot%205-2.png) · [Shot 5-3.png](ui-screenshots/Shot%205-3.png) | Focus graph |
+| [Shot 6.png](ui-screenshots/Shot%206.png) · [Shot 6-2.png](ui-screenshots/Shot%206-2.png) · [Shot 6-3.png](ui-screenshots/Shot%206-3.png) | Exports + brief context |
+| [Shot 7.png](ui-screenshots/Shot%207.png) | **Copy Brief** pasted in an editor — proof of LLM-facing text |
+| [cli-ide-proof.png](../console%20tutorial/cli-ide-proof.png) | **CLI in IDE terminal** — unchanged asset, not Qt |
 
 ---
 

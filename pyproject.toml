@@ -31,6 +31,7 @@ nexus-grep = "nexus.cli_grep:main"
 nexus-cursor-rules = "nexus.cursor_rules_cli:main"
 nexus-policy = "nexus.cli_policy:main"
 nexus-console = "nexus.ui.app:main"
+nexus-opc = "nexus.cli_opc:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.9.0", "tiktoken>=0.5"]

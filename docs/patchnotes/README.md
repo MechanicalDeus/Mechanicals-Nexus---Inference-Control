@@ -25,4 +25,5 @@ Vorlage: **[`TEMPLATE.md`](TEMPLATE.md)** — Abschnitte: Meta, Zusammenfassung,
 
 | Datum | Datei | Thema |
 |-------|--------|--------|
+| 2026-04-03 | [2026-04-03-nexus-opc-isa.md](2026-04-03-nexus-opc-isa.md) | `nexus-opc` Opcode-ISA, `--dry-run`, JSONL-Log, `stats`, Rules + Tutorial |
 | 2026-04-03 | [2026-04-03-agent-output-und-metriken.md](2026-04-03-agent-output-und-metriken.md) | `agent_compact`, `--compact-fields`, `--agent-mode`, Metrikfelder, Benchmark |

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 from PyQt6.QtCore import QEvent, QModelIndex, QObject, Qt
-from PyQt6.QtGui import QGuiApplication, QStandardItem, QStandardItemModel
+from PyQt6.QtGui import QBrush, QColor, QGuiApplication, QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -28,6 +28,7 @@ from PyQt6.QtWidgets import (
 )
 
 from nexus.core.models import SymbolRecord
+from nexus.semantic_palette import PALETTE_DARK, PALETTE_LIGHT, UiPalette
 from nexus.output.llm_format import DEFAULT_QUERY_MAX_SYMBOLS
 from nexus.output.inference_projection import (
     build_focus_payload,
@@ -63,6 +64,7 @@ class MainWindow(QMainWindow):
 
         self._selected_symbol: SymbolRecord | None = None
         self._hover_row = -1
+        self._slice_col_widths_initialized = False
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -82,6 +84,12 @@ class MainWindow(QMainWindow):
         ctrl.addWidget(self._path_edit, stretch=1)
         ctrl.addWidget(btn_browse)
         ctrl.addWidget(btn_refresh)
+        ctrl.addWidget(QLabel("Darstellung:"))
+        self._theme_combo = QComboBox()
+        self._theme_combo.setToolTip("Helles oder dunkles Farbschema für die gesamte Konsole.")
+        self._theme_combo.addItem("Dunkel", PALETTE_DARK)
+        self._theme_combo.addItem("Hell", PALETTE_LIGHT)
+        ctrl.addWidget(self._theme_combo)
         root.addWidget(gb_repo)
 
         gb_query = QGroupBox("Query / Slice")
@@ -151,10 +159,13 @@ class MainWindow(QMainWindow):
         self._table.viewport().installEventFilter(self)
         self._table.setItemDelegateForColumn(6, TagsChipDelegate(self._table))
         hdr = self._table.horizontalHeader()
-        hdr.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        hdr.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        for c in range(2, len(self._table_headers)):
-            hdr.setSectionResizeMode(c, QHeaderView.ResizeMode.ResizeToContents)
+        hdr.setSectionsMovable(True)
+        hdr.setMinimumSectionSize(48)
+        hdr.setStretchLastSection(True)
+        n_hdr = len(self._table_headers)
+        for c in range(n_hdr - 1):
+            hdr.setSectionResizeMode(c, QHeaderView.ResizeMode.Interactive)
+        hdr.setSectionResizeMode(n_hdr - 1, QHeaderView.ResizeMode.Stretch)
 
         self._context_panel = QPlainTextEdit()
         self._context_panel.setReadOnly(True)
@@ -256,18 +267,12 @@ class MainWindow(QMainWindow):
         focus_tab = QWidget()
         fl = QVBoxLayout(focus_tab)
         self._focus_view = FocusGraphView()
-        c = theme.GRAPH_ROLE_HEX["center"]
-        ca = theme.GRAPH_ROLE_HEX["caller"]
-        ce = theme.GRAPH_ROLE_HEX["callee"]
-        legend = QLabel(
-            f'<span style="color:{ca}">●</span> caller &nbsp; '
-            f'<span style="color:{c}">●</span> center &nbsp; '
-            f'<span style="color:{ce}">●</span> callee'
+        self._focus_legend = QLabel()
+        self._focus_legend.setToolTip(
+            "Knotenfarben folgen der aktiven Darstellung (caller / center / callee), identisch im Graph-Renderer."
         )
-        legend.setToolTip(
-            "Knotenfarben = theme.GRAPH_ROLE_HEX (caller / center / callee), identisch im Graph-Renderer."
-        )
-        fl.addWidget(legend)
+        self._update_focus_legend()
+        fl.addWidget(self._focus_legend)
         fl.addWidget(
             QLabel(
                 "Symbol wählen — 1 Hop: callers (links) / callees (rechts). "
@@ -276,6 +281,62 @@ class MainWindow(QMainWindow):
         )
         fl.addWidget(self._focus_view, stretch=1)
         tabs.addTab(focus_tab, "Focus Graph")
+
+        self._theme_combo.currentIndexChanged.connect(self._on_theme_changed)
+
+    def _update_focus_legend(self) -> None:
+        gr = theme.ui_palette().graph_role_hex
+        c = gr["center"]
+        ca = gr["caller"]
+        ce = gr["callee"]
+        self._focus_legend.setText(
+            f'<span style="color:{ca}">●</span> caller &nbsp; '
+            f'<span style="color:{c}">●</span> center &nbsp; '
+            f'<span style="color:{ce}">●</span> callee'
+        )
+
+    def _current_focus_symbol(self) -> SymbolRecord | None:
+        if self._selected_symbol:
+            return self._selected_symbol
+        if self._hover_row >= 0:
+            it = self._model.item(self._hover_row, 1)
+            if it:
+                sym = it.data(Qt.ItemDataRole.UserRole)
+                if isinstance(sym, SymbolRecord):
+                    return sym
+        return None
+
+    def _on_theme_changed(self, _index: int) -> None:
+        data = self._theme_combo.currentData()
+        if not isinstance(data, UiPalette):
+            return
+        theme.set_ui_palette(data)
+        app = QGuiApplication.instance()
+        if app:
+            app.setStyleSheet(theme.application_stylesheet())
+        self._update_focus_legend()
+        self._refresh_table_row_colors()
+        self._apply_focus_graph(self._current_focus_symbol(), animate=False)
+
+    def _refresh_table_row_colors(self) -> None:
+        pal = theme.ui_palette()
+        base = QColor(pal.text_primary)
+        n_col = len(self._table_headers)
+        for r in range(self._model.rowCount()):
+            items = [self._model.item(r, c) for c in range(n_col)]
+            if not items[0]:
+                continue
+            items[0].setForeground(base)
+            if items[2]:
+                items[2].setForeground(base)
+            if items[3]:
+                items[3].setBackground(QBrush())
+            row = {
+                "kind": items[0].text(),
+                "confidence": float(items[2].text()),
+                "layer": items[3].text(),
+            }
+            self._apply_semantic_item_roles(items, row)
 
     def eventFilter(self, obj: QObject | None, event: QEvent | None) -> bool:
         if (
@@ -340,6 +401,7 @@ class MainWindow(QMainWindow):
             )
 
     def _on_repo_changed(self, _path: str) -> None:
+        self._slice_col_widths_initialized = False
         self._model.removeRows(0, self._model.rowCount())
         self._brief.clear()
         self._selected_symbol = None
@@ -437,6 +499,14 @@ class MainWindow(QMainWindow):
             items[6].setData(row["tags_list"], TagsChipDelegate.TAGS_LIST_ROLE)
             self._apply_semantic_item_roles(items, row)
             self._model.appendRow(items)
+        if rows and not self._slice_col_widths_initialized:
+            h = self._table.horizontalHeader()
+            n_hdr = len(self._table_headers)
+            for c in range(n_hdr - 1):
+                self._table.resizeColumnToContents(c)
+            if h.sectionSize(1) < 200:
+                h.resizeSection(1, 200)
+            self._slice_col_widths_initialized = True
         if not rows:
             self._brief.setPlainText("(Keine Treffer — Slice leer. Query oder Repo prüfen.)")
             self._set_context_for_symbol(None)

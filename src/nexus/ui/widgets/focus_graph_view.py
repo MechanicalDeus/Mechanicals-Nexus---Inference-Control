@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from PyQt6.QtCore import QPointF, QPropertyAnimation, Qt, QEasingCurve
-from PyQt6.QtGui import QBrush, QColor, QPainter, QPen
+from PyQt6.QtGui import QBrush, QPainter, QPen
 from PyQt6.QtWidgets import (
     QGraphicsEllipseItem,
     QGraphicsLineItem,
@@ -78,9 +78,7 @@ class FocusGraphView(QGraphicsView):
             role = n.get("role", "center")
             ellipse = QGraphicsEllipseItem(p.x() - r, p.y() - r, 2 * r, 2 * r)
             ellipse.setBrush(QBrush(theme.graph_role_qcolor(role)))
-            pen_node = QPen(QColor("#1a1a1a"))
-            pen_node.setWidthF(1.5)
-            ellipse.setPen(pen_node)
+            ellipse.setPen(theme.graph_node_outline_pen())
             if role != "center":
                 ellipse.setOpacity(0.55)
             self._scene.addItem(ellipse)

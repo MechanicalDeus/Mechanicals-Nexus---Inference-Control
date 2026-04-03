@@ -17,6 +17,8 @@ In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) as 
 - CLI: `--control-header`
 - Env: `NEXUS_CONTROL_HEADER=1`
 
+**Opcode ISA (when `nexus-opc` is available):** Prefer **`nexus-opc <opcode>`** (or **`python -m nexus.cli_opc`**) so the agent does **not** invent `nexus` flags. **`locate -q "…" [path]`** ≈ **`--agent-mode`**; **`map`**, **`grep`**, **`policy`**, **`explain`**, **`focus`**, **`bench`**, **`compare`**, **`catalog`**, **`stats`** cover fixed pipelines. Inspect argv: **`--dry-run`** before a real run. **Fallback:** use the manual patterns below if an opcode does not cover the case (e.g. **`impact` / `why`**, full **`llm_brief`**, **`--json`** export) or the entry point is missing.
+
 **Tiering (default for agents):** **`nexus <path> --agent-mode -q "..."`** (structural compact slice: `agent_compact` + **minimal** fields + cap **10**, overridable) → **`read_file`** (tiny slice) → STOP. Alternatives: **`nexus-grep <path> -q "..."`** (thin map search) or **`nexus --names-only`**.  
 Escalate when required: plain **`nexus -q "…"`** (**`llm_brief`**, richer text) for narrative depth; **`nexus -q "impact …"`** / **`why …`** / mutation chains; **`nexus --json`** only for explicit full-graph export.
 
@@ -38,21 +40,21 @@ Full requirement matrix (upstream): **`docs/cli-perspective.md`** in the Nexus r
 
 | Goal | Command pattern (conceptual) |
 |------|------------------------------|
-| **Fast structural orientation** (default agent path) | `nexus <path> --agent-mode -q "<topic or identifiers>"` |
+| **Fast structural orientation** (default agent path) | **`nexus-opc locate -q "…" <path>`** (or `python -m nexus.cli_opc locate …`); else `nexus <path> --agent-mode -q "<topic or identifiers>"` |
 | **Even thinner** name list | `nexus <path> -q "…" --names-only [--annotate] --max-symbols N` |
-| **Wrapped search** (bounded symbols) | `nexus-grep <path> -q "…" --max-symbols N` |
+| **Wrapped search** (bounded symbols) | **`nexus-opc grep -q "…" <path>`** or `nexus-grep <path> -q "…" --max-symbols N` |
 | **Rich narrative + special modes** | `nexus <path> -q "impact Class"` / `why …` / `full mutation chain` ( **`llm_brief`** ) |
 | **Explicit perspective** | `nexus <path> --perspective heuristic_slice -q "…"` vs `agent_compact` vs `llm_brief` (see matrix in `docs/cli-perspective.md`) |
 | **Per-run telemetry** | append **`--metrics-json`** (or env); batch: **`extras/nexus_benchmark.py`** on Nexus checkout |
-| **Safe-by-default exploration** | **`nexus-policy <path> -q "…"`** |
+| **Safe-by-default exploration** | **`nexus-opc policy -q "…" <path>`** or **`nexus-policy <path> -q "…"`** |
 
-**Canonical template:** Shipped with **`nexus-inference`** (Python package `nexus`, module **`nexus.cursor_rules`**). **CLI commands:** **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`** — there is **no** shell command `nexus-inference`. **Install into a target repo:** run **`nexus-cursor-rules install`** at the project root — writes this `.mdc` to **`<target-repo>/.cursor/rules/`** (Cursor loads rules from there). Print bundled directory: **`nexus-cursor-rules --path`**. Overwrite: **`nexus-cursor-rules install --force`**. Same via **`python -m nexus.cursor_rules`** with the same arguments. Optional global: `%USERPROFILE%\.cursor\rules\` (User Rules). When developing Nexus, source lives at **`src/nexus/cursor_rules/nexus-over-grep.mdc`**.
+**Canonical template:** Shipped with **`nexus-inference`** (Python package `nexus`, module **`nexus.cursor_rules`**). **CLI commands:** **`nexus-opc`**, **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`** — there is **no** shell command `nexus-inference`. **Install into a target repo:** run **`nexus-cursor-rules install`** at the project root — writes this `.mdc` to **`<target-repo>/.cursor/rules/`** (Cursor loads rules from there). Print bundled directory: **`nexus-cursor-rules --path`**. Overwrite: **`nexus-cursor-rules install --force`**. Same via **`python -m nexus.cursor_rules`** with the same arguments. Optional global: `%USERPROFILE%\.cursor\rules\` (User Rules). When developing Nexus, source lives at **`src/nexus/cursor_rules/nexus-over-grep.mdc`**.
 
 ---
 
 On a **reference machine** the same logic can be **global**: `%USERPROFILE%\.cursor\rules\nexus-python-context.mdc` (same content as this file; adjust paths to your Nexus checkout if needed).
 
-When you need to understand **Python code, calls, mutations, or architecture**, prefer **`nexus --agent-mode`**, **`nexus-grep`**, or **`nexus -q`** for map queries first. Do **not** use `grep`/`rg`/Select-String for “orientation”.
+When you need to understand **Python code, calls, mutations, or architecture**, prefer **`nexus-opc locate`** (or **`map` / `grep` / `policy`**), else **`nexus --agent-mode`**, **`nexus-grep`**, or **`nexus -q`** for map queries first. Do **not** use `grep`/`rg`/Select-String for “orientation”.
 
 ## Why
 
@@ -64,8 +66,9 @@ When you need to understand **Python code, calls, mutations, or architecture**, 
 
 1. Choose repo root or package path (e.g. `.` or `src/mypkg`).
 2. **Unknown or large codebase:** orient with **few tokens first** by querying the map:
-   - **Preferred (agents):** `nexus <path> --agent-mode -q "<topic or identifiers>"`, or
-   - `nexus-grep <path> -q "<topic>" --max-symbols 25`, or
+   - **Preferred (agents):** **`nexus-opc locate -q "<topic or identifiers>" <path>`** (or `python -m nexus.cli_opc locate …`), or
+   - `nexus <path> --agent-mode -q "<topic or identifiers>"`, or
+   - **`nexus-opc grep …`** / `nexus-grep <path> -q "<topic>" --max-symbols 25`, or
    - `nexus <path> -q "<topic>" --names-only --max-symbols 40`, or `--names-only --annotate` for one-liners with confidence/tags.
 3. If more context is needed: **tighter** follow-up query (identifiers from step 2), or switch to **`nexus -q`** ( **`llm_brief`** ) for narrative / **`impact`** / **`why`**; keep **`--max-symbols`** small.
 4. Full graph only when explicitly needed: `nexus <path> --json > graph.json`
@@ -74,7 +77,7 @@ When you need to understand **Python code, calls, mutations, or architecture**, 
 
 The model **drives context acquisition** (hypothesis → tool → evidence → refine). Default path:
 
-1. **Orient:** `nexus … --agent-mode -q "..."` when you want **structured** calls/writes; or `nexus-grep … -q "..."` (thin); or `nexus … --names-only` (names only).
+1. **Orient:** `nexus-opc locate -q "…" …` when available; else `nexus … --agent-mode -q "..."` for **structured** calls/writes; or `nexus-opc grep …` / `nexus-grep … -q "..."` (thin); or `nexus … --names-only` (names only).
 2. **From hits:** derive concrete symbols/paths/files.
 3. **Deepen:** targeted **`read_file`** (relevant blocks only) **or** a second, tighter `nexus-grep` / `nexus -q` query with **identifiers** from step 2.
 4. **Structure/chains only if needed:** `nexus -q "…"` with **small** `--max-symbols` (e.g. 15–25) and explicit operators like `impact` / `why`.
@@ -82,7 +85,7 @@ The model **drives context acquisition** (hypothesis → tool → evidence → r
 
 **Text search:** do **not** use raw `grep`/`rg`/Select-String in Python repos. If you need search, use **`nexus-grep`** (wrapped) or ask a better `nexus -q` query.
 
-Note: the implementation may use additional internal helpers, but the agent-facing behavior is: **query the map (`nexus --agent-mode` / `nexus-grep` / `nexus -q`)**.
+Note: the implementation may use additional internal helpers, but the agent-facing behavior is: **query the map (`nexus-opc locate` / `nexus --agent-mode` / `nexus-grep` / `nexus -q`)**.
 
 ---
 
@@ -90,7 +93,7 @@ Note: the implementation may use additional internal helpers, but the agent-faci
 
 | Situation | Preferred tool |
 |-----------|----------------|
-| Vague question, unknown location | **`nexus --agent-mode -q "…"`** or **`nexus-grep`** with a focused query; keep caps small |
+| Vague question, unknown location | **`nexus-opc locate -q "…"`** (if available) or **`nexus --agent-mode -q "…"`** or **`nexus-grep`** with a focused query; keep caps small |
 | After first hit list: “where exactly?” | Second **`nexus-grep`** with extracted identifiers **or** **`read_file`** at `file:line` |
 | Function/class/file already known | **`read_file`** (slice), no Nexus needed |
 | Mutation paths, impact, “why does X change …?” | **`nexus -q "…"`** with **`--max-symbols` capped** |
@@ -102,7 +105,7 @@ Note: the implementation may use additional internal helpers, but the agent-faci
 
 **Default (sweet spot):**
 
-1. **`nexus --agent-mode`** or **`nexus-grep`** on a **sensible subtree**, **tight** `-q` with **concrete identifiers**; keep **`--max-symbols`** low when not using **`--agent-mode`** defaults.
+1. **`nexus-opc locate`** (or **`nexus --agent-mode`**) or **`nexus-opc grep`** / **`nexus-grep`** on a **sensible subtree**, **tight** `-q` with **concrete identifiers**; keep **`--max-symbols`** low when not using **`--agent-mode`** defaults.
 2. **`read_file`** only as a **slice** at locations from step 1.
 3. **STOP** — no further Nexus steps while the question is answered or the next step is clear.
 

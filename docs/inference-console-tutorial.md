@@ -1,6 +1,8 @@
 # Nexus Inference Console — quick tutorial
 
-**Also read:** the repo’s **[full CLI + UI tutorial](tutorial-nexus-cli-and-ui.md)** (same screenshots, terminal commands, and the “one map, two surfaces” idea).
+**Screenshots** below use **`docs/ui-screenshots/`** (current UI, incl. **Darstellung** dark/light). For CLI-terminal and Cursor/metrics images still under **`console tutorial/`**, see **[extended tutorial §0](tutorial-nexus-cli-extended.md#0-other-assets-in-console-tutorial)**.
+
+**Also read:** the repo’s **[full CLI + UI tutorial](tutorial-nexus-cli-and-ui.md)** (same story as here) and the **[extended CLI tutorial](tutorial-nexus-cli-extended.md)** (deeper command reference + all new shots).
 
 The **Nexus Inference Console** is a small PyQt UI on top of the same engine as `nexus` / `nexus-grep`: one **inference map** per scan, then **projections** (table, brief, mutation trace, focus graph) and **clipboard exports** for LLM workflows.
 
@@ -31,9 +33,9 @@ Without `[ui]`, PyQt6 is missing and the entry point prints an install hint.
 
 Pick your Python project root (where your package and `.py` files live), then **Scan / Refresh**.
 
-![Empty console after choosing a repo](../console%20tutorial/1.png)
+![Empty console after choosing a repo](ui-screenshots/Shot%201.png)
 
-*UI labels in the screenshots are in German: **Ordner…** = browse folder, **Scan / Refresh** = rebuild the map.*
+*UI labels are in German: **Ordner…** = browse folder, **Scan / Refresh** = rebuild the map, **Darstellung** = theme.*
 
 ---
 
@@ -43,7 +45,7 @@ Enter a heuristic query (same idea as `nexus-grep` / `nexus -q`), set **max sym*
 
 Example query: `runtime resolver` on a large app gives a **prioritized slice** and a **balanced brief** (`to_llm_brief`) — stats, symbol cards, `NEXT_OPEN` hints.
 
-![Slice table and brief after querying](../console%20tutorial/2.png)
+![Slice table and brief after querying](ui-screenshots/Shot%202.png)
 
 ---
 
@@ -51,7 +53,9 @@ Example query: `runtime resolver` on a large app gives a **prioritized slice** a
 
 Select a row. The right-hand pane shows **raw Nexus fields** for that symbol: confidence, layer, reads/writes/calls, tags, mutation paths, etc. No extra semantics are invented here.
 
-![Selected symbol with full detail panel](../console%20tutorial/3.png)
+![Selected symbol — inspector / trust (1)](ui-screenshots/Shot%203-1.png)
+
+![Selected symbol — inspector (2)](ui-screenshots/Shot%203-2.png)
 
 ---
 
@@ -59,7 +63,7 @@ Select a row. The right-hand pane shows **raw Nexus fields** for that symbol: co
 
 Switch to **Mutation**, enter a **state key substring** (matched against write-hint strings), then run **trace_mutation**. You get three buckets: **direct**, **indirect**, and **transitive** writers.
 
-![Mutation trace for substring “delta”](../console%20tutorial/4.png)
+![Mutation trace (example)](ui-screenshots/Shot%204-1.png)
 
 ---
 
@@ -69,11 +73,11 @@ Open **Focus Graph**, then select a symbol again on the **Slice** tab. You see *
 
 The “clean” four-node example is ideal for screenshots:
 
-![Focus graph — compact 1-hop view](../console%20tutorial/5b-focus-graph-clean.png)
+![Focus graph — compact 1-hop view](ui-screenshots/Shot%205-1.png)
 
 A busier view (many callees) is still valid but harder to read at a glance:
 
-![Focus graph — many direct callees](../console%20tutorial/5.png)
+![Focus graph — many direct callees](ui-screenshots/Shot%205-2.png)
 
 ---
 
@@ -87,7 +91,7 @@ The three buttons under the slice copy **different projections** of the **same**
 | **Copy Brief**   | Full `to_llm_brief` text for the current query/settings |
 | **Copy JSON**    | Slice symbols + edges **only inside** the slice ID set |
 
-![Detail + export buttons (brief area visible)](../console%20tutorial/bottom%20textbox%28brief%29.png)
+![Detail + export buttons (brief area visible)](ui-screenshots/Shot%206.png)
 
 ---
 
@@ -95,7 +99,7 @@ The three buttons under the slice copy **different projections** of the **same**
 
 Click **Copy Brief**, then paste into any editor or chat. The text is the same **`to_llm_brief`** output as from the CLI for that repo, query, and `max_symbols` / `min confidence` settings: repo line, stats, `NEXT_OPEN`, symbol sections (reads/writes/calls, tags, mutation hints), etc.
 
-![Full balanced brief pasted into an editor (TTRPG Studio example)](../console%20tutorial/full%20text%20brief.png)
+![Full balanced brief pasted into an editor (TTRPG Studio example)](ui-screenshots/Shot%207.png)
 
 This closes the loop: **inference map → bounded projection → exact context string** you can drop into a model.
 

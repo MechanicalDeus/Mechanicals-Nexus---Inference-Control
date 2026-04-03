@@ -1,70 +1,79 @@
 """
 Zentrale Farben und QSS für die Inference Console.
 
-Alle semantischen Farben liegen hier; Widgets nutzen Helper (QColor/QPen) statt
-verstreuter RGB-Literale. Dark-Theme, damit Kontrast und Tönung konsistent sind.
+Semantik pro ``UiPalette`` (Dunkel/Hell); Widgets nutzen ``ui_palette()`` und Helper
+(QColor/QPen), keine verstreuten RGB-Literale.
 """
 
 from __future__ import annotations
 
 from PyQt6.QtGui import QColor, QPen
 
-from nexus.semantic_palette import (
-    ACCENT,
-    BG_HEADER,
-    BG_MAIN,
-    BG_PANEL,
-    BORDER,
-    BORDER_HOVER,
-    GRAPH_ROLE_HEX,
-    KIND_TEXT_HEX,
-    LAYER_CELL_BG_HEX,
-    TEXT_MUTED,
-    TEXT_PRIMARY,
-)
+from nexus.semantic_palette import PALETTE_DARK, UiPalette
+
+_active: UiPalette = PALETTE_DARK
+
+
+def ui_palette() -> UiPalette:
+    return _active
+
+
+def set_ui_palette(p: UiPalette) -> None:
+    global _active
+    _active = p
+
 
 # --- Konfidenz: Gewichtung (weniger Signal = gedimmt/ausgegraut, kein „Fehler-Rot“) ---
 def confidence_text_qcolor(confidence: float) -> QColor | None:
+    pal = ui_palette()
     c = float(confidence)
     if c >= 0.82:
         return None
     if c >= 0.55:
-        out = QColor(TEXT_PRIMARY)
+        out = QColor(pal.text_primary)
         out.setAlphaF(0.62)
         return out
-    out = QColor(TEXT_MUTED)
+    out = QColor(pal.text_muted)
     out.setAlphaF(0.9)
     return out
 
 
 def graph_role_qcolor(role: str) -> QColor:
-    h = GRAPH_ROLE_HEX.get(role, "#888888")
+    h = ui_palette().graph_role_hex.get(role, "#888888")
     return QColor(h)
 
 
 def graph_edge_pen() -> QPen:
-    p = QPen(QColor("#707070"))
+    p = QPen(QColor(ui_palette().graph_edge))
     p.setWidthF(1.25)
     return p
 
 
 def graph_edge_pen_highlight() -> QPen:
-    p = QPen(QColor(ACCENT))
+    p = QPen(QColor(ui_palette().accent))
     p.setWidthF(2.25)
     return p
 
 
 def graph_edge_pen_dim() -> QPen:
-    c = QColor("#5a5a5a")
+    pal = ui_palette()
+    c = QColor(pal.graph_edge_dim)
     c.setAlphaF(0.38)
     p = QPen(c)
     p.setWidthF(1.0)
     return p
 
 
+def graph_node_outline_pen() -> QPen:
+    pal = ui_palette()
+    pen_node = QPen(QColor(pal.graph_node_stroke))
+    pen_node.setWidthF(1.5)
+    return pen_node
+
+
 def layer_cell_qcolor(layer: str) -> QColor | None:
     key = (layer or "").strip().lower()
-    h = LAYER_CELL_BG_HEX.get(key)
+    h = ui_palette().layer_cell_bg_hex.get(key)
     if not h:
         return None
     return QColor(h)
@@ -72,20 +81,21 @@ def layer_cell_qcolor(layer: str) -> QColor | None:
 
 def kind_text_qcolor(kind: str) -> QColor | None:
     key = (kind or "").strip().lower()
-    h = KIND_TEXT_HEX.get(key)
+    h = ui_palette().kind_text_hex.get(key)
     if not h:
         return None
     return QColor(h)
 
 
-def application_stylesheet() -> str:
+def application_stylesheet(p: UiPalette | None = None) -> str:
+    pal = p if p is not None else ui_palette()
     return f"""
     QMainWindow, QWidget {{
-        background-color: {BG_MAIN};
-        color: {TEXT_PRIMARY};
+        background-color: {pal.bg_main};
+        color: {pal.text_primary};
     }}
     QGroupBox {{
-        border: 1px solid {BORDER};
+        border: 1px solid {pal.border};
         border-radius: 4px;
         margin-top: 8px;
         padding-top: 4px;
@@ -95,90 +105,90 @@ def application_stylesheet() -> str:
         subcontrol-origin: margin;
         left: 8px;
         padding: 0 4px;
-        color: {TEXT_MUTED};
+        color: {pal.text_muted};
     }}
     QLineEdit, QSpinBox, QDoubleSpinBox, QComboBox {{
-        background-color: {BG_PANEL};
-        color: {TEXT_PRIMARY};
-        border: 1px solid {BORDER};
+        background-color: {pal.bg_panel};
+        color: {pal.text_primary};
+        border: 1px solid {pal.border};
         border-radius: 3px;
         padding: 4px 6px;
     }}
     QLineEdit:focus, QSpinBox:focus, QDoubleSpinBox:focus, QComboBox:focus {{
-        border: 1px solid {ACCENT};
+        border: 1px solid {pal.accent};
     }}
     QPushButton {{
-        background-color: {BG_PANEL};
-        color: {TEXT_PRIMARY};
-        border: 1px solid {BORDER};
+        background-color: {pal.bg_panel};
+        color: {pal.text_primary};
+        border: 1px solid {pal.border};
         border-radius: 3px;
         padding: 5px 10px;
     }}
     QPushButton:hover {{
-        border: 1px solid {BORDER_HOVER};
+        border: 1px solid {pal.border_hover};
     }}
     QPushButton:pressed {{
-        background-color: {BG_HEADER};
+        background-color: {pal.bg_header};
     }}
     QTableView {{
-        background-color: {BG_PANEL};
-        alternate-background-color: {BG_MAIN};
-        color: {TEXT_PRIMARY};
-        gridline-color: {BORDER};
-        border: 1px solid {BORDER};
+        background-color: {pal.bg_panel};
+        alternate-background-color: {pal.bg_main};
+        color: {pal.text_primary};
+        gridline-color: {pal.border};
+        border: 1px solid {pal.border};
         border-radius: 3px;
     }}
     QTableView::item:selected {{
-        background-color: {ACCENT};
-        color: #ffffff;
+        background-color: {pal.accent};
+        color: {pal.table_selection_fg};
     }}
     QHeaderView::section {{
-        background-color: {BG_HEADER};
-        color: {TEXT_PRIMARY};
+        background-color: {pal.bg_header};
+        color: {pal.text_primary};
         padding: 6px;
         border: none;
-        border-bottom: 2px solid {ACCENT};
+        border-bottom: 2px solid {pal.accent};
         font-weight: bold;
     }}
     QTabWidget::pane {{
-        border: 1px solid {BORDER};
+        border: 1px solid {pal.border};
         border-radius: 3px;
         top: -1px;
-        background-color: {BG_MAIN};
+        background-color: {pal.bg_main};
     }}
     QTabBar::tab {{
-        background-color: {BG_HEADER};
-        color: {TEXT_MUTED};
+        background-color: {pal.bg_header};
+        color: {pal.text_muted};
         padding: 6px 14px;
-        border: 1px solid {BORDER};
+        border: 1px solid {pal.border};
         border-bottom: none;
         border-top-left-radius: 4px;
         border-top-right-radius: 4px;
     }}
     QTabBar::tab:selected {{
-        background-color: {BG_PANEL};
-        color: {TEXT_PRIMARY};
+        background-color: {pal.bg_panel};
+        color: {pal.text_primary};
     }}
     QTextEdit, QPlainTextEdit {{
-        background-color: {BG_PANEL};
-        color: {TEXT_PRIMARY};
-        border: 1px solid {BORDER};
+        background-color: {pal.bg_panel};
+        color: {pal.text_primary};
+        border: 1px solid {pal.border};
         border-radius: 3px;
     }}
     QCheckBox {{
-        color: {TEXT_PRIMARY};
+        color: {pal.text_primary};
     }}
     QLabel {{
-        color: {TEXT_PRIMARY};
+        color: {pal.text_primary};
     }}
     QSplitter::handle {{
-        background-color: {BORDER};
+        background-color: {pal.border};
         width: 3px;
         height: 3px;
     }}
     QStatusBar {{
-        background-color: {BG_HEADER};
-        color: {TEXT_MUTED};
-        border-top: 1px solid {BORDER};
+        background-color: {pal.bg_header};
+        color: {pal.text_muted};
+        border-top: 1px solid {pal.border};
     }}
     """

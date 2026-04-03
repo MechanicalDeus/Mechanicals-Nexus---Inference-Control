@@ -24,11 +24,12 @@ class TagsChipDelegate(QStyledItemDelegate):
             return
 
         painter.save()
+        pal = theme.ui_palette()
         if option.state & QStyle.StateFlag.State_Selected:
             painter.fillRect(option.rect, option.palette.highlight())
             fg = option.palette.color(option.palette.ColorRole.HighlightedText)
         else:
-            fg = QColor(theme.TEXT_PRIMARY)
+            fg = QColor(pal.text_primary)
 
         fm = QFontMetrics(option.font)
         x = option.rect.x() + 4
@@ -39,8 +40,8 @@ class TagsChipDelegate(QStyledItemDelegate):
             chip_h = min(20, option.rect.height() - 4)
             y = cy - chip_h // 2
             rect = QRect(x, y, chip_w, chip_h)
-            painter.setPen(QColor(theme.BORDER))
-            painter.setBrush(QColor(theme.BG_HEADER))
+            painter.setPen(QColor(pal.border))
+            painter.setBrush(QColor(pal.bg_header))
             painter.drawRoundedRect(rect, 3, 3)
             painter.setPen(fg)
             painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, label)
