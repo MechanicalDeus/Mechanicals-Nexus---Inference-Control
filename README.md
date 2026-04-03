@@ -78,6 +78,8 @@ Example mutation-chain fragment when analysing this repo (your project will diff
 
 **Tutorial hub:** **[`TUTORIAL.md`](TUTORIAL.md)** (links to the full guide, screenshots, and related docs).
 
+**Repository analysis** (architecture, risks, packaging, roadmap — full map): **EN** [`docs/repository-analysis.md`](docs/repository-analysis.md) · **DE** [`docs/repository-analyse.md`](docs/repository-analyse.md).
+
 More narrative walkthrough: [`docs/proof-of-concept.md`](docs/proof-of-concept.md).
 
 ## Efficiency: one scan, bounded prompts

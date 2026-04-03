@@ -78,6 +78,13 @@ For **Python / CI support**, **CLI vs. pip package name** (`nexus-inference` vs.
 
 ---
 
+## See also (deeper read)
+
+- **[Repository analysis (English)](docs/repository-analysis.md)** — architecture, module map, security, risks, and roadmap-style recommendations.
+- **[Repository-Analyse (Deutsch)](docs/repository-analyse.md)** — gleiche Tiefe auf Deutsch.
+
+---
+
 ## Closing
 
 Nexus is a **focused tool** for **structured Python maps** and **token-aware** agent workflows. The pitch: **less noise, more edge** — map first, text second, not the other way around.
