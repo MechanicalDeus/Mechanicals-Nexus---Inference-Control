@@ -88,7 +88,39 @@ The expensive part for LLM workflows is **not** the local AST pass — it is **r
 
 **Reproducible numbers** (this repo + reference legacy scans), log-style before/after, and full **amortization** discussion: **[`docs/token-efficiency.md`](docs/token-efficiency.md)**.
 
-**Empirical agent metrics (optional):** Screenshots of Cursor usage dashboards comparing sessions **with** vs **without** Nexus show **large** total-token gaps in **open-ended** exploration (often on the order of **~7×–15×** vs the highest “without Nexus” rows in the gallery), with **Cache Read** as the dominant line — consistent with **less wide context re-injected** each turn. The same doc adds two **honest anchors**: (1) **Nexus-on-Nexus** on this **small** checkout (**~55k–~169k** per row, still Cache-read-heavy — here **fresh Input** barely moves; tiny graph); (2) a **controlled** **large-checkout** pair (**TTRPG Studio**, **N=1**): **~43%** lower total tokens and **~25%** lower **Input** in the captured analysis task — a **conservative, same-prompt** complement to the more extreme gallery sessions. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)** and **`docs/assets/usage-metrics/`**.
+**Empirical agent metrics** (Cursor usage dashboards, screenshots, and how to read them): see **[§ Metrics](#metrics)** below and the full write-up **[`docs/usage-metrics.md`](docs/usage-metrics.md)**.
+
+## Metrics
+
+Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **Input**, **Output** — **not** local AST time. Use this section as a **quick index**; narrative + honesty constraints live in **[`docs/usage-metrics.md`](docs/usage-metrics.md)**.
+
+| Layer | What it shows | Headline |
+|-------|----------------|----------|
+| **Small checkout** (~**7 MB**, this repo) | Build-leaning sessions **with** vs **without** Nexus | Totals differ; **fresh Input** almost flat — **tiny graph**, not a stress test for orientation. |
+| **Large checkout** (~**7 GB**, **TTRPG Studio**, **N=1**) | **Same analysis prompt**, Nexus on vs off | **~43%** lower **Total**, **~25%** lower **Input**; big **Cache Read** delta — **[details + tooltips](docs/usage-metrics.md#controlled-benchmark-ttrpg-studio-same-task-with-vs-without-nexus)**. |
+| **Exploratory gallery** | Open-ended agent work without tiering vs Nexus-first | Often **~7×–15×** vs the worst “without” rows — **real**, but **not** same-prompt A/B. |
+
+### Controlled benchmark — large Python checkout (TTRPG Studio)
+
+Same task wording, **with Nexus** vs **without** (one captured pair). **~314k** vs **~180k** total tokens; **Cache Read** carries most of the gap.
+
+| With Nexus | Without Nexus |
+|------------|----------------|
+| ![TTRPG Studio — with Nexus](docs/assets/usage-metrics/ttrpg-studio-with-nexus.png) | ![TTRPG Studio — without Nexus](docs/assets/usage-metrics/ttrpg-studio-without-nexus.png) |
+
+### Small checkout — Nexus analyzed with Nexus (this repository)
+
+**~169k** row (example): **Cache Read** still dominates; totals stay **far below** million-token “exploration” sessions. **Fresh Input** ~**8.7k** — comparable to a **without-Nexus** build row on the same small tree (**~7.7k**), i.e. **marginal** orientation win here.
+
+![Nexus repo — session usage (self-scan example)](docs/assets/usage-metrics/nexus-self-scan.png)
+
+### Gallery — exploratory sessions (illustrative)
+
+**Without** Nexus (broad reads / search-shaped context) vs **with** Nexus (structural queries first). Full set: **[`docs/assets/usage-metrics/`](docs/assets/usage-metrics/)** · **[`docs/usage-metrics.md`](docs/usage-metrics.md#screenshot-gallery)**.
+
+| Without Nexus (example) | With Nexus (example) |
+|-------------------------|----------------------|
+| ![Usage metrics — without Nexus (example run)](docs/assets/usage-metrics/without-nexus-1.png) | ![Usage metrics — with Nexus (example run)](docs/assets/usage-metrics/with-nexus-1.png) |
 
 ## Mental model
 
@@ -203,7 +235,7 @@ Guided walkthrough: **CLI** (including in your IDE terminal), optional **Inferen
 | **Console** quick steps | [`docs/inference-console-tutorial.md`](docs/inference-console-tutorial.md) |
 | **Architecture** (session, exports) | [`docs/inference-console-deep-dive.md`](docs/inference-console-deep-dive.md) |
 | **Screenshot assets** | [`console tutorial/`](console tutorial/) |
-| **Usage metrics** (agent token dashboards) | [`docs/usage-metrics.md`](docs/usage-metrics.md) · [`docs/assets/usage-metrics/`](docs/assets/usage-metrics/) |
+| **Usage metrics** (agent token dashboards) | **[§ Metrics](#metrics)** · [`docs/usage-metrics.md`](docs/usage-metrics.md) · [`docs/assets/usage-metrics/`](docs/assets/usage-metrics/) |
 
 ---
 
