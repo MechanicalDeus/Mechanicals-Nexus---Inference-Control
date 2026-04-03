@@ -42,9 +42,9 @@ From a Nexus development checkout:
 
 ---
 
-## Messlatte (measured sizes, 2026-04-03)
+## Measuring stick (measured sizes, 2026-04-03)
 
-**What this is:** The **measuring stick** for **disk** and **developer-sliced `.py` mass** in this documentation. It **replaces** the earlier misleading **Aether↔TTRPG `.py`-byte league table** (wrongly implying comparable “repo smallness”). **Do not** invent parallel size figures elsewhere — **link here** or re-run the same methodology and update this section.
+**What this is:** The **canonical ruler** for **disk** and **developer-sliced `.py` mass** in this documentation. It **replaces** the earlier misleading **Aether↔TTRPG `.py`-byte league table** (wrongly implying comparable “repo smallness”). **Do not** invent parallel size figures elsewhere — **link here** or re-run the same methodology and update this section.
 
 **When:** **2026-04-03** · **OS:** Windows · **Roots:** author’s local paths below · **same machine** as the cross-repo session described above.
 
@@ -64,7 +64,7 @@ From a Nexus development checkout:
 
 ## Scale contrast (why “not nice optimization”)
 
-**Messlatte:** All **disk** and **`.py`** claims below **must** match the **table in [§ Messlatte (measured sizes, 2026-04-03)](#messlatte-measured-sizes-2026-04-03)** — no fresh guesstimates. **Prompt** size is a different quantity (session totals, brief caps); do not conflate.
+**Measuring stick:** All **disk** and **`.py`** claims below **must** match the **table in [§ Measuring stick (measured sizes, 2026-04-03)](#measuring-stick-measured-sizes-2026-04-03)** — no fresh guesstimates. **Prompt** size is a different quantity (session totals, brief caps); do not conflate.
 
 **TTRPG Studio:** **~65 MB** of `.py` in the measured slice is a concrete order of magnitude for **naive full-text orientation** of Python source alone — still on the order of **millions of tokens** if ingested wholesale (very rough **÷3–5 characters per token** for code), **before** reasoning, and **not** repeatable as a single context window.
 

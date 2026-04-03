@@ -18,7 +18,7 @@ Original root filenames (same content as above, where applicable): `works withou
 
 ## Measurement map (what is being compared)
 
-**Messlatte:** **Measured** checkout scale (**Nexus ~13 MB**, **TTRPG Studio ~7.1 GB** total / **~65 MB** `.py` with standard dev-folder excludes, **Aether VPN ~605 MB** total / **~507 KB** `.py**) is **anchored** in **[`case-study-cross-repo-orientation.md` § Messlatte](case-study-cross-repo-orientation.md#messlatte-measured-sizes-2026-04-03)** (full table + method). This page’s “small / large tree” rows **cite** that stick; they do not introduce alternate disk claims.
+**Measuring stick:** **Measured** checkout scale (**Nexus ~13 MB**, **TTRPG Studio ~7.1 GB** total / **~65 MB** `.py` with standard dev-folder excludes, **Aether VPN ~605 MB** total / **~507 KB** `.py**) is **anchored** in **[`case-study-cross-repo-orientation.md` § Measuring stick](case-study-cross-repo-orientation.md#measuring-stick-measured-sizes-2026-04-03)** (full table + method). This page’s “small / large tree” rows **cite** that stick; they do not introduce alternate disk claims.
 
 These captures **do not** all answer the same question. Treat them as **layers** on a timeline, not one mega-chart.
 

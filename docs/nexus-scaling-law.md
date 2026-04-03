@@ -2,7 +2,7 @@
 
 This note states an **architectural consequence** of Nexus, not a formal theorem. It explains **why** the **relative** win from structural retrieval tends to **grow with repository size** — consistent with the **controlled analysis** capture on a large checkout in **[`usage-metrics.md`](usage-metrics.md)** (TTRPG Studio A/B), and with the **small-repo** captures where the effect is **marginal**.
 
-**Messlatte:** Measured **on-disk** and **`.py`** scale for **Nexus vs TTRPG vs Aether** (so “large” and “small” are not hand-wavy) lives in **[`case-study-cross-repo-orientation.md` § Messlatte](case-study-cross-repo-orientation.md#messlatte-measured-sizes-2026-04-03)**.
+**Measuring stick:** Measured **on-disk** and **`.py`** scale for **Nexus vs TTRPG vs Aether** (so “large” and “small” are not hand-wavy) lives in **[`case-study-cross-repo-orientation.md` § Measuring stick](case-study-cross-repo-orientation.md#measuring-stick-measured-sizes-2026-04-03)**.
 
 ---
 

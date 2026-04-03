@@ -1,7 +1,7 @@
-# Archiv (`docs/archive`)
+# Archive (`docs/archive`)
 
-Dateien hier sind **kein** kanonisches Produkt-Handbuch. Sie bleiben aus historischen oder Arbeitsgründen im Tree, können veraltete Formulierungen oder Duplikate zur Hauptdoku enthalten.
+Files here are **not** canonical product documentation. They remain in the tree for history or working notes and may contain outdated wording or overlap with the main docs.
 
-| Datei | Hinweis |
-|--------|---------|
-| [`deep-research-report.md`](deep-research-report.md) | Einmaliger Forschungs-/Export-Text; Kanon für Architektur: [`../repository-analysis.md`](../repository-analysis.md) / [`../repository-analyse.md`](../repository-analyse.md). |
+| File | Note |
+|------|------|
+| [`deep-research-report.md`](deep-research-report.md) | One-off research / export text; canonical architecture write-ups: [`../repository-analysis.md`](../repository-analysis.md) / [`../repository-analyse.md`](../repository-analyse.md). |

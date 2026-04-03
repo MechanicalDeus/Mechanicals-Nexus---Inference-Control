@@ -134,11 +134,11 @@ The expensive part for LLM workflows is **not** the local AST pass — it is **r
 
 **Empirical agent metrics** (Cursor usage dashboards, screenshots, and how to read them): see **[§ Metrics](#metrics)** below and the full write-up **[`docs/usage-metrics.md`](docs/usage-metrics.md)**.
 
-**Case study (two repos, zero file opens):** **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** — cross-checkout comparison via **`nexus.cli_opc`** only; **~110k** session tokens vs **naive full-`.py` ingest** at **TTRPG-scale**. **Messlatte** (disk + `.py`, **2026-04-03**, single canonical table): **[§ Messlatte (measured sizes, 2026-04-03)](docs/case-study-cross-repo-orientation.md#messlatte-measured-sizes-2026-04-03)** in that doc — **do not** fork ad-hoc size figures elsewhere.
+**Case study (two repos, zero file opens):** **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** — cross-checkout comparison via **`nexus.cli_opc`** only; **~110k** session tokens vs **naive full-`.py` ingest** at **TTRPG-scale**. **Measuring stick** (disk + `.py`, **2026-04-03**, single canonical table): **[§ Measuring stick (measured sizes, 2026-04-03)](docs/case-study-cross-repo-orientation.md#measuring-stick-measured-sizes-2026-04-03)** in that doc — **do not** fork ad-hoc size figures elsewhere.
 
 ## Metrics
 
-**Messlatte (checkout scale):** **Disk** and **`.py`** numbers cited below for **Nexus** / **TTRPG Studio** / cross-repo narrative are **tied** to **[`docs/case-study-cross-repo-orientation.md` § Messlatte (measured sizes, 2026-04-03)](docs/case-study-cross-repo-orientation.md#messlatte-measured-sizes-2026-04-03)** — one canonical table; do not duplicate with ad-hoc estimates.
+**Measuring stick (checkout scale):** **Disk** and **`.py`** numbers cited below for **Nexus** / **TTRPG Studio** / cross-repo narrative are **tied** to **[`docs/case-study-cross-repo-orientation.md` § Measuring stick (measured sizes, 2026-04-03)](docs/case-study-cross-repo-orientation.md#measuring-stick-measured-sizes-2026-04-03)** — one canonical table; do not duplicate with ad-hoc estimates.
 
 Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **Input**, **Output** — **not** local AST time. Use this section as a **quick index**; narrative + honesty constraints live in **[`docs/usage-metrics.md`](docs/usage-metrics.md)**.
 
@@ -147,7 +147,7 @@ Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **I
 | **Small checkout** (**Nexus** repo, **~13 MB** on disk — measured 2026-04-03) | Build-leaning sessions **with** vs **without** Nexus | Totals differ; **fresh Input** almost flat — **tiny graph**, not a stress test for orientation. |
 | **Large checkout** (**TTRPG Studio**, **~7.1 GB** on disk — measured; **N=1**) | **Same analysis-only prompt**, Nexus on vs off | **Fair** anchor for **analysis**: **~43%** lower **Total**, **~25%** lower **Input**; big **Cache Read** delta — **[details](docs/usage-metrics.md#controlled-benchmark-ttrpg-studio-same-task-with-vs-without-nexus)**. |
 | **Gallery** | **Build without Nexus** (high totals) vs **analysis with Nexus** (lower totals) | Dashboard ratios **~7×–15×** are **real** but **confound task type** with retrieval — **not** a controlled “Nexus multiplier” for analysis. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)**. |
-| **Cross-repo case study** | **Two** local Python trees compared **without opening** their source/docs in the agent — **Nexus-only** orientation | **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** + screenshot **`cursor-cross-repo-orientation-110k.png`** — **N=1**, **representation shift** vs naive ingest; **Messlatte** for disk / `.py`: **[same doc § Messlatte](docs/case-study-cross-repo-orientation.md#messlatte-measured-sizes-2026-04-03)**. |
+| **Cross-repo case study** | **Two** local Python trees compared **without opening** their source/docs in the agent — **Nexus-only** orientation | **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** + screenshot **`cursor-cross-repo-orientation-110k.png`** — **N=1**, **representation shift** vs naive ingest; **measuring stick** for disk / `.py`: **[same doc § Measuring stick](docs/case-study-cross-repo-orientation.md#measuring-stick-measured-sizes-2026-04-03)**. |
 
 ### Controlled benchmark — large Python checkout (TTRPG Studio)
 
