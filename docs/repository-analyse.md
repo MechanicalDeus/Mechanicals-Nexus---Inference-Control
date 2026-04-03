@@ -162,7 +162,7 @@ Mechanicals-Nexus---Inference-Control/
 
 - **Build:** Hatchling; Paketname **nexus-inference**; Python **>= 3.10**.
 - **Runtime:** PyYAML (Policy-Profile, `safe_load`).
-- **Optional UI:** PyQt6 — **Lizenz-Hinweis** für Distributoren: PyQt ist **GPLv3 oder Commercial**, nicht LGPL; siehe auch [`README.md`](../README.md) / diese Analyse.
+- **Optional UI:** PyQt6 — **GPLv3 oder Commercial** (Riverbank), nicht LGPL.
 - **Projektlizenz:** **MIT** (Root `LICENSE`).
 
 ---
@@ -202,7 +202,7 @@ Mechanicals-Nexus---Inference-Control/
 
 | Horizont | Maßnahme |
 |----------|-----------|
-| **Kurz** | Scanner-/Import-Tests ausbauen; README um **PyQt6-/GPL-Hinweis** für UI-Extra ergänzen; SECURITY um Cache-Best-Practices; klarere CLI-Fehler bei `--mode` / `--perspective`. |
+| **Kurz** | Scanner-/Import-Tests ausbauen; SECURITY um Cache-Best-Practices; klarere CLI-Fehler bei `--mode` / `--perspective`. |
 | **Mittel** | `follow_imports` / Recall in modularen Repos; inkrementeller Scan auf Basis vorhandener Fingerprint-Idee; standardisierte Heuristik-Provenance (über `--debug-perspective` hinaus). |
 | **Lang** | Plugin-/Adapter für Framework-Heuristiken; andere Sprachen (z. B. Tree-sitter) wären große Produktentscheidung. |
 

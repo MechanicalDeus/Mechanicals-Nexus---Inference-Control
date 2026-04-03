@@ -253,4 +253,6 @@ pytest
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+**This repository (library + CLIs except the optional GUI)** is licensed under the **MIT License** — see [`LICENSE`](LICENSE).
+
+**Optional Inference Console** (`pip install …[ui]`, `nexus-console`) adds **PyQt6**, which is **dual-licensed (GPLv3 or commercial)** from Riverbank Computing — not LGPL. If you **redistribute** or **bundle** the GUI, you must **satisfy PyQt/Qt compliance** (or use a commercial PyQt license). The MIT license here applies to **Nexus source code**; it does not replace PyQt’s terms. Third-party notes: [`docs/licensing.md`](docs/licensing.md).
