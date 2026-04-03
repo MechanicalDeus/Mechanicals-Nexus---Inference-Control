@@ -26,6 +26,7 @@ That guide is written as a **story**: first the **CLI output** (what you already
 | Console only (quick steps) | [`docs/inference-console-tutorial.md`](docs/inference-console-tutorial.md) |
 | Console architecture & exports | [`docs/inference-console-deep-dive.md`](docs/inference-console-deep-dive.md) |
 | Token caps & amortization (totals **vs** purpose / search offloaded) | [`docs/token-efficiency.md`](docs/token-efficiency.md) (§1.1) |
+| **Cursor usage:** why the metric looks “broken” with Nexus | [`docs/cursor-metrics-nexus.md`](docs/cursor-metrics-nexus.md) |
 | Narrative PoC | [`docs/proof-of-concept.md`](docs/proof-of-concept.md) |
 
 **Screenshots** (GUI + CLI-in-IDE) live in **[`console tutorial/`](console tutorial/)**.
