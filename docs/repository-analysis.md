@@ -16,7 +16,7 @@ This repository implements a Python package called **nexus-inference** that buil
 
 1. Scan / graph build (`attach` / `scan`)
 2. Query / slicing logic and perspective-based projections (**Perspectives**)
-3. Output surfaces: **CLI** (`nexus`, `nexus-grep`, `nexus-policy`, …) and an optional **PyQt** GUI (“Inference Console”)
+3. Output surfaces: **CLI** (`nexus`, **`nexus-opc`**, `nexus-grep`, `nexus-policy`, …) and an optional **PyQt** GUI (“Inference Console”)
 
 The repo also ships concrete **governance / safety** mechanics (e.g. `.nexusdeny`, `.nexusignore`, output caps, control header) and an explicit **security stance** that treats inference exports as potentially sensitive ([`SECURITY.md`](../SECURITY.md)).
 
@@ -40,7 +40,7 @@ The repository positions Nexus as an **inference layer** between source and reas
 
 | Stage | Idea |
 |-------|------|
-| **Thin first** | `nexus-grep` or `--names-only` / `--annotate` → small candidate set (token-frugal). |
+| **Thin first** | For agents: **`nexus-opc`** (`locate`, `grep`, `policy`) or **`nexus --agent-mode`**; otherwise **`nexus-grep`** or **`--names-only` / `--annotate`** → small candidate set (token-frugal). |
 | **Read slices** | Then targeted file slices (`NEXT_OPEN`, `file:line`). |
 | **Deeper only if needed** | Special queries (`impact`, `why`, mutation chain, core flow) via `nexus -q` / `llm_brief`. |
 | **Full export rarely** | `--json` (full graph) as a sensitive special case. |
@@ -68,7 +68,7 @@ flowchart LR
   C --> D["InferenceGraph<br/>SymbolRecord + Edge"]
   D --> E["Heuristics<br/>writes, tags, confidence, layers, mutation paths"]
   E --> F["Projections<br/>slice / brief / json / focus / trace"]
-  F --> G["CLI: nexus / nexus-grep / nexus-policy"]
+  F --> G["CLIs: nexus / nexus-opc / nexus-grep / nexus-policy"]
   F --> H["UI: nexus-console (PyQt)"]
 ```
 
@@ -101,7 +101,7 @@ flowchart LR
 | **Heuristics** | `scanner.py`, `analysis/layers.py`, `analysis/mutation_chains.py` |
 | **Output** | `output/llm_format.py`, `output/llm_query_modes.py`, `output/perspective.py`, `output/inference_projection.py`, `output/json_export.py` |
 | **Policy** | `policy/profile.py`, `policy/planner.py`, `default_profile.v2.yaml` |
-| **Surfaces** | `cli.py`, `cli_grep.py`, `cli_policy.py`, `ui/*` |
+| **Surfaces** | `cli.py`, `cli_opc.py`, `cli_grep.py`, `cli_policy.py`, `ui/*` |
 
 ---
 
@@ -125,6 +125,7 @@ Mechanicals-Nexus---Inference-Control/
     cli.py
     cli_grep.py
     cli_policy.py
+    cli_opc.py
     cursor_rules_cli.py
     control_header.py
     inference_modes.py
@@ -152,6 +153,7 @@ Mechanicals-Nexus---Inference-Control/
 | Surface | Modules | Role |
 |---------|---------|------|
 | `nexus` | `cli.py`, `output/perspective.py` | Main frontend: brief, JSON, names-only, traces, `--perspective`. |
+| `nexus-opc` | `cli_opc.py` | Stable opcodes → fixed subprocess argv for `nexus` / `cli_grep` / …; `--dry-run`, optional JSONL logging, `stats`. |
 | `nexus-grep` | `cli_grep.py` | Slice → search only in relevant files; special queries intentionally blocked. |
 | `nexus-policy` | `cli_policy.py`, `policy/*` | Safe-by-default: scope, caps, stages, output budgets. |
 | `nexus-console` | `ui/*` | Optional GUI (`[ui]`); same projections as CLI. |
@@ -213,5 +215,7 @@ Mechanicals-Nexus---Inference-Control/
 A byte-perfect inventory of every binary file is **not** the goal; the tree is representative for **text/code paths and documented assets**. For **canonical** API and CLI behavior, use **`README.md`**, [`AGENTS.md`](../AGENTS.md), and the linked `docs/*` files.
 
 ---
+
+**Maintainers:** when changing scripts or defaults, follow **[`MAINTAINERS.md`](MAINTAINERS.md)** to keep this page aligned with `pyproject.toml` and the README.
 
 *This page tracks the Nexus source tree and documentation in the same repository.*

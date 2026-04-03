@@ -2,6 +2,8 @@
 
 This document summarizes **purpose, value, and positioning** of Nexus — as an **overview** for decisions and as a **pitch** for teams using LLM agents or structured code analysis.
 
+**Status:** **Beta** (version in `pyproject.toml`) — treat output and CLI details as **evolving**; breaking or notable changes are tracked in **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)** and **[Releases](https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control/releases)**. The living entry point for install, limits, and links is **[`README.md`](README.md)**.
+
 ---
 
 ## Pitch (~60 seconds)
@@ -10,9 +12,9 @@ This document summarizes **purpose, value, and positioning** of Nexus — as an 
 
 **Solution:** **Nexus** builds an **inference map** from source: symbols (functions, classes, methods), **call edges**, heuristic **read/write traces** and **mutation paths**, plus **confidence** and **layers** (e.g. core vs. support). Instead of raw hit lists, agents and humans get **compact, sorted briefs** or **targeted name lists**.
 
-**Tiering:** Start with **`nexus-grep`** or **`nexus --names-only`** (thin output), then **read specific files**, **`nexus -q`** with small `--max-symbols` for chains/impact, **`--json`** only when the full graph is needed.
+**Tiering:** Prefer **`nexus-opc locate`** / **`grep`** / **`policy`** (fixed argv for agents) or **`nexus --agent-mode`**; then **`nexus-grep`** or **`nexus --names-only`** (thin output); **read specific files**; **`nexus -q`** with small `--max-symbols` for chains/impact; **`--json`** only when the full graph is needed.
 
-**One line:** Nexus is **grep with structural priors** — built to keep **LLM context lean and relevant**.
+**One line:** Nexus is **grep with structural priors** — built to keep **LLM context lean and relevant**, with the caveat that the map is **heuristic and static**, not a proof of runtime behavior (see **README** → *Repo health & known limitations*).
 
 ---
 
@@ -28,12 +30,14 @@ Nexus fills a gap in agent workflows: **orientation and impact analysis** in Pyt
 2. **In-memory graph:** `InferenceGraph` with `SymbolRecord` nodes and `Edge` edges (mainly `calls`).
 3. **Heuristics:** Direct/indirect/**transitive** write traces along call chains (fixpoint), **semantic tags** (e.g. `mutator`, `delegate`, `ambiguous-call`), **confidence** in [0, 1], **layer** from path/name.
 4. **Query layer:** Free-text `-q` with keyword filters for mutation vs. flow; **special modes** (impact, mutation chain, why, …) for deeper but still formatted answers.
-5. **Second tool `nexus-grep`:** Nexus slice (relevant symbols/files) first, then **grep only inside that slice** — not the whole repo.
+5. **`nexus-opc`:** Stable **opcodes** that invoke `nexus` / `nexus.cli_grep` / … with fixed flags (`--dry-run`, JSONL logging, `stats`) so agents do not invent CLI arguments.
+6. **Second tool `nexus-grep`:** Nexus slice (relevant symbols/files) first, then **grep only inside that slice** — not the whole repo.
 
 ### Pipeline (short)
 
 - **Entry:** `attach(path)` / `scan(path)` → full graph for chosen options (`include_tests`, `transitive_depth`, …).
 - **CLI `nexus`:** JSON export or **LLM brief** (`to_llm_brief`), optional **`--names-only`** for minimal tokens and **`--annotate`** for one-line names with **confidence / tags / layer / file:line**; query briefs add **`NEXT_OPEN`** and **same-name folding** to cut repetition.
+- **CLI `nexus-opc`:** Opcode → subprocess with fixed **`argv`** (see **`docs/tutorial-nexus-opc-isa.md`**).
 - **CLI `nexus-grep`:** No special queries; **small symbol set → search in few files**.
 - **CLI `nexus-policy`:** “safe by default” wrapper: **scope gating**, **risk-based caps**, **staged retrieval**, and **hard output bounds** (chars + lines). Auto-escalates only stage 1 → 2; stage 3 is explicit only.
 
@@ -66,20 +70,25 @@ For **Python / CI support**, **CLI vs. pip package name** (`nexus-inference` vs.
 | **Cost** | Fewer irrelevant tokens → lower model cost and faster answers. |
 | **Quality** | Structured maps reduce hallucinations about “somewhere in the repo”. |
 | **Workflow** | Clear tiering: thin → read → deeper when needed — fits human and agent work. |
-| **Integration** | Library (`attach`) + CLI + installable Cursor rule; no mandatory cloud service. |
+| **Integration** | Library (`attach`) + CLI (**incl. `nexus-opc`**) + installable Cursor rule; no mandatory cloud service. |
 
 ---
 
 ## Next steps
 
-1. **Install:** `pipx install -e <nexus-checkout>` or `PYTHONPATH=<checkout>/src` and `python -m nexus …` (details: `README.md`, `AGENTS.md`).
+1. **Install:** from a clone, `pip install -e <nexus-checkout>` or `pipx install -e …`; without install, `PYTHONPATH=<checkout>/src` and `python -m nexus …` / `python -m nexus.cli_opc …`. When **`nexus-inference`** is published on your index, `pip install nexus-inference` applies — see **`README.md` → Installation**.
 2. **Rule in target repo:** `nexus-cursor-rules install` at project root (package rule → `.cursor/rules/`).
-3. **First use:** `nexus-grep . -q "<concrete code terms>" --max-symbols 20` in the target project, then open files selectively.
+3. **First use:** `nexus-opc locate -q "<topic or identifiers>" .` (or `nexus . --agent-mode -q "…"`), then **`nexus-grep . -q "<concrete code terms>" --max-symbols 20`** if you need wrapped text search inside the slice — open files selectively.
+
+Command reference and policy details: **[`AGENTS.md`](AGENTS.md)** · full **`docs/`** map: **[`docs/README.md`](docs/README.md)**.
 
 ---
 
 ## See also (deeper read)
 
+- **[`docs/README.md`](docs/README.md)** — index of all topical documentation under `docs/`.
+- **[`CHANGELOG.md`](CHANGELOG.md)** — where release summaries and patchnote index are linked.
+- **[`docs/MAINTAINERS.md`](docs/MAINTAINERS.md)** — checklist to keep docs aligned with packaging and CLI.
 - **[Repository analysis (English)](docs/repository-analysis.md)** — architecture, module map, security, risks, and roadmap-style recommendations.
 - **[Repository-Analyse (Deutsch)](docs/repository-analyse.md)** — gleiche Tiefe auf Deutsch.
 

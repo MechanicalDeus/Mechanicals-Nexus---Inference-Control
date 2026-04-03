@@ -5,11 +5,18 @@
 > **Grep with structural understanding.**  
 > **Stop reading code. Start querying structure.**
 
-Nexus is an **inference layer** for Python code. It sits between **raw source** and **reasoning systems** (LLMs, humans, scripts): it turns a tree of `.py` files into a **map** of symbols, calls, reads/writes, mutation hints, and confidence — so you can **target** work instead of drowning in flat search hits.
+Nexus is a **static, heuristic inference layer** for Python. It scans `.py` trees (AST + heuristics) and keeps an in-memory **map**: symbols, call edges, reads/writes, mutation hints, layers, and confidence. You **query** that map with bounded outputs (briefs, compact slices, optional JSON) instead of treating the repo like a flat full-text haystack.
 
-**Core claim:** The **CPU scans the repo once** (AST + inference) and keeps a **map**. The **LLM does not open files** to “find” structure — it **asks Nexus** (again on the CPU) with a **query** and gets back a **bounded, topographic slice**: symbols, calls, writes, `NEXT_OPEN` regions — an **IR-shaped view** of the requested area, not a dump of every file body. To go deeper or follow a different thread, the model **changes the query**; Nexus already encoded **who calls whom** and **what might touch state**, so you are not manually **filtering dependencies** or **grep-hopping** the tree. **Retrieval is structural and local**, not “read everything in the editor.”
+| | |
+|--|--|
+| **Status** | **Beta** (`0.1.0b1` in `pyproject.toml`) — CLI contracts and output shapes may still change; larger shifts are noted in **[`docs/patchnotes/`](docs/patchnotes/README.md)**. |
+| **Python** | **3.10+**; CI runs **3.10** and **3.12** on **Ubuntu** and **Windows** (see `.github/workflows/ci.yml`). |
+| **Good for** | Orientation, “where does this live?”, mutation/impact-style questions in **Python** repos — especially **agent** workflows with token budgets. |
+| **Not** | A linter, type checker, profiler, or guarantee of runtime behavior — the graph is a **navigation aid** (see **[Repo health & known limitations](#repo-health-known-limitations)**). |
 
-**Nexus does not reduce tokens mainly by compressing text. It reduces tokens by removing the need to ship whole-file context before you understand shape.**
+**Documentation:** **[`docs/README.md`](docs/README.md)** (index of all `docs/`) · **Agents:** [`AGENTS.md`](AGENTS.md) · **Security / exports:** [`SECURITY.md`](SECURITY.md) · **Changelog:** [`CHANGELOG.md`](CHANGELOG.md) · **Releases:** [GitHub](https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control/releases)
+
+**Workflow (typical):** Each CLI run builds (or reuses, if you opt into cache modes) a graph for the chosen root; you issue **`-q`** queries with caps and get **symbols, calls, writes**, and **`NEXT_OPEN`** hints — refine with a **tighter query** or **read source** where it matters. That moves **search-shaped** work off the prompt and onto the **local** scan; it is **not** mainly “text compression,” it is **less whole-file context before you know shape**.
 
 ---
 
@@ -22,7 +29,7 @@ Nexus is an **inference layer** for Python code. It sits between **raw source** 
 ![Agent-mode flow: install → one command → structured slice](docs/assets/readme-agent-mode-flow.svg)
 
 ```bash
-pip install nexus-inference
+pip install -e .   # from a clone; see Installation for PyPI
 cd your-python-repo
 nexus . --agent-mode -q "what handles mutations?"
 ```
@@ -62,30 +69,11 @@ With **`--agent-mode`** but **`--max-symbols` 12** explicitly matched to the bri
 
 ---
 
-## Problem
+## Why structure first?
 
-LLMs and developers burn context when the **model is forced to behave like a file browser**: open file, read wall of text, guess structure, repeat. The model **searches for content** by **absorbing text**, instead of **asking an index** for the **shape** of a region.
+Exploratory workflows often burn context when the **model acts like a file browser** (open → read everything → guess). Line tools (`grep`, `rg`) return **text hits**, not **who calls whom** or **where state might change**.
 
-Classic tools (`grep`, `rg`):
-
-- return **lines of text**, not **meaning**  
-- scale poorly to “where does this behavior live?” questions  
-- still push you toward **read the file → infer structure** yourself  
-
-→ High cost, low precision. **Understanding** becomes **reading**.
-
-## Solution
-
-Nexus builds an **inference map** of your project — **structure as the primary artifact**, not raw text:
-
-- Symbols (functions, classes, methods)  
-- Call relationships  
-- Mutation / state-touching hints and chains  
-- Layering and confidence  
-
-Instead of only raw matches, you get **structured reasoning paths** and **briefings** (`nexus -q`, `nexus-grep`). A model (or human) **queries the map on the CPU** and receives the **next relevant region** as structured output — **not** by opening each file in the IDE. Dependencies and call edges are **already resolved in the graph**; refining understanding means **a new query / slice**, not re-filtering the repo by hand.
-
-**In one line:** *The LLM doesn’t open files to explore — it queries Nexus; the CPU returns a topographic structural slice of the area you asked for.*
+Nexus is meant for **query → bounded structural answer → targeted read** (see the **Workflow** paragraph in the opening summary above). For **limits** (AST, heuristics, no runtime truth), use **[Repo health & known limitations](#repo-health-known-limitations)**.
 
 ## Quick example (PoC)
 
@@ -189,20 +177,16 @@ Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **I
 
 ## Installation
 
-From PyPI (when published):
-
-```bash
-pip install nexus-inference
-```
-
-From a clone (recommended until release is on your index):
+**From a clone** (current default for users and contributors):
 
 ```bash
 pip install -e .
 # or: pipx install -e .
 ```
 
-Python **3.10+**. Continuous integration runs **3.10** and **3.12** on **Ubuntu** and **Windows** (see `.github/workflows/ci.yml`). After install, use these **commands**: **`nexus-opc`** (opcode ISA / fixed pipelines), **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`**. The pip/PyPI **distribution** name is **`nexus-inference`** — there is **no** `nexus-inference` shell command.
+**PyPI:** The intended distribution name is **`nexus-inference`**. When a release is published there, `pip install nexus-inference` is the one-liner; until then, use an **editable install** from this repository (or your own index).
+
+Python **3.10+**. Continuous integration runs **3.10** and **3.12** on **Ubuntu** and **Windows** (see `.github/workflows/ci.yml`). After install, these entry points are available: **`nexus-opc`** (opcode ISA / fixed pipelines), **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`**. There is **no** shell command named `nexus-inference` — that string is the **pip package** name only.
 
 ### Nexus Inference Console (optional GUI)
 
@@ -289,6 +273,7 @@ Guided walkthrough: **CLI** (including in your IDE terminal), optional **Inferen
 | | |
 |--|--|
 | **Entry point** | **[`TUTORIAL.md`](TUTORIAL.md)** |
+| **Documentation index** | **[`docs/README.md`](docs/README.md)** (all `docs/` in one table) |
 | **Full guide** | **[`docs/tutorial-nexus-cli-and-ui.md`](docs/tutorial-nexus-cli-and-ui.md)** |
 | **Opcode ISA** (`nexus-opc`, agents) | [`docs/tutorial-nexus-opc-isa.md`](docs/tutorial-nexus-opc-isa.md) |
 | **CLI in the IDE** (local, bounded output) | [Section in full guide](docs/tutorial-nexus-cli-and-ui.md#cli-in-the-ide-local-fast-bounded-output) |

@@ -2,7 +2,7 @@
 
 **Prerequisite:** Read the shorter story in **[tutorial-nexus-cli-and-ui.md](tutorial-nexus-cli-and-ui.md)** (*one map, two surfaces*). This page goes deeper on **CLI commands, perspectives, and PowerShell quoting**, using **up-to-date screenshots** from the Inference Console in **[`ui-screenshots/`](ui-screenshots/)** (April 2026 UI, including the **Darstellung** dark/light selector).
 
-**Core invariant:** One scan builds one **`InferenceGraph`**. Everything visible in the console and everything copied via **Copy …** uses the **same** projection paths as `nexus` / `nexus-grep` / `--perspective`.
+**Core invariant:** One scan builds one **`InferenceGraph`**. Everything visible in the console and everything copied via **Copy …** uses the **same** projection paths as `nexus` / `nexus-opc` (underlying `nexus` argv) / `nexus-grep` / `--perspective`.
 
 ---
 
@@ -20,13 +20,13 @@
 ## 1. Install and run
 
 ```bash
-pip install -e .
+pip install -e .   # from clone; PyPI path — see README → Installation
 pip install -e ".[ui]"   # console only (PyQt6)
 nexus-console
 # or: python -m nexus.ui
 ```
 
-**Commands:** `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`, `nexus-console`. PyPI package: **`nexus-inference`**.
+**Commands:** `nexus-opc`, `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`, `nexus-console`. PyPI distribution name: **`nexus-inference`** (not a shell command).
 
 ---
 

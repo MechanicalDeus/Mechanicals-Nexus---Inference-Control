@@ -46,7 +46,7 @@ Read it like a **short story**: first the **ending** (what lands in the terminal
 
 ```bash
 pip install -e .
-# or (PyPI): pip install nexus-inference
+# PyPI: when `nexus-inference` is on your index — `pip install nexus-inference` (see README → Installation)
 ```
 
 **Inference Console** (optional, needs PyQt6):
@@ -57,7 +57,7 @@ nexus-console
 # or: python -m nexus.ui
 ```
 
-**CLI commands** (on `PATH` after install): `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`, `nexus-console`. The **distribution** you install with pip is **`nexus-inference`** — not a shell command.
+**CLI commands** (on `PATH` after install): `nexus-opc`, `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`, `nexus-console`. The **distribution** you install with pip is **`nexus-inference`** — not a shell command.
 
 ---
 

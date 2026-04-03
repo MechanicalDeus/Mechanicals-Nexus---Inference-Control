@@ -2,7 +2,9 @@
 
 This file is the **entry point** for learning Nexus by example. It points to the full walkthrough (text + screenshots) in `docs/`.
 
-**What Nexus is for:** The **CPU scans once**; the **LLM queries** that map (**`-q`**, caps) and gets **IR-like structural slices** — callers, writes, `NEXT_OPEN` — **without** using “open file” as the primary way to explore. Refining means **another query**, not re-filtering the repo by hand. *Stop reading code. Start querying structure.*
+**Status:** **Beta** — version in **`pyproject.toml`**; limits and install paths in **[`README.md`](README.md)**; executive pitch in **[`NEXUS-REPORT.md`](NEXUS-REPORT.md)**; **`docs/`** map in **[`docs/README.md`](docs/README.md)**; release-style notes in **[`CHANGELOG.md`](CHANGELOG.md)** and **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)**.
+
+**What Nexus is for:** The **CPU scans once** (static AST + heuristics); the **LLM queries** that map (**`-q`**, caps) and gets **IR-like structural slices** — callers, writes, `NEXT_OPEN` — **without** using “open file” as the primary way to explore. Refining means **another query**, not re-filtering the repo by hand. *Stop reading code. Start querying structure.* For **what it is not** (linter, runtime truth), see **README → Repo health & known limitations**.
 
 ---
 
@@ -26,6 +28,7 @@ The full guide is written as a **story**: first the **CLI output** (what you alr
 
 | Topic | Document |
 |--------|----------|
+| **Documentation index** (`docs/`) | [`docs/README.md`](docs/README.md) |
 | **Repository deep dive** (architecture, modules, security, roadmap) — whole-picture read | **EN** [`docs/repository-analysis.md`](docs/repository-analysis.md) · **DE** [`docs/repository-analyse.md`](docs/repository-analyse.md) |
 | **Agent + Cursor** (loop, terminal, rules) | [`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md) |
 | Console only (quick steps) | [`docs/inference-console-tutorial.md`](docs/inference-console-tutorial.md) |
@@ -45,7 +48,7 @@ The full guide is written as a **story**: first the **CLI output** (what you alr
 ## Install (minimal)
 
 ```bash
-pip install -e .
+pip install -e .   # from a clone; PyPI when published — see README → Installation
 nexus-grep . -q "mutation" --max-symbols 10
 ```
 
@@ -62,6 +65,9 @@ nexus-console
 
 ## Related
 
+- **[README.md](README.md)** — product overview, install, limits  
+- **[NEXUS-REPORT.md](NEXUS-REPORT.md)** — short pitch for decisions  
+- **[CHANGELOG.md](CHANGELOG.md)** — where release notes and patchnotes live  
 - **[SECURITY.md](SECURITY.md)** — sensitive exports, `.nexusignore` / `.nexusdeny`  
 - **[LICENSE](LICENSE)** — MIT  
 - **[AGENTS.md](AGENTS.md)** — checklist for tools/agents using Nexus  

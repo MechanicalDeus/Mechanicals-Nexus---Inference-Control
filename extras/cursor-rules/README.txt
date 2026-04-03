@@ -31,17 +31,19 @@ Overview:
    - nexus-cursor-rules install  at project root
 
 3) CLI everywhere
-   pip install nexus-inference
-   pipx install nexus-inference
-   (pip package name nexus-inference; shell commands are nexus, nexus-grep, nexus-policy, nexus-cursor-rules, nexus-console)
-   Then: nexus . -q "mutation" --max-symbols 20
+   From clone: pip install -e .  or  pipx install -e <path-to-nexus>
+   When published on your index: pip install nexus-inference  /  pipx install nexus-inference
+   (pip package name nexus-inference; shell commands include nexus-opc, nexus, nexus-grep, nexus-policy, nexus-cursor-rules, nexus-console)
+   Agent-oriented first hop: nexus-opc locate -q "mutation" .
+   Then (examples): nexus . -q "mutation" --max-symbols 20
+   Windows PowerShell: python -m nexus.cli_opc locate "-q" "mutation" .
    Windows PowerShell: python -m nexus . "-q" "mutation" "--max-symbols" "20"
 
 4) Optional
    NEXUS_HOME = path to Nexus checkout
    PYTHONPATH=%NEXUS_HOME%\src
 
-Tiering: nexus-grep / nexus --names-only -> read_file (slice) -> nexus -q -> --json only when needed.
+Tiering: nexus-opc (locate/grep/policy) or nexus --agent-mode -> nexus-grep / nexus --names-only -> read_file (slice) -> nexus -q -> --json only when needed.
 
 Canonical perspectives (explicit contract, same names as the library/UI):
   nexus . --perspective heuristic_slice -q "flow" --max-symbols 20

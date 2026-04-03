@@ -58,7 +58,7 @@ cd /path/to/your/python/project
 nexus-cursor-rules install
 ```
 
-That adds **`nexus-over-grep.mdc`**, which tells the agent to prefer **`nexus-grep` / `nexus`** over broad **`grep`/`rg`** for orientation, and documents **`--perspective`** as the explicit CLI contract. Source in this repo: [`src/nexus/cursor_rules/nexus-over-grep.mdc`](../src/nexus/cursor_rules/nexus-over-grep.mdc). Perspective matrix: [`docs/cli-perspective.md`](cli-perspective.md).
+That adds **`nexus-over-grep.mdc`**, which tells the agent to prefer **`nexus-opc`** (when available) for fixed pipelines, then **`nexus --agent-mode`** / **`nexus-grep`** / **`nexus -q`**, over broad **`grep`/`rg`** for Python orientation — and documents **`--perspective`** as the explicit CLI contract. Source in this repo: [`src/nexus/cursor_rules/nexus-over-grep.mdc`](../src/nexus/cursor_rules/nexus-over-grep.mdc). Perspective matrix: [`docs/cli-perspective.md`](cli-perspective.md).
 
 Optional: same rule under **`%USERPROFILE%\.cursor\rules\`** for all projects.
 
@@ -95,9 +95,9 @@ Many teams add an **`AGENTS.md`** at the project root with **copy-paste commands
 
 | Situation | What to do |
 |-----------|------------|
-| Nexus on PATH | **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, … work as-is (from package **`nexus-inference`**). |
+| Nexus on PATH | **`nexus-opc`**, **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, … work as-is (from package **`nexus-inference`**). |
 | Editable clone | `pip install -e /path/to/Nexus` or `pipx install -e …`. |
-| No install | Set **`PYTHONPATH`** to `…/Nexus/src`, use **`python -m nexus …`** / **`python -m nexus.cli_grep …`**. |
+| No install | Set **`PYTHONPATH`** to `…/Nexus/src`, use **`python -m nexus.cli_opc …`** / **`python -m nexus …`** / **`python -m nexus.cli_grep …`**. |
 
 Agents do not need the **Inference Console** (`nexus-console`); that is optional for humans. The **same** map powers CLI and GUI.
 
@@ -116,6 +116,7 @@ Agents do not need the **Inference Console** (`nexus-console`); that is optional
 
 | Doc | Why |
 |-----|-----|
+| [`docs/README.md`](README.md) | Index of all `docs/` pages |
 | [`AGENTS.md`](../AGENTS.md) | Commands, PowerShell, control header, policy |
 | [`TUTORIAL.md`](../TUTORIAL.md) | Tutorial hub |
 | [`docs/tutorial-nexus-cli-and-ui.md`](tutorial-nexus-cli-and-ui.md) | CLI + Console story |

@@ -4,6 +4,10 @@ Use this file as the **reference** when working in **any Python repo** and you n
 
 **Cursor-specific explanation anchor** (agent loop, terminal, rules): **[`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md)** in the Nexus repo.
 
+**Documentation index (`docs/`):** **[`docs/README.md`](docs/README.md)**.
+
+**Changelog / releases:** **[`CHANGELOG.md`](CHANGELOG.md)** (links to GitHub Releases and patchnotes).
+
 **Patch notes (this repo):** **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)** — dated reports on metrics keys, perspectives, and CLI (e.g. `agent_compact`, `--compact-fields`, `--agent-mode`); template for new entries in the same folder.
 
 ## Working in the Nexus checkout (this repository)
@@ -18,8 +22,8 @@ When the open project **is** the Nexus source tree, agents should treat **infere
 ## Other repos: one-time setup per project
 
 1. **Install Nexus** (usable everywhere):  
-   `pipx install -e <path-to-nexus-clone>` **or** `pip install -e <path-to-nexus-clone>` (distribution **`nexus-inference`** on PyPI).  
-   Without install: `PYTHONPATH=<nexus-clone>/src` and `python -m nexus …` / `python -m nexus.cli_grep …`.
+   `pipx install -e <path-to-nexus-clone>` **or** `pip install -e <path-to-nexus-clone>`. When **`nexus-inference`** is published on your package index, `pip install nexus-inference` applies — see **`README.md` → Installation**.  
+   Without install: `PYTHONPATH=<nexus-clone>/src` and `python -m nexus …` / `python -m nexus.cli_opc …` / `python -m nexus.cli_grep …`.
 2. **Install the Cursor rule** (bundled in the **`nexus-inference`** package, import **`nexus.cursor_rules`**):  
    From the **target repo root**: **`nexus-cursor-rules install`** — writes `nexus-over-grep.mdc` to **`<your-repo>/.cursor/rules/`** (Cursor loads `.mdc` from there).  
    Alternatives: **`python -m nexus.cursor_rules install`**, print bundled path with **`nexus-cursor-rules --path`**, overwrite with **`install --force`**.  

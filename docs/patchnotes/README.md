@@ -1,6 +1,6 @@
 # Patchnotes (Nexus)
 
-**Patchnotes** sind kurze, versionierbare **Berichte** zu größeren Änderungswellen: neue CLI-Flags, Metrikfelder, Perspektiven, Benchmarks — mit **Messbarkeit** und **Migrationshinweisen**. Sie ergänzen die **PyPI-Version** in `pyproject.toml` und können **zwischen Releases** erscheinen.
+**Patchnotes** sind kurze, versionierbare **Berichte** zu größeren Änderungswellen: neue CLI-Flags, Metrikfelder, Perspektiven, Benchmarks — mit **Messbarkeit** und **Migrationshinweisen**. Sie ergänzen die **Versionsangabe** in `pyproject.toml` und können **zwischen Releases** erscheinen. Für die **Release-Übersicht** und Links siehe **[`CHANGELOG.md`](../CHANGELOG.md)** (Root).
 
 ## Wann eine Patchnote schreiben?
 
