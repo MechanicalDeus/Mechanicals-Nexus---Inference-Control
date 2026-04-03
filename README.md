@@ -9,7 +9,7 @@ Nexus is a **static, heuristic inference layer** for Python. It scans `.py` tree
 
 | | |
 |--|--|
-| **Status** | **Beta** (`0.1.0b1` in `pyproject.toml`) — CLI contracts and output shapes may still change; larger shifts are noted in **[`docs/patchnotes/`](docs/patchnotes/README.md)**. |
+| **Status** | **`0.1.0`** (first packaged milestone on the `0.x` line) — inference-facing CLI and output shapes may still evolve within **minor** `0.x` releases; high-impact shifts are noted in **[`docs/patchnotes/`](docs/patchnotes/README.md)** and GitHub Releases (**Contract impact**). |
 | **Python** | **3.10+**; CI runs **3.10** and **3.12** on **Ubuntu** and **Windows** (see `.github/workflows/ci.yml`). |
 | **Good for** | Orientation, “where does this live?”, mutation/impact-style questions in **Python** repos — especially **agent** workflows with token budgets. |
 | **Not** | A linter, type checker, profiler, or guarantee of runtime behavior — the graph is a **navigation aid** (see **[Repo health & known limitations](#repo-health-known-limitations)**). |
@@ -206,7 +206,7 @@ python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/M
 pipx install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
 ```
 
-Pin a **tag** or **branch** with a suffix on the URL, e.g. `…Inference-Control.git@v0.1.0b1` or `…@main` (see [pip — VCS support](https://pip.pypa.io/en/stable/topics/vcs-support/)).
+Pin a **tag** or **branch** with a suffix on the URL, e.g. `…Inference-Control.git@v0.1.0` or `…@main` (see [pip — VCS support](https://pip.pypa.io/en/stable/topics/vcs-support/)).
 
 ### From a clone (contributors)
 

@@ -14,7 +14,7 @@ The **pip-from-GitHub** one-liner is duplicated in several docs. If the **canoni
 
 | Check | Update if needed |
 |--------|------------------|
-| **`[project.version]`** | [`README.md`](../README.md) — status table (Beta + version line). |
+| **`[project.version]`** | [`README.md`](../README.md) — status table (`0.x` milestone + version line). |
 | **`[project.scripts]`** (new/removed CLI) | [`README.md`](../README.md) Installation · [`AGENTS.md`](../AGENTS.md) · [`docs/repository-analysis.md`](repository-analysis.md) / [`repository-analyse.md`](repository-analyse.md) · [`extras/cursor-rules/README.txt`](../extras/cursor-rules/README.txt) · bundled [`nexus-over-grep.mdc`](../src/nexus/cursor_rules/nexus-over-grep.mdc) (when agent-facing). |
 | **`requires-python` / classifiers** | [`README.md`](../README.md) · CI matrix in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). |
 

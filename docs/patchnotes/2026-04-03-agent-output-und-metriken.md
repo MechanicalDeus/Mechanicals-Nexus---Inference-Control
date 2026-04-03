@@ -3,7 +3,7 @@
 ## Meta
 
 - **Datum:** 2026-04-03
-- **Bezug Version:** `nexus-inference` **0.1.0b1** (`pyproject.toml` — keine Versionsbump in dieser Welle)
+- **Bezug Version:** `nexus-inference` **0.1.0** (`pyproject.toml`)
 - **Scope:** CLI, Perspektiven, `context_metrics`, Benchmark-Dokumentation, ergänzende Projekt-Doku
 
 ## Zusammenfassung

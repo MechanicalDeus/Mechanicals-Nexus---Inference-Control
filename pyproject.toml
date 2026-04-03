@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "nexus-inference"
-version = "0.1.0b1"
+version = "0.1.0"
 description = "Inference layer for Python: symbols, calls, mutation hints — structured context for LLMs and humans."
 readme = "README.md"
 requires-python = ">=3.10"

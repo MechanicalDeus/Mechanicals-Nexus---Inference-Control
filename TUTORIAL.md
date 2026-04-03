@@ -2,7 +2,7 @@
 
 This file is the **entry point** for learning Nexus by example. It points to the full walkthrough (text + screenshots) in `docs/`.
 
-**Status:** **Beta** — version in **`pyproject.toml`**; limits and install paths in **[`README.md`](README.md)**; executive pitch in **[`NEXUS-REPORT.md`](NEXUS-REPORT.md)**; **`docs/`** map in **[`docs/README.md`](docs/README.md)**; release-style notes in **[`CHANGELOG.md`](CHANGELOG.md)** and **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)**.
+**Status:** **`0.1.0`** (`0.x` line) — version in **`pyproject.toml`**; limits and install paths in **[`README.md`](README.md)**; executive pitch in **[`NEXUS-REPORT.md`](NEXUS-REPORT.md)**; **`docs/`** map in **[`docs/README.md`](docs/README.md)**; release-style notes in **[`CHANGELOG.md`](CHANGELOG.md)** and **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)**.
 
 **What Nexus is for:** The **CPU scans once** (static AST + heuristics); the **LLM queries** that map (**`-q`**, caps) and gets **IR-like structural slices** — callers, writes, `NEXT_OPEN` — **without** using “open file” as the primary way to explore. Refining means **another query**, not re-filtering the repo by hand. *Stop reading code. Start querying structure.* For **what it is not** (linter, runtime truth), see **README → Repo health & known limitations**.
 

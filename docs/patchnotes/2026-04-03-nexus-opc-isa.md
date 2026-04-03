@@ -3,7 +3,7 @@
 ## Meta
 
 - **Datum:** 2026-04-03
-- **Bezug Version:** `nexus-inference` 0.1.0b1 (`pyproject.toml`)
+- **Bezug Version:** `nexus-inference` **0.1.0** (`pyproject.toml`)
 - **Scope:** CLI (`nexus-opc`), Cursor-Rules, Agent-Doku, Tutorials
 
 ## Zusammenfassung
