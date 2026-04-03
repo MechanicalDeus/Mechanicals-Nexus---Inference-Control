@@ -2,21 +2,21 @@
   <title id="title">Summed output tokens: llm_brief vs agent_compact vs agent-mode</title>
   <desc id="desc">Horizontal bar chart. Four queries on TTRPG Studio app, tiktoken cl100k_base, from NEXUS_METRICS. Values 24655, 9057, 4182.</desc>
   <rect width="720" height="280" fill="#0d1117"/>
-  <text x="360" y="36" fill="#e6edf3" font-family="Segoe UI, system-ui, sans-serif" font-size="18" font-weight="600" text-anchor="middle">£ output tokens (4 queries, example checkout)</text>
-  <text x="360" y="58" fill="#8b949e" font-family="Segoe UI, system-ui, sans-serif" font-size="12" text-anchor="middle">TTRPG Studio app/ · cl100k_base · --metrics-json</text>
+  <text x="360" y="36" fill="#e6edf3" font-family="Segoe UI, system-ui, sans-serif" font-size="18" font-weight="600" text-anchor="middle">? output tokens (4 queries, example checkout)</text>
+  <text x="360" y="58" fill="#8b949e" font-family="Segoe UI, system-ui, sans-serif" font-size="12" text-anchor="middle">TTRPG Studio app/ ? cl100k_base ? --metrics-json</text>
   <g font-family="Segoe UI, system-ui, sans-serif" font-size="13">
     <text x="24" y="100" fill="#e6edf3" dominant-baseline="middle">llm_brief (cap 12)</text>
     <rect x="200" y="82" width="480" height="28" rx="4" fill="#30363d"/>
     <rect x="200" y="82" width="480" height="28" rx="4" fill="#58a6ff"/>
-    <text x="692" y="100" fill="#e6edf3" text-anchor="end" dominant-baseline="middle">24/655</text>
+    <text x="692" y="100" fill="#e6edf3" text-anchor="end" dominant-baseline="middle">24,655</text>
     <text x="24" y="152" fill="#e6edf3" dominant-baseline="middle">agent_compact full (cap 12)</text>
     <rect x="200" y="134" width="480" height="28" rx="4" fill="#30363d"/>
     <rect x="200" y="134" width="176" height="28" rx="4" fill="#d29922"/>
-    <text x="692" y="152" fill="#e6edf3" text-anchor="end" dominant-baseline="middle">9/057</text>
+    <text x="692" y="152" fill="#e6edf3" text-anchor="end" dominant-baseline="middle">9,057</text>
     <text x="24" y="204" fill="#e6edf3" dominant-baseline="middle">--agent-mode (minimal, cap 10)</text>
     <rect x="200" y="186" width="480" height="28" rx="4" fill="#30363d"/>
     <rect x="200" y="186" width="82" height="28" rx="4" fill="#3fb950"/>
-    <text x="692" y="204" fill="#e6edf3" text-anchor="end" dominant-baseline="middle">4/182</text>
+    <text x="692" y="204" fill="#e6edf3" text-anchor="end" dominant-baseline="middle">4,182</text>
   </g>
-  <text x="360" y="258" fill="#6e7681" font-family="Segoe UI, system-ui, sans-serif" font-size="11" text-anchor="middle">Same graph build per run  projection differs. N=1; reproduce with extras/nexus_benchmark.py</text>
+  <text x="360" y="258" fill="#6e7681" font-family="Segoe UI, system-ui, sans-serif" font-size="11" text-anchor="middle">Same graph build per run ? projection differs. N=1; reproduce with extras/nexus_benchmark.py</text>
 </svg>
