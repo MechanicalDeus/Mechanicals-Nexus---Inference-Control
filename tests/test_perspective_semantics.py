@@ -6,8 +6,10 @@ Epistemische Trennung: ``heuristic_slice`` (reine Heuristik) vs. ``llm_brief``
 from __future__ import annotations
 
 from nexus import attach
+from nexus.output.llm_format import AGENT_COMPACT_PRESETS, parse_agent_compact_fields_arg
 from nexus.output.perspective import (
     CenterKind,
+    PerspectiveAdvice,
     PerspectiveDriver,
     PerspectiveKind,
     PerspectivePayloadKind,
@@ -58,6 +60,58 @@ def test_llm_brief_impact_mode_is_not_heuristic_slice_as_text(tmp_path) -> None:
     assert "QUERY (impact):" in text
     flat_names = "\n".join(s.qualified_name for s in h.symbols)
     assert text.strip() != flat_names.strip()
+
+
+def test_parse_agent_compact_fields_arg() -> None:
+    assert parse_agent_compact_fields_arg("minimal") == AGENT_COMPACT_PRESETS["minimal"]
+    assert parse_agent_compact_fields_arg(" calls , writes ") == AGENT_COMPACT_PRESETS["minimal"]
+
+
+def test_agent_compact_minimal_omits_meta_and_next_open(tmp_path) -> None:
+    g = _fight_repo(tmp_path)
+    q = "deal_damage"
+    c = render_perspective(
+        PerspectiveRequest(
+            kind=PerspectiveKind.AGENT_COMPACT,
+            graph=g,
+            query=q,
+            max_symbols=25,
+            agent_compact_fields=AGENT_COMPACT_PRESETS["minimal"],
+        )
+    )
+    assert c.payload_kind is PerspectivePayloadKind.TEXT
+    text = c.payload_text or ""
+    assert "  L=" not in text
+    assert "NEXT_OPEN:" not in text
+    assert "calls:" in text or "writes:" in text
+
+
+def test_agent_compact_structured_and_falls_back_on_impact(tmp_path) -> None:
+    g = _fight_repo(tmp_path)
+    q = "deal_damage"
+    c = render_perspective(
+        PerspectiveRequest(
+            kind=PerspectiveKind.AGENT_COMPACT,
+            graph=g,
+            query=q,
+            max_symbols=25,
+        )
+    )
+    assert c.payload_kind is PerspectivePayloadKind.TEXT
+    text = c.payload_text or ""
+    assert "QUERY: deal_damage" in text
+    assert "PRIMARY" in text
+    assert "calls:" in text or "writes:" in text
+    imp = render_perspective(
+        PerspectiveRequest(
+            kind=PerspectiveKind.AGENT_COMPACT,
+            graph=g,
+            query="impact deal_damage",
+            max_symbols=25,
+        )
+    )
+    assert imp.payload_kind is PerspectivePayloadKind.NONE
+    assert imp.advice is PerspectiveAdvice.FALLBACK_TO_LLM_BRIEF
 
 
 def test_agent_names_rejects_impact_while_heuristic_slice_still_runs(tmp_path) -> None:

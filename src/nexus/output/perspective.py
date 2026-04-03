@@ -39,6 +39,7 @@ Perspektive              | Payload-Art   | Zugrundeliegende API
 ``llm_brief``           | text          | ``InferenceGraph.to_llm_brief``
 ``agent_names``         | text          | ``InferenceGraph.agent_qualified_names``
 ``agent_symbol_lines``  | text / none+advice | ``agent_symbol_lines``; Spezialquery → ``advice``
+``agent_compact``       | text / none+advice | :func:`~nexus.output.llm_format.agent_compact_lines`; Spezialquery → ``advice``
 ``trust_detail``        | text          | ``format_symbol_detail``
 ``focus_graph``         | graph_json    | ``build_focus_graph``
 ``mutation_trace``      | json          | ``InferenceGraph.trace_mutation``
@@ -59,7 +60,11 @@ from nexus.output.inference_projection import (
     build_json_slice,
     format_symbol_detail,
 )
-from nexus.output.llm_format import agent_symbol_lines, generic_query_symbol_slice
+from nexus.output.llm_format import (
+    agent_compact_lines,
+    agent_symbol_lines,
+    generic_query_symbol_slice,
+)
 
 __all__ = [
     "CenterKind",
@@ -80,6 +85,7 @@ class PerspectiveKind(str, Enum):
     LLM_BRIEF = "llm_brief"
     AGENT_NAMES = "agent_names"
     AGENT_SYMBOL_LINES = "agent_symbol_lines"
+    AGENT_COMPACT = "agent_compact"
     TRUST_DETAIL = "trust_detail"
     FOCUS_GRAPH = "focus_graph"
     MUTATION_TRACE = "mutation_trace"
@@ -141,6 +147,8 @@ class PerspectiveRequest:
     annotate: bool = False
     #: Console „Copy JSON“: gebundener Slice ohne erneutes ``generic_query_symbol_slice``.
     symbols_override: tuple[SymbolRecord, ...] | None = None
+    #: Nur ``agent_compact``: ausgewählte Ausgabefelder (``None`` = volles Set).
+    agent_compact_fields: frozenset[str] | None = None
 
 
 @dataclass
@@ -299,6 +307,31 @@ def _perspective_agent_symbol_lines(g: InferenceGraph, req: PerspectiveRequest) 
     )
 
 
+def _perspective_agent_compact(g: InferenceGraph, req: PerspectiveRequest) -> PerspectiveResult:
+    q = _nonempty_query(req)
+    if not q:
+        return _err("agent_compact requires non-empty query")
+    lines = agent_compact_lines(
+        g,
+        query=q,
+        max_symbols=req.max_symbols,
+        min_confidence=req.min_confidence,
+        fields=req.agent_compact_fields,
+    )
+    if lines is None:
+        return PerspectiveResult(
+            payload_kind=PerspectivePayloadKind.NONE,
+            advice=PerspectiveAdvice.FALLBACK_TO_LLM_BRIEF,
+            provenance=_prov("agent_compact_lines", PerspectiveDriver.QUERY),
+        )
+    body = "\n".join(lines)
+    return PerspectiveResult(
+        payload_kind=PerspectivePayloadKind.TEXT,
+        payload_text=body + ("\n" if lines else ""),
+        provenance=_prov("agent_compact_lines", PerspectiveDriver.QUERY),
+    )
+
+
 def _perspective_trust_detail(g: InferenceGraph, req: PerspectiveRequest) -> PerspectiveResult:
     center = _resolve_center(g, req)
     if center is None:
@@ -345,6 +378,7 @@ _DISPATCH: dict[
     PerspectiveKind.LLM_BRIEF: _perspective_llm_brief,
     PerspectiveKind.AGENT_NAMES: _perspective_agent_names,
     PerspectiveKind.AGENT_SYMBOL_LINES: _perspective_agent_symbol_lines,
+    PerspectiveKind.AGENT_COMPACT: _perspective_agent_compact,
     PerspectiveKind.TRUST_DETAIL: _perspective_trust_detail,
     PerspectiveKind.FOCUS_GRAPH: _perspective_focus_graph,
     PerspectiveKind.MUTATION_TRACE: _perspective_mutation_trace,

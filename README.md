@@ -13,6 +13,51 @@ Nexus is an **inference layer** for Python code. It sits between **raw source** 
 
 ---
 
+## Agent quick start (install → one command)
+
+**Opinionated defaults** for LLM/agent workflows: structural compact output, **calls + writes** fields, **10** symbols — override anytime with `--max-symbols`, `--compact-fields`, or another `--perspective`.
+
+**What you get:** a **compact, structured map** of the most relevant symbols for your query — mainly **calls** and **writes** — so you can orient fast without a wall of prose.
+
+```bash
+pip install nexus-inference
+cd your-python-repo
+nexus . --agent-mode -q "what handles mutations?"
+```
+
+More one-liners (same mode, different intent):
+
+```bash
+# core mutation / state-touching logic
+nexus . --agent-mode -q "mutation"
+
+# where state is read or updated
+nexus . --agent-mode -q "state"
+
+# orchestration, HTTP, or “how requests move”
+nexus . --agent-mode -q "request flow"
+```
+
+**When to use what:** **`--agent-mode`** → fast structural orientation (agents, tight context). Plain **`nexus -q …`** (default **llm_brief**) → richer narrative brief, special modes like **`impact`** / **`why`**. Use the default when you need explanation depth; use **`--agent-mode`** when you need a **small, parse-friendly** slice first.
+
+Developing from a checkout: `pip install -e .` (or `PYTHONPATH=…/src` and `python -m nexus …`). Details, metrics, and patch notes: **[`docs/token-efficiency.md`](docs/token-efficiency.md)** · **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)**.
+
+*Tip: a short terminal recording of one of the commands above shows the value faster than any diagram.*
+
+### Measured stdout tokens (example: large Python app)
+
+**Controlled local run** on one checkout (**TTRPG Studio** `app/`, ~59 files / 1530 symbols in the graph). **Four queries** (`mutation`, `resolver engine`, `session export`, `transcription`), **tiktoken** `cl100k_base`, summed **`output_tokens_tiktoken`** from **`--metrics-json`** (stderr). Same inference pass per invocation; only **output projection** differs.
+
+| Mode | Σ output tokens (4 queries) | % of `llm_brief` |
+|------|----------------------------:|-----------------:|
+| `nexus -q …` default (**`llm_brief`**, `--max-symbols` **12**) | **24 655** | 100% |
+| `--perspective agent_compact` **`full`** (cap **12**) | **9 057** | 37% |
+| **`--agent-mode`** (product default: **minimal** fields, cap **10**) | **4 182** | 17% |
+
+With **`--agent-mode`** but **`--max-symbols` 12** explicitly matched to the brief row: **~4 479** (~18%). **N=1** checkout; your tree and queries will differ — use **`extras/nexus_benchmark.py`** + **`--metrics-json`** to reproduce on your project.
+
+---
+
 ## Problem
 
 LLMs and developers burn context when the **model is forced to behave like a file browser**: open file, read wall of text, guess structure, repeat. The model **searches for content** by **absorbing text**, instead of **asking an index** for the **shape** of a region.
@@ -77,6 +122,8 @@ Example mutation-chain fragment when analysing this repo (your project will diff
 `src.nexus.cli.main → src.nexus.scanner.attach → src.nexus.scanner.scan → src.nexus.scanner._scan_impl → src.nexus.scanner._tag_symbol`
 
 **Tutorial hub:** **[`TUTORIAL.md`](TUTORIAL.md)** (links to the full guide, screenshots, and related docs).
+
+**Patchnotes (release-style reports):** **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)** — Messmetriken, neue CLI/Perspektiven, Benchmark-Hinweise; aktuell z. B. [Agent-Ausgabe & Metriken (2026-04-03)](docs/patchnotes/2026-04-03-agent-output-und-metriken.md).
 
 **Repository analysis** (architecture, risks, packaging, roadmap — full map): **EN** [`docs/repository-analysis.md`](docs/repository-analysis.md) · **DE** [`docs/repository-analyse.md`](docs/repository-analyse.md).
 

@@ -28,6 +28,7 @@ from nexus.core.models import SymbolRecord
 from nexus.output.llm_format import DEFAULT_QUERY_MAX_SYMBOLS
 from nexus.output.perspective import (
     CenterKind,
+    PerspectiveAdvice,
     PerspectiveKind,
     PerspectivePayloadKind,
     PerspectiveRequest,
@@ -126,6 +127,7 @@ class MainWindow(QMainWindow):
             ("Focus (JSON)", PerspectiveKind.FOCUS_GRAPH),
             ("Brief (llm_brief)", PerspectiveKind.LLM_BRIEF),
             ("Namen (agent_names)", PerspectiveKind.AGENT_NAMES),
+            ("Compact (agent_compact)", PerspectiveKind.AGENT_COMPACT),
         ):
             self._perspective_combo.addItem(label, kind)
         self._perspective_combo.currentIndexChanged.connect(self._on_perspective_combo_changed)
@@ -255,6 +257,9 @@ class MainWindow(QMainWindow):
         if kind is PerspectiveKind.AGENT_NAMES and not pq.strip():
             self._lens.setPlainText("(Keine Query — Namen-Liste braucht Query.)")
             return
+        if kind is PerspectiveKind.AGENT_COMPACT and not pq.strip():
+            self._lens.setPlainText("(Keine Query — Compact braucht Query.)")
+            return
 
         r = render_perspective(
             PerspectiveRequest(
@@ -267,6 +272,19 @@ class MainWindow(QMainWindow):
                 center_ref=sym.id,
             )
         )
+        if (
+            kind is PerspectiveKind.AGENT_COMPACT
+            and r.advice is PerspectiveAdvice.FALLBACK_TO_LLM_BRIEF
+        ):
+            r = render_perspective(
+                PerspectiveRequest(
+                    kind=PerspectiveKind.LLM_BRIEF,
+                    graph=g,
+                    query=pq,
+                    max_symbols=max_s,
+                    min_confidence=min_c,
+                )
+            )
         if r.payload_kind is PerspectivePayloadKind.ERROR:
             self._lens.setPlainText(r.error or "")
             return

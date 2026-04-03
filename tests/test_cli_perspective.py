@@ -1,10 +1,65 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
 
-from nexus.cli import main
+from nexus.cli import AGENT_MODE_DEFAULT_MAX_SYMBOLS, main
+
+
+def test_agent_mode_sets_compact_perspective_and_minimal(tmp_path: Path, capsys) -> None:
+    (tmp_path / "m.py").write_text(
+        "def a():\n    b()\ndef b():\n    pass\n",
+        encoding="utf-8",
+    )
+    code = main([str(tmp_path), "--agent-mode", "-q", "flow", "--metrics-json"])
+    assert code == 0
+    out = capsys.readouterr()
+    assert "QUERY: flow" in out.out
+    assert "  L=" not in out.out
+    metrics = None
+    for ln in out.err.splitlines():
+        if ln.startswith("[NEXUS_METRICS] "):
+            metrics = json.loads(ln[len("[NEXUS_METRICS] ") :].strip())
+            break
+    assert metrics is not None
+    assert metrics.get("agent_mode") is True
+    assert metrics.get("compact_fields") == ["calls", "writes"]
+    assert metrics.get("max_symbols_cli_explicit") == AGENT_MODE_DEFAULT_MAX_SYMBOLS
+
+
+def test_agent_mode_conflicts_with_other_perspective(tmp_path: Path) -> None:
+    (tmp_path / "m.py").write_text("def x(): pass\n", encoding="utf-8")
+    with pytest.raises(SystemExit) as e:
+        main(
+            [
+                str(tmp_path),
+                "--agent-mode",
+                "--perspective",
+                "llm_brief",
+                "-q",
+                "x",
+            ]
+        )
+    assert e.value.code == 2
+
+
+def test_agent_mode_max_symbols_override(tmp_path: Path, capsys) -> None:
+    lines = "\n\n".join(f"def fn{i}():\n    pass" for i in range(12))
+    (tmp_path / "m.py").write_text(lines + "\n", encoding="utf-8")
+    code = main(
+        [
+            str(tmp_path),
+            "--agent-mode",
+            "-q",
+            "fn",
+            "--max-symbols",
+            "3",
+        ]
+    )
+    assert code == 0
+    assert f"PRIMARY (n=3):" in capsys.readouterr().out
 
 
 def test_perspective_heuristic_slice_smoke(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

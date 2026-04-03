@@ -97,6 +97,34 @@ As a **proxy** for “agent pastes a wide grep into the prompt”: all lines con
 
 **Implication:** Start **thin**, then **read_file** on 1–3 paths; pull the **full brief** only when the question needs it — otherwise you pay many structured tokens per symbol.
 
+### 2.5 Reproducible “token budget” telemetry (`--metrics-json`)
+
+For **diffing** runs against a target (CI, before/after refactors, or policy caps), `nexus` can emit **one JSON object per invocation** on **stderr** (prefix `[NEXUS_METRICS]`, stdout unchanged — pipe-safe):
+
+```bash
+python -m nexus . -q "mutation" --max-symbols 10 --metrics-json 2>metrics_line.txt
+# or: NEXUS_METRICS_JSON=1
+```
+
+Fields include **`output_chars`**, **`output_lines`**, **`est_tokens_chars_div_4`** (rough heuristic: characters÷4), **`slice_cap_effective`**, optional **`symbols_in_heuristic_slice`** / **`slice_fill_ratio`**, graph dimensions, and when the stdout text contains them, **`context_handoff`** (`next_open_suggestions`, `same_name_fold`).
+
+**Model-aligned token counts (optional):** install **`pip install 'nexus-inference[metrics]'`** (pulls **`tiktoken`**). Then metrics may include **`output_tokens_tiktoken`** plus a small **`tokenizer`** object (`backend`, and either **`encoding`** or **`model`**). Choose the encoding explicitly so comparisons stay stable:
+
+- **`NEXUS_TIKTOKEN_ENCODING`** — default **`cl100k_base`** if unset (good enough for many GPT-4/4o-style models for **relative** diffs).
+- **`NEXUS_TIKTOKEN_MODEL`** — e.g. **`gpt-4o`** → `tiktoken.encoding_for_model(...)` (closer to “what OpenAI counts” for that family).
+
+**Slice source weight (optional):** `NEXUS_METRICS_SLICE_SOURCE_TOKENS=1` adds **`slice_source_tokens_total`**: tiktoken count over **raw source lines** of symbols in the slice (file reads, capped via `NEXUS_METRICS_SLICE_SOURCE_MAX_SYMBOLS`, default 40, max 500). With `NEXUS_METRICS_SLICE_SOURCE_DETAIL=1`, also per-symbol **`slice_source_tokens_by_symbol`**. Derived fields when possible: **`slice_symbols_total`**, **`compression_ratio`** (output tokens ÷ slice-source tokens), **`density_source_over_output`** (inverse), **`avg_source_tokens_per_symbol`**. If the CLI passed **`--max-symbols`**, **`max_symbols_cli_explicit`** is set; **`slice_cap_effective`** is always the cap used (including default **12** when `-q` is set but `--max-symbols` omitted).
+
+This is **not** the same as “tokens in the brief text”; it estimates **how much source text** the slice points at — useful for compression / tuning, not for billing.
+
+Tokenizer choice must match **your** deployment model for **absolute** budgets; for **A/B on one setup**, any fixed encoder is enough. This does **not** replace IDE session dashboards (reasoning + tools + cache); see §1.1 and [`usage-metrics.md`](usage-metrics.md).
+
+**Relevant universe (optional, extra cost):** `NEXUS_METRICS_RELEVANT_UNIVERSE=1` adds **`relevant_symbols_total`** — count of symbols that the **same** heuristic slice would return with a very large internal cap (same ranking as `-q`, effectively “all that would ever enter the slice before truncation”). If **`slice_symbols_total`** is present, **`slice_relevant_coverage_ratio`** = slice ÷ relevant (how much of the heuristic universe fits under the current cap).
+
+**Batch benchmarks:** from the Nexus checkout, run [`extras/nexus_benchmark.py`](../extras/nexus_benchmark.py) to execute `nexus … --metrics-json` over multiple `--repo` / `--repos-list` and `--query` / `--queries-file`, with optional `--relevant-universe`, `--slice-source`, `--tiktoken-encoding`, `--out-json` / `--out-csv`.
+
+**Perspektive `agent_compact` + Felder:** Mit `--perspective agent_compact` bleibt dieselbe Slice-Heuristik wie bei Agent-Namenlisten; die **Ausgabegröße** steuert **`--compact-fields`** (`minimal` / `standard` / `full` oder explizite Liste). Der Shortcut **`--agent-mode`** setzt `agent_compact` + `minimal` + `--max-symbols 10` (überschreibbar). In den Metriken erscheinen dann u. a. **`compact_fields`** und bei `--agent-mode` **`agent_mode`: true** — für A/B und Regressionen. Vollständiger Bericht: **[Patchnotes → 2026-04-03](patchnotes/2026-04-03-agent-output-und-metriken.md)**; Format-Überblick: **[`docs/patchnotes/README.md`](patchnotes/README.md)**.
+
 ---
 
 ## 3. Reference: larger production trees (smoke / exploration runs)

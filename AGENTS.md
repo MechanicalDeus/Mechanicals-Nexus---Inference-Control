@@ -4,6 +4,8 @@ Use this file as the **reference** when working in **any Python repo** and you n
 
 **Cursor-specific explanation anchor** (agent loop, terminal, rules): **[`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md)** in the Nexus repo.
 
+**Patch notes (this repo):** **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)** — dated reports on metrics keys, perspectives, and CLI (e.g. `agent_compact`, `--compact-fields`, `--agent-mode`); template for new entries in the same folder.
+
 ## Other repos: one-time setup per project
 
 1. **Install Nexus** (usable everywhere):  
@@ -26,6 +28,8 @@ From the **target repo root** (or `src/<package>`):
 
 ```bash
 nexus-policy . -q "state"
+# Fast structural slice for agents (compact, default cap 10; override with --max-symbols / --compact-fields)
+nexus . --agent-mode -q "mutation"
 nexus . -q "mutation" --max-symbols 25
 nexus . -q "full mutation chain" --max-symbols 40
 nexus . -q "impact ClassName"
@@ -40,9 +44,11 @@ nexus . --json > ./exports/graph.json
 
 ### 1.1 Canonical CLI perspectives (same language as UI / library)
 
-Use **`nexus --perspective NAME`** when you want the **explicit contract** (stable enum strings: `heuristic_slice`, `llm_brief`, `query_slice_json`, `agent_names`, `agent_symbol_lines`, `trust_detail`, `focus_graph`, `mutation_trace`). Centered views need **`--center-kind`** (`symbol_id` | `symbol_qualified_name`) and **`--center-ref`**; **`mutation_trace`** needs **`--mutation-key`**. Do **not** mix `--perspective` with **`--names-only`**, **`--query-slice-json`**, **`--trace-mutation`**, **`--focus-graph`**, or **`--json`** in one command.
+Use **`nexus --perspective NAME`** when you want the **explicit contract** (stable enum strings: `heuristic_slice`, `llm_brief`, `query_slice_json`, `agent_names`, `agent_symbol_lines`, `agent_compact`, `trust_detail`, `focus_graph`, `mutation_trace`). Centered views need **`--center-kind`** (`symbol_id` | `symbol_qualified_name`) and **`--center-ref`**; **`mutation_trace`** needs **`--mutation-key`**. Do **not** mix `--perspective` with **`--names-only`**, **`--query-slice-json`**, **`--trace-mutation`**, **`--focus-graph`**, or **`--json`** in one command.
 
 **Important:** **`heuristic_slice`** (heuristic pick only) and **`llm_brief`** (may activate `impact` / `why` / …) can **disagree** on the same `-q` — by design. For special-mode questions, use **`llm_brief`** or plain **`nexus -q`**.
+
+**Agent entry (one switch):** **`--agent-mode`** sets **`--perspective agent_compact`**, **`--compact-fields minimal`**, and **`--max-symbols 10`** unless you pass those flags explicitly. Metrics include **`agent_mode`** and **`compact_fields`** when enabled.
 
 Optional: **`--debug-perspective`** → one JSON line on **stderr** per render (`payload_kind`, `advice`, `provenance`); stdout unchanged.
 

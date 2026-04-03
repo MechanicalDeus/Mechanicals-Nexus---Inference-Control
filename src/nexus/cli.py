@@ -12,7 +12,19 @@ from nexus.control_header import (
     emit_control_header,
 )
 from nexus import __version__ as nexus_version
-from nexus.output.llm_format import DEFAULT_QUERY_MAX_SYMBOLS
+from nexus.output.context_metrics import (
+    build_context_metrics,
+    emit_context_metrics_line,
+    metrics_json_enabled,
+)
+from nexus.output.llm_format import (
+    DEFAULT_QUERY_MAX_SYMBOLS,
+    agent_compact_default_fields,
+    parse_agent_compact_fields_arg,
+)
+
+# --agent-mode: opinionierter Agenten-Einstieg (kompakt, kleiner Slice-Cap).
+AGENT_MODE_DEFAULT_MAX_SYMBOLS = 10
 from nexus.output.perspective import (
     CenterKind,
     PerspectiveAdvice,
@@ -80,6 +92,7 @@ def _validate_perspective_cli(args: argparse.Namespace, parser: argparse.Argumen
         PerspectiveKind.QUERY_SLICE_JSON,
         PerspectiveKind.AGENT_NAMES,
         PerspectiveKind.AGENT_SYMBOL_LINES,
+        PerspectiveKind.AGENT_COMPACT,
     ):
         if not (args.query and args.query.strip()):
             parser.error(
@@ -232,7 +245,70 @@ def main(argv: list[str] | None = None) -> int:
             "advice, error (if any), and provenance. Stdout unchanged."
         ),
     )
+    parser.add_argument(
+        "--metrics-json",
+        action="store_true",
+        help=(
+            "After successful output, emit one JSON line to stderr (prefix [NEXUS_METRICS]) "
+            "with size/slice/handoff hints for benchmarking. Or set NEXUS_METRICS_JSON=1."
+        ),
+    )
+    parser.add_argument(
+        "--compact-fields",
+        default=None,
+        metavar="SPEC",
+        help=(
+            "Only with --perspective agent_compact: field preset minimal|standard|full, or "
+            "comma-list meta,calls,writes,called_by,reads,tags,next_open. "
+            "Default when omitted: full (unchanged output vs. pre-flag)."
+        ),
+    )
+    parser.add_argument(
+        "--agent-mode",
+        action="store_true",
+        help=(
+            "Opinionated agent entry: same as --perspective agent_compact with "
+            f"--compact-fields minimal and --max-symbols {AGENT_MODE_DEFAULT_MAX_SYMBOLS} "
+            "unless you pass those flags explicitly. Incompatible with --json, --names-only, "
+            "and other legacy output modes."
+        ),
+    )
     args = parser.parse_args(argv)
+
+    if args.agent_mode:
+        if (
+            args.json
+            or args.names_only
+            or args.query_slice_json
+            or args.trace_mutation is not None
+            or args.focus_graph is not None
+        ):
+            parser.error(
+                "--agent-mode cannot be combined with --json, --names-only, "
+                "--query-slice-json, --trace-mutation, or --focus-graph"
+            )
+        if (
+            args.perspective is not None
+            and args.perspective != PerspectiveKind.AGENT_COMPACT.value
+        ):
+            parser.error(
+                "--agent-mode implies --perspective agent_compact; "
+                "omit --perspective or set it to agent_compact"
+            )
+        args.perspective = PerspectiveKind.AGENT_COMPACT.value
+        if args.compact_fields is None:
+            args.compact_fields = "minimal"
+        if args.max_symbols is None:
+            args.max_symbols = AGENT_MODE_DEFAULT_MAX_SYMBOLS
+
+    agent_compact_fields_resolved: frozenset[str] | None = None
+    if args.compact_fields is not None:
+        if args.perspective != PerspectiveKind.AGENT_COMPACT.value:
+            parser.error("--compact-fields requires --perspective agent_compact")
+        try:
+            agent_compact_fields_resolved = parse_agent_compact_fields_arg(args.compact_fields)
+        except ValueError as e:
+            parser.error(str(e))
 
     legacy_output = (
         args.names_only,
@@ -278,43 +354,60 @@ def main(argv: list[str] | None = None) -> int:
         emit_control_header(cfg)
     g = attach(root, mode=args.mode, cache_dir=args.cache_dir)
     dbg = args.debug_perspective
+    want_metrics = metrics_json_enabled(args.metrics_json)
+    captured_stdout: str | None = None
+    last_pr: PerspectiveResult | None = None
+    include_query_slice_stats = False
+    is_full_json = False
+    output_mode = ""
+    compact_fields_for_metrics: list[str] | None = None
+    agent_mode_for_metrics = bool(args.agent_mode)
 
-    def _emit_json_obj(obj: object) -> None:
-        out = json.dumps(obj, indent=2, ensure_ascii=False)
-        sys.stdout.write(out)
-        if not out.endswith("\n"):
-            sys.stdout.write("\n")
-
-    def _emit_perspective_stdout(pr: PerspectiveResult) -> int:
+    def _emit_perspective_stdout(pr: PerspectiveResult) -> tuple[int, str | None]:
         if pr.payload_kind is PerspectivePayloadKind.ERROR:
             sys.stderr.write(f"nexus: {pr.error}\n")
-            return 1
+            return 1, None
         if pr.payload_kind is PerspectivePayloadKind.NONE:
             sys.stderr.write("nexus: perspective returned no payload (unhandled advice?)\n")
-            return 1
+            return 1, None
         if pr.payload_kind is PerspectivePayloadKind.SYMBOL_LIST:
             syms = pr.symbols or []
             if syms:
-                sys.stdout.write("\n".join(s.qualified_name for s in syms) + "\n")
-            return 0
+                text = "\n".join(s.qualified_name for s in syms) + "\n"
+                sys.stdout.write(text)
+                return 0, text
+            return 0, ""
         if pr.payload_json is not None:
-            _emit_json_obj(pr.payload_json)
-            return 0
+            out = json.dumps(pr.payload_json, indent=2, ensure_ascii=False)
+            sys.stdout.write(out)
+            if not out.endswith("\n"):
+                sys.stdout.write("\n")
+            captured = out if out.endswith("\n") else out + "\n"
+            return 0, captured
         if pr.payload_text is not None:
             sys.stdout.write(pr.payload_text)
             if not pr.payload_text.endswith("\n"):
                 sys.stdout.write("\n")
-            return 0
+            captured = (
+                pr.payload_text
+                if pr.payload_text.endswith("\n")
+                else pr.payload_text + "\n"
+            )
+            return 0, captured
         sys.stderr.write("nexus: empty perspective result\n")
-        return 1
+        return 1, None
 
     if args.json:
         out = g.to_json()
         sys.stdout.write(out)
         if not out.endswith("\n"):
             sys.stdout.write("\n")
+        captured_stdout = out if out.endswith("\n") else out + "\n"
+        output_mode = "full_graph_json"
+        is_full_json = True
     elif args.perspective is not None:
         kind = PerspectiveKind(args.perspective)
+        perspective_kind_for_metrics = kind
         req = PerspectiveRequest(
             kind=kind,
             graph=g,
@@ -325,10 +418,18 @@ def main(argv: list[str] | None = None) -> int:
             center_ref=(args.center_ref or "").strip() or None,
             mutation_key=(args.mutation_key or "").strip() or None,
             annotate=args.annotate,
+            agent_compact_fields=agent_compact_fields_resolved,
         )
         pr = render_perspective(req)
         _debug_perspective_stderr(pr, dbg)
-        if kind is PerspectiveKind.AGENT_SYMBOL_LINES and pr.advice is PerspectiveAdvice.FALLBACK_TO_LLM_BRIEF:
+        if (
+            kind
+            in (
+                PerspectiveKind.AGENT_SYMBOL_LINES,
+                PerspectiveKind.AGENT_COMPACT,
+            )
+            and pr.advice is PerspectiveAdvice.FALLBACK_TO_LLM_BRIEF
+        ):
             pr = render_perspective(
                 PerspectiveRequest(
                     kind=PerspectiveKind.LLM_BRIEF,
@@ -338,10 +439,26 @@ def main(argv: list[str] | None = None) -> int:
                     min_confidence=args.min_confidence,
                 )
             )
+            perspective_kind_for_metrics = PerspectiveKind.LLM_BRIEF
             _debug_perspective_stderr(pr, dbg)
-        code = _emit_perspective_stdout(pr)
+        code, captured_stdout = _emit_perspective_stdout(pr)
         if code != 0:
             return code
+        last_pr = pr
+        output_mode = f"perspective:{perspective_kind_for_metrics.value}"
+        if perspective_kind_for_metrics is PerspectiveKind.AGENT_COMPACT:
+            eff = (
+                agent_compact_default_fields()
+                if agent_compact_fields_resolved is None
+                else agent_compact_fields_resolved
+            )
+            compact_fields_for_metrics = sorted(eff)
+        include_query_slice_stats = perspective_kind_for_metrics in (
+            PerspectiveKind.LLM_BRIEF,
+            PerspectiveKind.AGENT_NAMES,
+            PerspectiveKind.AGENT_SYMBOL_LINES,
+            PerspectiveKind.AGENT_COMPACT,
+        )
     elif args.trace_mutation is not None:
         pr = render_perspective(
             PerspectiveRequest(
@@ -351,9 +468,11 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         _debug_perspective_stderr(pr, dbg)
-        code = _emit_perspective_stdout(pr)
+        code, captured_stdout = _emit_perspective_stdout(pr)
         if code != 0:
             return code
+        last_pr = pr
+        output_mode = "trace_mutation"
     elif args.focus_graph is not None:
         pr = render_perspective(
             PerspectiveRequest(
@@ -364,9 +483,11 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         _debug_perspective_stderr(pr, dbg)
-        code = _emit_perspective_stdout(pr)
+        code, captured_stdout = _emit_perspective_stdout(pr)
         if code != 0:
             return code
+        last_pr = pr
+        output_mode = "focus_graph"
     elif args.query_slice_json:
         if not (args.query and args.query.strip()):
             parser.error("--query-slice-json requires a non-empty --query / -q")
@@ -380,9 +501,11 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         _debug_perspective_stderr(pr, dbg)
-        code = _emit_perspective_stdout(pr)
+        code, captured_stdout = _emit_perspective_stdout(pr)
         if code != 0:
             return code
+        last_pr = pr
+        output_mode = "query_slice_json"
     elif args.names_only:
         if not (args.query and args.query.strip()):
             parser.error("--names-only requires a non-empty --query / -q")
@@ -408,9 +531,12 @@ def main(argv: list[str] | None = None) -> int:
                 )
             )
             _debug_perspective_stderr(pr, dbg)
-        code = _emit_perspective_stdout(pr)
+        code, captured_stdout = _emit_perspective_stdout(pr)
         if code != 0:
             return code
+        last_pr = pr
+        output_mode = "names_only"
+        include_query_slice_stats = True
     else:
         pr = render_perspective(
             PerspectiveRequest(
@@ -422,7 +548,27 @@ def main(argv: list[str] | None = None) -> int:
             )
         )
         _debug_perspective_stderr(pr, dbg)
-        code = _emit_perspective_stdout(pr)
+        code, captured_stdout = _emit_perspective_stdout(pr)
         if code != 0:
             return code
+        last_pr = pr
+        output_mode = "llm_brief"
+        include_query_slice_stats = True
+
+    if want_metrics and captured_stdout is not None:
+        emit_context_metrics_line(
+            build_context_metrics(
+                stdout_payload=captured_stdout,
+                output_mode=output_mode,
+                graph=g,
+                query=args.query,
+                max_symbols_arg=args.max_symbols,
+                min_confidence=args.min_confidence,
+                pr=last_pr,
+                is_full_json=is_full_json,
+                include_query_slice_stats=include_query_slice_stats,
+                compact_fields=compact_fields_for_metrics,
+                agent_mode=agent_mode_for_metrics,
+            )
+        )
     return 0

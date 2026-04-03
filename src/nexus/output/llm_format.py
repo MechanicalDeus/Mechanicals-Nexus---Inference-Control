@@ -23,6 +23,52 @@ if TYPE_CHECKING:
 # Default-Slice-Größe für ``-q`` / Console „max sym“ — CLI und UI teilen dieselbe Konstante.
 DEFAULT_QUERY_MAX_SYMBOLS = 12
 
+# ``agent_compact`` / ``--compact-fields``: steuerbare Informationsdichte (keine neue Heuristik).
+AGENT_COMPACT_FIELD_NAMES: tuple[str, ...] = (
+    "meta",
+    "calls",
+    "writes",
+    "called_by",
+    "reads",
+    "tags",
+    "next_open",
+)
+_AGENT_COMPACT_ALLOWED: frozenset[str] = frozenset(AGENT_COMPACT_FIELD_NAMES)
+AGENT_COMPACT_PRESETS: dict[str, frozenset[str]] = {
+    "minimal": frozenset({"calls", "writes"}),
+    "standard": frozenset({"calls", "writes", "called_by"}),
+    "full": frozenset(AGENT_COMPACT_FIELD_NAMES),
+}
+
+
+def agent_compact_default_fields() -> frozenset[str]:
+    """Volles Compact-Format (entspricht bisherigem Verhalten ohne ``--compact-fields``)."""
+    return AGENT_COMPACT_PRESETS["full"]
+
+
+def parse_agent_compact_fields_arg(spec: str) -> frozenset[str]:
+    """
+    CLI-String für ``--compact-fields``: Preset ``minimal`` / ``standard`` / ``full``
+    oder kommagetrennte Kanalnamen aus :data:`AGENT_COMPACT_FIELD_NAMES`.
+    """
+    raw = spec.strip().lower()
+    if not raw:
+        raise ValueError("--compact-fields must not be empty")
+    if raw in AGENT_COMPACT_PRESETS:
+        return AGENT_COMPACT_PRESETS[raw]
+    parts = tuple(p.strip().lower() for p in spec.split(",") if p.strip())
+    if not parts:
+        raise ValueError("--compact-fields must not be empty")
+    bad = [p for p in parts if p not in _AGENT_COMPACT_ALLOWED]
+    if bad:
+        allowed = ", ".join(sorted(_AGENT_COMPACT_ALLOWED))
+        raise ValueError(
+            "unknown --compact-fields "
+            + ", ".join(bad)
+            + f"; allowed: {allowed} or presets minimal|standard|full"
+        )
+    return frozenset(parts)
+
 
 def _format_symbol_one_liner(s: SymbolRecord) -> str:
     tags = ",".join(s.semantic_tags) if s.semantic_tags else "-"
@@ -351,6 +397,104 @@ def agent_symbol_lines(
     if foot and foot[-1] == "":
         foot = foot[:-1]
     lines.extend(foot)
+    return lines
+
+
+def _compact_join(items: list[str], *, max_items: int = 8) -> str:
+    if not items:
+        return ""
+    if len(items) <= max_items:
+        return ", ".join(items)
+    head = ", ".join(items[:max_items])
+    return f"{head} (+{len(items) - max_items})"
+
+
+def agent_compact_lines(
+    graph: InferenceGraph,
+    *,
+    query: str,
+    max_symbols: int | None = None,
+    min_confidence: float | None = None,
+    next_open_k: int = 2,
+    fields: frozenset[str] | None = None,
+) -> list[str] | None:
+    """
+    Execution-oriented, token-sparse projection: same slice as :func:`agent_symbol_lines`,
+    but structured ``field: value`` blocks instead of prose.
+
+    ``fields`` steuert pro Symbol ausgegebene Kanten (Preset via CLI ``--compact-fields``);
+    ``None`` = volles Set (:func:`agent_compact_default_fields`).
+
+    ``None`` bei Spezialqueries (impact / why / …) — CLI kann auf ``llm_brief`` fallen.
+    """
+    q_raw = query.strip()
+    if not q_raw:
+        return None
+    if detect_special_query_mode(q_raw):
+        return None
+    eff = agent_compact_default_fields() if fields is None else fields
+    syms = generic_query_symbol_slice(
+        graph,
+        q_raw,
+        max_symbols=max_symbols,
+        min_confidence=min_confidence,
+    )
+    primaries = _primary_symbols_in_order(syms)
+    lines: list[str] = [
+        f"QUERY: {q_raw}",
+        f"PRIMARY (n={len(primaries)}):",
+        "",
+    ]
+    for s in primaries:
+        lines.append(s.qualified_name)
+        if "meta" in eff:
+            lines.append(
+                f"  L={s.layer} c={s.confidence:.2f} @{s.file}:{s.line_start}-{s.line_end}"
+            )
+        if "calls" in eff and s.calls:
+            lines.append(f"  calls: {_compact_join(s.calls)}")
+        if "writes" in eff:
+            if s.writes:
+                lines.append(f"  writes: {_compact_join(s.writes)}")
+            if s.indirect_writes:
+                lines.append(f"  indirect_writes: {_compact_join(s.indirect_writes)}")
+            if s.transitive_writes:
+                lines.append(f"  transitive_writes: {_compact_join(s.transitive_writes)}")
+        if "reads" in eff and s.reads:
+            lines.append(f"  reads: {_compact_join(s.reads)}")
+        if "called_by" in eff and s.called_by:
+            lines.append(f"  called_by: {_compact_join(s.called_by, max_items=6)}")
+        if "tags" in eff and s.semantic_tags:
+            lines.append(f"  tags: {_compact_join(s.semantic_tags, max_items=10)}")
+        lines.append("")
+    lines.extend(_same_name_footer_lines(syms))
+    if lines and lines[-1] == "":
+        lines.pop()
+    if next_open_k > 0 and "next_open" in eff:
+        no = _next_open_lines_compact(syms, k=next_open_k)
+        if no:
+            lines.append("")
+            lines.extend(no)
+    return lines
+
+
+def _next_open_lines_compact(syms: list[SymbolRecord], *, k: int = 2) -> list[str]:
+    """Kurze NEXT_OPEN-Zeilen für :func:`agent_compact_lines` (weniger Tokens als Vollfooter)."""
+    picked: list[SymbolRecord] = []
+    seen_files: set[str] = set()
+    for s in top_entry_point_symbols(syms, k=len(syms)):
+        if s.file in seen_files:
+            continue
+        seen_files.add(s.file)
+        picked.append(s)
+        if len(picked) >= k:
+            break
+    if not picked:
+        return []
+    lines = ["NEXT_OPEN:"]
+    for s in picked:
+        lines.append(f"  {s.file}:{s.line_start}-{s.line_end}  {s.qualified_name}")
+    lines.append("")
     return lines
 
 

@@ -7,9 +7,9 @@ alwaysApply: true
 
 ## Design goal (short)
 
-In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) by the agent is usually **token-expensive** and low-signal. **Nexus** builds (or rebuilds) a **map** (symbols, edges, mutation hints) and exposes a **query interface**.
+In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) as a first step is **token-expensive** and tends to produce low-signal raw hit lines. **Nexus** builds the map and exposes a **query interface**.
 
-**Rule:** The agent should **not search by itself**. It should send questions to Nexus (`nexus-grep` / `nexus -q`) and let Nexus return **where to read**.
+**Rule:** The agent should **not search by itself**. It should send questions to Nexus and let Nexus return **where to read**.
 
 **Security / freshness:** default to **fresh rebuild** per query (no persistent cache). If a cached mode exists, it must be an explicit opt-in and treated as **security-sensitive**.
 
@@ -17,7 +17,34 @@ In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) by 
 - CLI: `--control-header`
 - Env: `NEXUS_CONTROL_HEADER=1`
 
-**Tiering:** `nexus-grep` / `nexus --names-only` → **`read_file`** (slice) → if needed **`nexus -q`** with small `--max-symbols` → **`nexus --json`** only when a **full graph export** is required.
+**Tiering (default for agents):** **`nexus <path> --agent-mode -q "..."`** (structural compact slice: `agent_compact` + **minimal** fields + cap **10**, overridable) → **`read_file`** (tiny slice) → STOP. Alternatives: **`nexus-grep <path> -q "..."`** (thin map search) or **`nexus --names-only`**.  
+Escalate when required: plain **`nexus -q "…"`** (**`llm_brief`**, richer text) for narrative depth; **`nexus -q "impact …"`** / **`why …`** / mutation chains; **`nexus --json`** only for explicit full-graph export.
+
+**Canonical perspectives (stable agent vocabulary):** `nexus` supports **`--perspective NAME`** with the same string values as the library’s `PerspectiveKind` (`heuristic_slice`, `llm_brief`, `query_slice_json`, `agent_names`, `agent_symbol_lines`, **`agent_compact`**, `trust_detail`, `focus_graph`, `mutation_trace`). Use **`--center-kind`** + **`--center-ref`** for symbol-centered views; **`--mutation-key`** for `mutation_trace`. **`--perspective` must not** be combined with legacy output switches (`--names-only`, `--query-slice-json`, `--trace-mutation`, `--focus-graph`, `--json`) in one invocation — pick one style. Legacy shortcuts remain valid and equivalent where documented.
+
+**`--agent-mode`:** one flag → **`agent_compact`** + **`--compact-fields minimal`** + **`--max-symbols` 10** unless you pass those explicitly; incompatible with `--json` / `--names-only` / etc. Prefer this as the **first structural** query in agent loops when you want **parse-friendly** output.
+
+**`--compact-fields`:** only with **`--perspective agent_compact`**. Presets **`minimal`** / **`standard`** / **`full`**, or comma-list (`meta`, `calls`, `writes`, `called_by`, `reads`, `tags`, `next_open`). Omitted = **full** (verbose compact).
+
+**`--metrics-json`:** stderr line **`[NEXUS_METRICS] {…}`** after success — use for benchmarks and regression (`output_tokens_tiktoken`, `compact_fields`, `agent_mode`, slice stats). Env: **`NEXUS_METRICS_JSON=1`**.
+
+**Epistemic rule:** **`heuristic_slice`** is only the **heuristic** symbol pick (table/slice path). **`llm_brief`** may use **special query modes** (`impact`, `why`, …). For the same `-q`, those two can **differ by design** — do not assume the slice list equals the brief’s symbol set. For impact/why/mutation-chain style questions, prefer **`llm_brief`** (or plain `nexus -q …`, which is the same brief path).
+
+**Debug (optional):** **`--debug-perspective`** prints one JSON line per render to **stderr** (`payload_kind`, `advice`, `provenance`); **stdout** stays pipe-clean.
+
+Full requirement matrix (upstream): **`docs/cli-perspective.md`** in the Nexus repo; verify with **`nexus --help`** if your installed version exposes `--perspective`. Patch-style reports: **`docs/patchnotes/README.md`**.
+
+## CLI catalog (what to run when)
+
+| Goal | Command pattern (conceptual) |
+|------|------------------------------|
+| **Fast structural orientation** (default agent path) | `nexus <path> --agent-mode -q "<topic or identifiers>"` |
+| **Even thinner** name list | `nexus <path> -q "…" --names-only [--annotate] --max-symbols N` |
+| **Wrapped search** (bounded symbols) | `nexus-grep <path> -q "…" --max-symbols N` |
+| **Rich narrative + special modes** | `nexus <path> -q "impact Class"` / `why …` / `full mutation chain` ( **`llm_brief`** ) |
+| **Explicit perspective** | `nexus <path> --perspective heuristic_slice -q "…"` vs `agent_compact` vs `llm_brief` (see matrix in `docs/cli-perspective.md`) |
+| **Per-run telemetry** | append **`--metrics-json`** (or env); batch: **`extras/nexus_benchmark.py`** on Nexus checkout |
+| **Safe-by-default exploration** | **`nexus-policy <path> -q "…"`** |
 
 **Canonical template:** Shipped with **`nexus-inference`** (Python package `nexus`, module **`nexus.cursor_rules`**). **CLI commands:** **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`** — there is **no** shell command `nexus-inference`. **Install into a target repo:** run **`nexus-cursor-rules install`** at the project root — writes this `.mdc` to **`<target-repo>/.cursor/rules/`** (Cursor loads rules from there). Print bundled directory: **`nexus-cursor-rules --path`**. Overwrite: **`nexus-cursor-rules install --force`**. Same via **`python -m nexus.cursor_rules`** with the same arguments. Optional global: `%USERPROFILE%\.cursor\rules\` (User Rules). When developing Nexus, source lives at **`src/nexus/cursor_rules/nexus-over-grep.mdc`**.
 
@@ -25,39 +52,37 @@ In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) by 
 
 On a **reference machine** the same logic can be **global**: `%USERPROFILE%\.cursor\rules\nexus-python-context.mdc` (same content as this file; adjust paths to your Nexus checkout if needed).
 
-When you need to understand **Python code, calls, mutations, or architecture**, use **`nexus-grep` / `nexus -q`** first. Do **not** use raw `grep`/`rg`/Select-String for “orientation”.
+When you need to understand **Python code, calls, mutations, or architecture**, prefer **`nexus --agent-mode`**, **`nexus-grep`**, or **`nexus -q`** for map queries first. Do **not** use `grep`/`rg`/Select-String for “orientation”.
 
 ## Why
 
-- Grep returns **raw hit lines** → many tokens, little structure.
 - `nexus` returns **symbols, edges, layer, mutation paths, confidence** → more compact answers.
-- `nexus-grep` keeps output **small** where a full `nexus -q` report would be too large.
-- **`--names-only --annotate`:** one line per primary symbol (`qualified_name | confidence | tags | layer | file:line`). Plain `-q` briefs add **`NEXT_OPEN`** hints and fold duplicate simple names (**`SAME_NAME`** / `same_name_also`). Default query slice cap if `--max-symbols` is omitted: **12**.
+- Map-query answers can be kept **bounded** via `--max-symbols` and `--names-only`.
+- **`--names-only --annotate`:** one line per primary symbol (`qualified_name | confidence | tags | layer | file:line`); plain `-q` briefs add **`NEXT_OPEN`** file:line hints and fold **duplicate simple names** (`SAME_NAME` / `same_name_also`). Default query slice cap if `--max-symbols` is omitted: **12**.
 
 ## Default flow
 
 1. Choose repo root or package path (e.g. `.` or `src/mypkg`).
-2. **Unknown or large codebase:** orient with **few tokens first**, not broad `grep`/`rg`:
-   - `nexus <path> -q "<topic>" --names-only --max-symbols 40`, or **`--names-only --annotate`** for compact uncertainty metadata, **or**
-   - **`nexus-grep <path> -q "<topic>" --max-symbols 25`** (Nexus slice → then name search only in relevant `.py`; without PATH: `python -m nexus.cli_grep <path> -q "..."`).
-3. If more context is needed: short brief: `nexus <path> -q "<topic>" --max-symbols 25`
-4. Full graph only when needed: `nexus <path> --json > graph.json`
+2. **Unknown or large codebase:** orient with **few tokens first** by querying the map:
+   - **Preferred (agents):** `nexus <path> --agent-mode -q "<topic or identifiers>"`, or
+   - `nexus-grep <path> -q "<topic>" --max-symbols 25`, or
+   - `nexus <path> -q "<topic>" --names-only --max-symbols 40`, or `--names-only --annotate` for one-liners with confidence/tags.
+3. If more context is needed: **tighter** follow-up query (identifiers from step 2), or switch to **`nexus -q`** ( **`llm_brief`** ) for narrative / **`impact`** / **`why`**; keep **`--max-symbols`** small.
+4. Full graph only when explicitly needed: `nexus <path> --json > graph.json`
 
 ## Agent workflow (Cursor): closed loop
 
 The model **drives context acquisition** (hypothesis → tool → evidence → refine). Default path:
 
-1. **Orient:** `nexus-grep` or `nexus … --names-only` (few symbols).
+1. **Orient:** `nexus … --agent-mode -q "..."` when you want **structured** calls/writes; or `nexus-grep … -q "..."` (thin); or `nexus … --names-only` (names only).
 2. **From hits:** derive concrete symbols/paths/files.
-3. **Deepen:** targeted **`read_file`** (relevant blocks only) **or** a second, tighter `nexus-grep` query with **identifiers** from step 2.
-4. **Structure/chains only if needed:** `nexus -q "…"` with **small** `--max-symbols` (e.g. 15–25).
+3. **Deepen:** targeted **`read_file`** (relevant blocks only) **or** a second, tighter `nexus-grep` / `nexus -q` query with **identifiers** from step 2.
+4. **Structure/chains only if needed:** `nexus -q "…"` with **small** `--max-symbols` (e.g. 15–25) and explicit operators like `impact` / `why`.
 5. **Full graph** only for explicit need or hard architecture questions: `nexus <path> --json > graph.json`
 
-**Raw text search (`rg`/Select-String/grep):** allowed only for **non-Python** targets (config/logs) or when explicitly instructed; for Python code search use **`nexus-grep`** (wrapped).
+**Text search:** do **not** use raw `grep`/`rg`/Select-String in Python repos. If you need search, use **`nexus-grep`** (wrapped) or ask a better `nexus -q` query.
 
-**`nexus-grep`** does not replace special modes: for `impact …`, `why …`, deep mutation chains use `nexus -q "…"` as below.
-
-Note: the implementation may use additional internal helpers, but the agent-facing behavior is: **query the map (`nexus-grep` / `nexus -q`)**.
+Note: the implementation may use additional internal helpers, but the agent-facing behavior is: **query the map (`nexus --agent-mode` / `nexus-grep` / `nexus -q`)**.
 
 ---
 
@@ -65,8 +90,8 @@ Note: the implementation may use additional internal helpers, but the agent-faci
 
 | Situation | Preferred tool |
 |-----------|----------------|
-| Vague question, unknown location | **`nexus-grep`** with a **focused** query (**identifiers from code**, not buzzwords alone) |
-| After first hit list: “where exactly?” | Second **`nexus-grep`** with extracted symbols **or** **`read_file`** at `file:line` |
+| Vague question, unknown location | **`nexus --agent-mode -q "…"`** or **`nexus-grep`** with a focused query; keep caps small |
+| After first hit list: “where exactly?” | Second **`nexus-grep`** with extracted identifiers **or** **`read_file`** at `file:line` |
 | Function/class/file already known | **`read_file`** (slice), no Nexus needed |
 | Mutation paths, impact, “why does X change …?” | **`nexus -q "…"`** with **`--max-symbols` capped** |
 | Full dependency graph / export | **`nexus --json`** only when necessary |
@@ -77,7 +102,7 @@ Note: the implementation may use additional internal helpers, but the agent-faci
 
 **Default (sweet spot):**
 
-1. **`nexus-grep`** on a **sensible subtree** (not reflexively always repo root), **tight** `-q` with **concrete code identifiers** from the task, keep `--max-symbols` low.
+1. **`nexus --agent-mode`** or **`nexus-grep`** on a **sensible subtree**, **tight** `-q` with **concrete identifiers**; keep **`--max-symbols`** low when not using **`--agent-mode`** defaults.
 2. **`read_file`** only as a **slice** at locations from step 1.
 3. **STOP** — no further Nexus steps while the question is answered or the next step is clear.
 
@@ -87,10 +112,10 @@ Note: the implementation may use additional internal helpers, but the agent-faci
 - **`nexus -q`** (`impact …`, `why …`, mutation chains): only for **impact, cause, or architecture** questions; **always** small `--max-symbols`.
 - **`--names-only`** / **`nexus --json`:** only for **explicit** need or graph export — **not** as default after every question.
 
-**Grep/read fallback:**
+**Read fallback:**
 
-- **Path/symbol already known** → **`read_file`** or **very tight** grep/`rg` on **few** files.
-- Broad grep only with **unambiguous** patterns; **avoid** substrings with **extremely many hits** in large modules (classic **token spike**).
+- **Path/symbol already known** → **`read_file`**.
+- If you must locate something beyond the first answer: tighten and repeat **`nexus-grep`**, do not switch to raw grep.
 
 **Explicitly avoid:**
 
@@ -102,7 +127,7 @@ Note: the implementation may use additional internal helpers, but the agent-faci
 
 - **Typically:** at most **2–3** `nexus-grep` rounds, then **read** instead of broadening.
 - If output is large (many hits), **tighten** the query (unique identifiers from prior output), do not repeat blindly.
-- **Token goal:** `nexus-grep` + **one** good file slice often beats **two** long `nexus -q` reports with many symbol cards.
+- **Token goal:** `nexus -q` + **one** good file slice beats long, repeated reports.
 
 ### PowerShell (Windows)
 
@@ -110,7 +135,17 @@ So **`-q` is not swallowed** by PowerShell, split arguments explicitly, e.g.:
 
 `& python -m nexus . "-q" "topic mutation" "--max-symbols" "25"`
 
-or `python -m nexus.cli_grep . "-q" "…" "--max-symbols" "18"` (with `PYTHONPATH` on Nexus `src` if `nexus` is not on PATH).
+Canonical perspective examples (split args so PowerShell does not eat `-q`):
+
+`python -m nexus . "--perspective" "heuristic_slice" "-q" "flow" "--max-symbols" "20"`  
+`python -m nexus . "--perspective" "llm_brief" "-q" "impact SomeClass" "--max-symbols" "15"`  
+`python -m nexus . "--perspective" "agent_compact" "-q" "mutation" "--compact-fields" "minimal"`  
+`python -m nexus . "--agent-mode" "-q" "mutation"`  
+`python -m nexus . "--perspective" "trust_detail" "--center-kind" "symbol_qualified_name" "--center-ref" "pkg.mod.func"`
+
+**Benchmark helper (Nexus checkout):** `python extras/nexus_benchmark.py … --nexus-arg=--agent-mode` — under PowerShell use **`--nexus-arg=value`** form so flags are not swallowed.
+
+Use `nexus-grep` (or `python -m nexus.cli_grep`) for wrapped search; avoid raw `rg`/Select-String.
 
 ## Useful queries
 
@@ -120,10 +155,9 @@ or `python -m nexus.cli_grep . "-q" "…" "--max-symbols" "18"` (with `PYTHONPAT
 - Core flow: `-q "core system flow"` / `-q "core mutation"`
 - Causes: `-q "why …"`
 
-## When grep/rg anyway
+## When text search anyway
 
-- **After** Nexus/`nexus-grep`: targeted (known names or few files).
-- Non-Python, config, logs, exact literal search in a **known** small path — broad grep is fine there.
+- Non-Python, config, logs, exact literal search in a **known** small path — text search is fine there.
 
 ---
 
@@ -135,7 +169,7 @@ If `nexus` is **not** found in the terminal:
    `pip install nexus-inference` **or** `pipx install nexus-inference` / `pip install -e <nexus-checkout>`.
 2. **Without install** (fallback):  
    `PYTHONPATH=<nexus-checkout>/src` (Windows: `$env:PYTHONPATH='<nexus-checkout>\src'`)  
-   then `python -m nexus <target-path> …` or `python -m nexus.cli_grep <target-path> -q "..."`.
+   then `python -m nexus <target-path> …`.
 3. **Cursor rule:** From target repo root **`nexus-cursor-rules install`** (copies bundled `.mdc` to **`.cursor/rules/`**). Overwrite: **`--force`**. Same: **`python -m nexus.cursor_rules install`**.
 4. **Reference:** **`AGENTS.md`** in the Nexus repo (checklist); **`SECURITY.md`** on sensitive inference exports (do not commit).
 

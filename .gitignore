@@ -56,3 +56,7 @@ nexus-package-brief.txt
 
 # Local one-off analyses
 ttrpg-studio-nexus-analyse.md
+
+# Local Nexus benchmark JSON dumps (repo root)
+ttrpg_bench_*.json
+ttrpg_studio_nexus_bench.json

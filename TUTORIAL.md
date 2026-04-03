@@ -28,6 +28,7 @@ That guide is written as a **story**: first the **CLI output** (what you already
 | Console architecture & exports | [`docs/inference-console-deep-dive.md`](docs/inference-console-deep-dive.md) |
 | Token caps & amortization (totals **vs** purpose / search offloaded) | [`docs/token-efficiency.md`](docs/token-efficiency.md) (§1.1) |
 | **Real session screenshots:** token totals with vs without Nexus | [`docs/usage-metrics.md`](docs/usage-metrics.md) · PNGs in [`docs/assets/usage-metrics/`](docs/assets/usage-metrics/) |
+| **Patch notes** (metrics keys, CLI/perspective changes, benchmarks) | [`docs/patchnotes/README.md`](docs/patchnotes/README.md) |
 | **Cursor usage:** why the metric looks “broken” with Nexus | [`docs/cursor-metrics-nexus.md`](docs/cursor-metrics-nexus.md) |
 | Narrative PoC | [`docs/proof-of-concept.md`](docs/proof-of-concept.md) |
 

@@ -33,7 +33,9 @@ nexus-policy = "nexus.cli_policy:main"
 nexus-console = "nexus.ui.app:main"
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.9.0"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.9.0", "tiktoken>=0.5"]
+# Optional: model-aligned token counts for --metrics-json (OpenAI-style BPE).
+metrics = ["tiktoken>=0.5"]
 # PyQt6: GPLv3 or commercial (Riverbank). See docs/licensing.md before redistributing the GUI.
 ui = ["PyQt6>=6.5"]
 dev-ui = ["pytest-qt>=4.4"]

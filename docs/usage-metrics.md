@@ -1,6 +1,6 @@
 # Agent usage metrics (Cursor): with vs without Nexus
 
-This page documents **screenshots of real agent sessions** (Cursor usage / token dashboard). **Canonical copies for GitHub / the website** live under **[`docs/assets/usage-metrics/`](assets/usage-metrics/)** (stable filenames, no spaces). Optional local exports may still sit in **[`usage metrics/`](../usage%20metrics/)** at the repo root under the original names.
+This page documents **screenshots of real agent sessions** (Cursor usage / token dashboard). For **programmatic** per-invocation telemetry from the `nexus` CLI (`[NEXUS_METRICS]` on stderr), see **[`token-efficiency.md`](token-efficiency.md)** §2.5 and **[`patchnotes/README.md`](patchnotes/README.md)**. **Canonical copies for GitHub / the website** live under **[`docs/assets/usage-metrics/`](assets/usage-metrics/)** (stable filenames, no spaces). Optional local exports may still sit in **[`usage metrics/`](../usage%20metrics/)** at the repo root under the original names.
 
 | Asset (in `docs/assets/usage-metrics/`) | Meaning |
 |------------------------------------------|---------|
