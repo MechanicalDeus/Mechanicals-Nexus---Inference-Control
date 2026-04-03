@@ -35,7 +35,7 @@ Kurze **Landkarte** für `docs/`: Zielgruppe, Zweck, Link. **Maintainer:** neue 
 | [`usage-metrics.md`](usage-metrics.md) | Cursor-Dashboards, faire Vergleiche |
 | [`nexus-scaling-law.md`](nexus-scaling-law.md) | Informelle Skalierungsargumentation |
 | [`cursor-metrics-nexus.md`](cursor-metrics-nexus.md) | Metrik-Interpretation mit Nexus |
-| [`case-study-cross-repo-orientation.md`](case-study-cross-repo-orientation.md) | Fallstudie Cross-Repo |
+| [`case-study-cross-repo-orientation.md`](case-study-cross-repo-orientation.md) | Fallstudie Cross-Repo; **Messlatte** Disk/`.py` (2026-04-03) |
 
 ## Patchnotes, Changelog, Maintainer
 

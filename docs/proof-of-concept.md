@@ -62,4 +62,4 @@ Any **saved** inference map (`--json`, exports) can encode **structure and paths
 
 ## Deeper dive: measured efficiency
 
-See [`token-efficiency.md`](token-efficiency.md) for **reproducible character counts**, graph-size metrics, **reference snapshots** (scoped Python trees — not whole-product disk totals), and an **amortization** section (scan once vs. tokens every turn).
+See [`token-efficiency.md`](token-efficiency.md) for **reproducible character counts**, graph-size metrics, **reference snapshots** (scoped Python trees — not whole-product disk totals), and an **amortization** section (scan once vs. tokens every turn). **Messlatte** for measured **disk / `.py`** across example checkouts: [`case-study-cross-repo-orientation.md` § Messlatte](case-study-cross-repo-orientation.md#messlatte-measured-sizes-2026-04-03).

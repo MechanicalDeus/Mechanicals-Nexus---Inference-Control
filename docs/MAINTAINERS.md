@@ -2,9 +2,9 @@
 
 Use this as a **short checklist** when you change shipping surfaces so the GitHub-facing story stays aligned.
 
-## Measured checkout sizes (`case-study-cross-repo-orientation.md`)
+## Messlatte — measured checkout sizes (`case-study-cross-repo-orientation.md`)
 
-The **disk / `.py` table** (Nexus, Aether VPN, TTRPG Studio) was produced with a **one-off PowerShell script** on the author’s machine (**2026-04-03**). If you need updated numbers, re-run the same methodology on your paths and update the table — do not “hand edit” without re-measuring.
+The canonical **disk / `.py` table** (**§ [Messlatte (measured sizes, 2026-04-03)](case-study-cross-repo-orientation.md#messlatte-measured-sizes-2026-04-03)**) was produced with a **one-off PowerShell script** on the author’s machine. If you need updated numbers, re-run the same methodology on your paths and update **that section** — do not “hand edit” without re-measuring or fork size claims into other pages.
 
 ## Install snippets (GitHub `git+https` URL)
 

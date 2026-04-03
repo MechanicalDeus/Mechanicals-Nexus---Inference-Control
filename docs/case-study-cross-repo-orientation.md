@@ -42,9 +42,11 @@ From a Nexus development checkout:
 
 ---
 
-## Measured checkout sizes (same machine as the session)
+## Messlatte (measured sizes, 2026-04-03)
 
-**When:** **2026-04-03** · **OS:** Windows · **Roots:** author’s local paths below.
+**What this is:** The **measuring stick** for **disk** and **developer-sliced `.py` mass** in this documentation. It **replaces** the earlier misleading **Aether↔TTRPG `.py`-byte league table** (wrongly implying comparable “repo smallness”). **Do not** invent parallel size figures elsewhere — **link here** or re-run the same methodology and update this section.
+
+**When:** **2026-04-03** · **OS:** Windows · **Roots:** author’s local paths below · **same machine** as the cross-repo session described above.
 
 **Method:** PowerShell recursive file walk. **Total** = sum of **all files** under the root. **`.py`†** = all `*.py` files whose path does **not** contain any of these **path segments:** `.git`, `venv`, `.venv`, `__pycache__`, `node_modules`, `dist`, `build` (developer-oriented slice, not “every byte in the product”).
 
@@ -62,7 +64,7 @@ From a Nexus development checkout:
 
 ## Scale contrast (why “not nice optimization”)
 
-**Cross-reference:** Use the **measured table** above for **disk** and **`.py` footprint**; do not equate them with **prompt** size.
+**Messlatte:** All **disk** and **`.py`** claims below **must** match the **table in [§ Messlatte (measured sizes, 2026-04-03)](#messlatte-measured-sizes-2026-04-03)** — no fresh guesstimates. **Prompt** size is a different quantity (session totals, brief caps); do not conflate.
 
 **TTRPG Studio:** **~65 MB** of `.py` in the measured slice is a concrete order of magnitude for **naive full-text orientation** of Python source alone — still on the order of **millions of tokens** if ingested wholesale (very rough **÷3–5 characters per token** for code), **before** reasoning, and **not** repeatable as a single context window.
 

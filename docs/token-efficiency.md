@@ -129,6 +129,8 @@ Tokenizer choice must match **your** deployment model for **absolute** budgets; 
 
 ## 3. Reference: larger production trees (smoke / exploration runs)
 
+**Messlatte (canonical):** **Disk** and **`.py` footprint** for **Nexus**, **Aether VPN**, and **TTRPG Studio** (measured **2026-04-03**, methodology, table) live in **[`case-study-cross-repo-orientation.md` § Messlatte](case-study-cross-repo-orientation.md#messlatte-measured-sizes-2026-04-03)**. §§3.1–3.2 below **hang off** those numbers; they do not define a second ruler.
+
 Nexus was used for **structure and mutation orientation** in **two** larger Python projects (including an **Aether VPN** backend and **TTRPG Studio** areas) — **without** publishing raw graph exports (see `SECURITY.md`).
 
 ### 3.1 Typical index size (Aether VPN backend snapshot — scan scope, not full repo)
