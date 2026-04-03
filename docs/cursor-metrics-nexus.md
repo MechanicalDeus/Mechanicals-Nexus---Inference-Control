@@ -41,7 +41,7 @@ The view labeled **retrieved data** (or equivalent **settled** usage export) sho
 
 ![Usage table — retrieved data with concrete token counts](../console%20tutorial/retrieved%20data.png)
 
-**Locale:** The screenshot uses a **dot as thousands separator** (typical DE-style formatting). For example, **24.753** is on the order of **25k** tokens, **423.516** on the order of **424k** — not decimal fractions.
+**Number format:** The table uses a **period (`.`)** as the **thousands separator**, **not** a comma. So **24.753** means on the order of **24.7k** tokens, **423.516** on the order of **424k** — the dot groups thousands; it is **not** a decimal point in these counts.
 
 **How this pairs with the earlier crop:** The **11:03 AM** session that showed **0** in the live table appears here with a **small but non-zero** total — a concrete illustration of **Notice 2** (minimal values **backfilled** after retrieval). The block still spans **tens to low hundreds of thousands** of tokens per row, i.e. **far below** million-token **exploratory** runs, while proving that **“0” in the dashboard was provisional**, not a permanent absence of attributed usage.
 
