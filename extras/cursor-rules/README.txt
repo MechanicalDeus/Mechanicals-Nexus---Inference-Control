@@ -42,3 +42,7 @@ Overview:
    PYTHONPATH=%NEXUS_HOME%\src
 
 Tiering: nexus-grep / nexus --names-only -> read_file (slice) -> nexus -q -> --json only when needed.
+
+Canonical perspectives (explicit contract, same names as the library/UI):
+  nexus . --perspective heuristic_slice -q "flow" --max-symbols 20
+  See docs/cli-perspective.md in the Nexus repo; bundled rule text in nexus-over-grep.mdc.

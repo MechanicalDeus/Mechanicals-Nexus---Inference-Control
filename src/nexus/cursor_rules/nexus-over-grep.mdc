@@ -20,6 +20,14 @@ In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) as 
 **Tiering (default):** `nexus-grep <path> -q "..."` (wrapped search over the map; bounded via `--max-symbols`) → **`read_file`** (tiny slice) → STOP.  
 Escalate only when required: `nexus -q "impact ..."` / `nexus -q "why ..."` / `nexus --json` (explicit export need).
 
+**Canonical perspectives (stable agent vocabulary):** `nexus` supports **`--perspective NAME`** with the same string values as the library’s `PerspectiveKind` (`heuristic_slice`, `llm_brief`, `query_slice_json`, `agent_names`, `agent_symbol_lines`, `trust_detail`, `focus_graph`, `mutation_trace`). Use **`--center-kind`** + **`--center-ref`** for symbol-centered views; **`--mutation-key`** for `mutation_trace`. **`--perspective` must not** be combined with legacy output switches (`--names-only`, `--query-slice-json`, `--trace-mutation`, `--focus-graph`, `--json`) in one invocation — pick one style. Legacy shortcuts remain valid and equivalent where documented.
+
+**Epistemic rule:** **`heuristic_slice`** is only the **heuristic** symbol pick (table/slice path). **`llm_brief`** may use **special query modes** (`impact`, `why`, …). For the same `-q`, those two can **differ by design** — do not assume the slice list equals the brief’s symbol set. For impact/why/mutation-chain style questions, prefer **`llm_brief`** (or plain `nexus -q …`, which is the same brief path).
+
+**Debug (optional):** **`--debug-perspective`** prints one JSON line per render to **stderr** (`payload_kind`, `advice`, `provenance`); **stdout** stays pipe-clean.
+
+Full requirement matrix (upstream): **`docs/cli-perspective.md`** in the Nexus repo; verify with **`nexus --help`** if your installed version exposes `--perspective`.
+
 **Canonical template:** Shipped with **`nexus-inference`** (Python package `nexus`, module **`nexus.cursor_rules`**). **CLI commands:** **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`** — there is **no** shell command `nexus-inference`. **Install into a target repo:** run **`nexus-cursor-rules install`** at the project root — writes this `.mdc` to **`<target-repo>/.cursor/rules/`** (Cursor loads rules from there). Print bundled directory: **`nexus-cursor-rules --path`**. Overwrite: **`nexus-cursor-rules install --force`**. Same via **`python -m nexus.cursor_rules`** with the same arguments. Optional global: `%USERPROFILE%\.cursor\rules\` (User Rules). When developing Nexus, source lives at **`src/nexus/cursor_rules/nexus-over-grep.mdc`**.
 
 ---
@@ -107,6 +115,12 @@ Note: the implementation may use additional internal helpers, but the agent-faci
 So **`-q` is not swallowed** by PowerShell, split arguments explicitly, e.g.:
 
 `& python -m nexus . "-q" "topic mutation" "--max-symbols" "25"`
+
+Canonical perspective examples (split args so PowerShell does not eat `-q`):
+
+`python -m nexus . "--perspective" "heuristic_slice" "-q" "flow" "--max-symbols" "20"`  
+`python -m nexus . "--perspective" "llm_brief" "-q" "impact SomeClass" "--max-symbols" "15"`  
+`python -m nexus . "--perspective" "trust_detail" "--center-kind" "symbol_qualified_name" "--center-ref" "pkg.mod.func"`
 
 Use `nexus-grep` (or `python -m nexus.cli_grep`) for wrapped search; avoid raw `rg`/Select-String.
 

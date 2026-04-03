@@ -30,7 +30,7 @@ flowchart LR
   A --> U
 ```
 
-1. **Agent** chooses a **Nexus command** (often `nexus-grep` or `nexus-policy` first, then `nexus -q` with small `--max-symbols`).  
+1. **Agent** chooses a **Nexus command** (often `nexus-grep` or `nexus-policy` first, then `nexus -q` with small `--max-symbols`, or the **canonical** `nexus --perspective …` path — same vocabulary as the library and Inference Console; see **`docs/cli-perspective.md`**).  
 2. **Shell** runs on the **workspace** (usually repo root). Nexus **scans** and prints a **short** structured answer.  
 3. **Agent** uses **`NEXT_OPEN`** / symbol paths from the output to **open only those files** (or slices), instead of searching the whole tree with `rg`.  
 4. Repeat with a **tighter `-q`** or another subpath until the task is done.
@@ -58,7 +58,7 @@ cd /path/to/your/python/project
 nexus-cursor-rules install
 ```
 
-That adds **`nexus-over-grep.mdc`**, which tells the agent to prefer **`nexus-grep` / `nexus`** over broad **`grep`/`rg`** for orientation. Source in this repo: [`src/nexus/cursor_rules/nexus-over-grep.mdc`](../src/nexus/cursor_rules/nexus-over-grep.mdc).
+That adds **`nexus-over-grep.mdc`**, which tells the agent to prefer **`nexus-grep` / `nexus`** over broad **`grep`/`rg`** for orientation, and documents **`--perspective`** as the explicit CLI contract. Source in this repo: [`src/nexus/cursor_rules/nexus-over-grep.mdc`](../src/nexus/cursor_rules/nexus-over-grep.mdc). Perspective matrix: [`docs/cli-perspective.md`](cli-perspective.md).
 
 Optional: same rule under **`%USERPROFILE%\.cursor\rules\`** for all projects.
 

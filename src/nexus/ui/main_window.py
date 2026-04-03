@@ -6,6 +6,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QGuiApplication, QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QFileDialog,
     QHBoxLayout,
     QLabel,
@@ -24,14 +25,20 @@ from PyQt6.QtWidgets import (
 )
 
 from nexus.core.models import SymbolRecord
-from nexus.ui.projections import format_symbol_detail
-from nexus.ui.projections.focus_graph import build_focus_graph
+from nexus.output.llm_format import DEFAULT_QUERY_MAX_SYMBOLS
+from nexus.output.perspective import (
+    CenterKind,
+    PerspectiveKind,
+    PerspectivePayloadKind,
+    PerspectiveRequest,
+    render_perspective,
+)
 from nexus.ui.session import ConsoleSession
 from nexus.ui.widgets.focus_graph_view import FocusGraphView
 
 
 class MainWindow(QMainWindow):
-    """Nexus Inference Console — keine direkten nexus.output-Imports; nur Session."""
+    """Nexus Inference Console — UI-Orchestrierung; Projektionen aus ``nexus.output.inference_projection``."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -42,6 +49,8 @@ class MainWindow(QMainWindow):
         self._session.sliceUpdated.connect(self._on_slice_updated)
         self._session.repoChanged.connect(self._on_repo_changed)
         self._session.statusMessage.connect(self.statusBar().showMessage)
+
+        self._selected_symbol: SymbolRecord | None = None
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -67,7 +76,7 @@ class MainWindow(QMainWindow):
         self._query_edit.returnPressed.connect(self._run_query)
         self._max_sym = QSpinBox()
         self._max_sym.setRange(1, 500)
-        self._max_sym.setValue(12)
+        self._max_sym.setValue(DEFAULT_QUERY_MAX_SYMBOLS)
         self._min_conf_enabled = QCheckBox("min confidence")
         self._min_conf = QDoubleSpinBox()
         self._min_conf.setRange(0.0, 1.0)
@@ -108,11 +117,25 @@ class MainWindow(QMainWindow):
         left_split.addWidget(self._brief)
         left_split.setStretchFactor(0, 2)
         left_split.setStretchFactor(1, 1)
-        self._detail = QTextEdit()
-        self._detail.setReadOnly(True)
-        self._detail.setPlaceholderText("Symbol-Detail (Trust) …")
+        inspector = QWidget()
+        ins_layout = QVBoxLayout(inspector)
+        ins_layout.addWidget(QLabel("Perspektive (Inspector)"))
+        self._perspective_combo = QComboBox()
+        for label, kind in (
+            ("Trust (Inspector)", PerspectiveKind.TRUST_DETAIL),
+            ("Focus (JSON)", PerspectiveKind.FOCUS_GRAPH),
+            ("Brief (llm_brief)", PerspectiveKind.LLM_BRIEF),
+            ("Namen (agent_names)", PerspectiveKind.AGENT_NAMES),
+        ):
+            self._perspective_combo.addItem(label, kind)
+        self._perspective_combo.currentIndexChanged.connect(self._on_perspective_combo_changed)
+        ins_layout.addWidget(self._perspective_combo)
+        self._lens = QTextEdit()
+        self._lens.setReadOnly(True)
+        self._lens.setPlaceholderText("Symbol wählen …")
+        ins_layout.addWidget(self._lens, stretch=1)
         split.addWidget(left_split)
-        split.addWidget(self._detail)
+        split.addWidget(inspector)
         split.setStretchFactor(0, 3)
         split.setStretchFactor(1, 2)
         slice_layout.addWidget(split)
@@ -185,7 +208,9 @@ class MainWindow(QMainWindow):
     def _on_repo_changed(self, _path: str) -> None:
         self._model.removeRows(0, self._model.rowCount())
         self._brief.clear()
-        self._detail.clear()
+        self._selected_symbol = None
+        self._lens.clear()
+        self._perspective_combo.setCurrentIndex(0)
 
     def _run_query(self) -> None:
         q = self._query_edit.text()
@@ -208,10 +233,58 @@ class MainWindow(QMainWindow):
             self._model.appendRow(items)
         self._brief.setPlainText(self._session.get_brief())
 
+    def _on_perspective_combo_changed(self, _index: int) -> None:
+        self._refresh_inspector_lens()
+
+    def _refresh_inspector_lens(self) -> None:
+        sym = self._selected_symbol
+        g = self._session.graph
+        if not sym or not g:
+            self._lens.clear()
+            return
+        kind = self._perspective_combo.currentData()
+        if not isinstance(kind, PerspectiveKind):
+            return
+        pq = self._session.last_query or ""
+        max_s = self._max_sym.value()
+        min_c = self._min_conf.value() if self._min_conf_enabled.isChecked() else None
+
+        if kind is PerspectiveKind.LLM_BRIEF and not pq.strip():
+            self._lens.setPlainText("(Keine Query — zuerst Query ausführen.)")
+            return
+        if kind is PerspectiveKind.AGENT_NAMES and not pq.strip():
+            self._lens.setPlainText("(Keine Query — Namen-Liste braucht Query.)")
+            return
+
+        r = render_perspective(
+            PerspectiveRequest(
+                kind=kind,
+                graph=g,
+                query=pq,
+                max_symbols=max_s,
+                min_confidence=min_c,
+                center_kind=CenterKind.SYMBOL_ID,
+                center_ref=sym.id,
+            )
+        )
+        if r.payload_kind is PerspectivePayloadKind.ERROR:
+            self._lens.setPlainText(r.error or "")
+            return
+        if r.payload_kind in (
+            PerspectivePayloadKind.JSON,
+            PerspectivePayloadKind.GRAPH_JSON,
+        ):
+            self._lens.setPlainText(
+                json.dumps(r.payload_json, indent=2, ensure_ascii=False)
+            )
+            return
+        self._lens.setPlainText(r.payload_text or "")
+
     def _on_table_selection(self) -> None:
         idxs = self._table.selectionModel().selectedRows()
         if not idxs:
-            self._detail.clear()
+            self._selected_symbol = None
+            self._lens.clear()
             self._focus_view.set_from_layout(None)
             return
         row = idxs[0].row()
@@ -220,13 +293,24 @@ class MainWindow(QMainWindow):
             return
         sym = it.data(Qt.ItemDataRole.UserRole)
         if isinstance(sym, SymbolRecord):
-            self._detail.setPlainText(format_symbol_detail(sym))
+            self._selected_symbol = sym
             self._session.symbolSelected.emit(sym)
             if self._session.graph:
-                layout = build_focus_graph(self._session.graph, sym)
-                self._focus_view.set_from_layout(layout)
+                fr = render_perspective(
+                    PerspectiveRequest(
+                        kind=PerspectiveKind.FOCUS_GRAPH,
+                        graph=self._session.graph,
+                        center_kind=CenterKind.SYMBOL_ID,
+                        center_ref=sym.id,
+                    )
+                )
+                self._focus_view.set_from_layout(
+                    fr.payload_json if fr.payload_kind is PerspectivePayloadKind.GRAPH_JSON else None
+                )
+            self._refresh_inspector_lens()
         else:
-            self._detail.clear()
+            self._selected_symbol = None
+            self._lens.clear()
             self._focus_view.set_from_layout(None)
 
     def _copy_minimal(self) -> None:

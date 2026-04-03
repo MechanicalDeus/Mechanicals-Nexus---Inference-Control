@@ -20,6 +20,9 @@ from nexus.output.llm_query_modes import (
 if TYPE_CHECKING:
     from nexus.core.graph import InferenceGraph
 
+# Default-Slice-Größe für ``-q`` / Console „max sym“ — CLI und UI teilen dieselbe Konstante.
+DEFAULT_QUERY_MAX_SYMBOLS = 12
+
 
 def _format_symbol_one_liner(s: SymbolRecord) -> str:
     tags = ",".join(s.semantic_tags) if s.semantic_tags else "-"
@@ -222,8 +225,7 @@ def generic_query_symbol_slice(
     """
     callees_by_from = _callees_by_caller(graph)
     q = q_raw.lower().strip()
-    default_cap = 12
-    cap = max_symbols if max_symbols is not None else default_cap
+    cap = max_symbols if max_symbols is not None else DEFAULT_QUERY_MAX_SYMBOLS
 
     syms = list(graph.symbols.values())
 
@@ -541,8 +543,7 @@ def format_graph_for_llm(
     q_raw = query or ""
     q = q_raw.lower()
     query_mode = bool(q.strip())
-    default_cap_query = 12
-    cap = max_symbols if max_symbols is not None else (default_cap_query if query_mode else None)
+    cap = max_symbols if max_symbols is not None else (DEFAULT_QUERY_MAX_SYMBOLS if query_mode else None)
 
     if query_mode:
         spec = detect_special_query_mode(q_raw)

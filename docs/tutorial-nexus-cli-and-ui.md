@@ -177,9 +177,20 @@ Same rules, busier slice (many callees):
 |------|---------|
 | Scan + brief | `nexus . -q "runtime resolver" --max-symbols 12` |
 | Names only | `nexus . -q "…" --names-only --max-symbols 12` |
+| Annotated names (confidence / layer / `file:line`) | `nexus . -q "…" --names-only --annotate --max-symbols 12` |
+| **Canonical perspective** (same contract as Console / library) | `nexus . --perspective heuristic_slice -q "flow" --max-symbols 12` |
+| Balanced brief via perspective (incl. special queries) | `nexus . --perspective llm_brief -q "impact SomeClass" --max-symbols 15` |
+| Bounded slice JSON | `nexus . --perspective query_slice_json -q "mutation" --max-symbols 20` |
+| Trust / one-hop graph (centered) | `nexus . --perspective trust_detail --center-kind symbol_qualified_name --center-ref "pkg.mod.fn"` · `nexus . --perspective focus_graph --center-kind symbol_qualified_name --center-ref "pkg.mod.fn"` |
+| Mutation trace JSON | `nexus . --perspective mutation_trace --mutation-key "statekey"` |
+| Provenance on stderr | add `--debug-perspective` to any `--perspective` run |
 | Slice + grep | `nexus-grep . -q "…" --max-symbols 12` |
 | Policy wrapper | `nexus-policy . -q "state"` |
 | Full graph (rare, sensitive) | `nexus . --json` — see **SECURITY.md** |
+
+**Rules:** `--perspective` is **mutually exclusive** with `--json`, `--names-only`, `--query-slice-json`, `--trace-mutation`, and `--focus-graph` (use the perspective name instead). **`heuristic_slice`** and **`llm_brief`** may disagree on the same `-q` when special modes apply — by design. Full requirement table: **[`cli-perspective.md`](cli-perspective.md)**.
+
+**PowerShell:** quote `-q` and flags separately, e.g. `python -m nexus . "--perspective" "llm_brief" "-q" "mutation" "--max-symbols" "12"`.
 
 **Library** (inspect the same graph interactively):
 
@@ -213,8 +224,10 @@ g = attach("./your_repo")
 |-----|---------|
 | [Inference Console quick tutorial](inference-console-tutorial.md) | UI-only steps + checklist |
 | [Inference Console deep dive](inference-console-deep-dive.md) | `ConsoleSession`, `projections/`, exports, security |
+| [CLI perspectives](cli-perspective.md) | `--perspective` contract, flags, examples |
 | [Proof of concept](proof-of-concept.md) | Narrative PoC |
 | [Token efficiency](token-efficiency.md) | Caps, amortization, numbers |
+| [Usage metrics (screenshots)](usage-metrics.md) | Real Cursor totals with vs without Nexus |
 | [SECURITY.md](../SECURITY.md) | Sensitive exports, ignore/deny |
 | [nexus-agent-cursor.md](nexus-agent-cursor.md) | **Agent + Cursor:** loop, terminal, `.mdc` rules |
 

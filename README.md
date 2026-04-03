@@ -70,6 +70,8 @@ nexus . -q "mutation" --names-only --max-symbols 10
 nexus . -q "mutation" --names-only --annotate --max-symbols 10
 ```
 
+**Canonical perspectives** (same vocabulary as the library and Inference Console): `nexus --perspective <name>` with optional `--center-kind`, `--center-ref`, `--mutation-key`. See **[`docs/cli-perspective.md`](docs/cli-perspective.md)** for the requirement table and `--debug-perspective` (stderr provenance).
+
 Example mutation-chain fragment when analysing this repo (your project will differ):
 
 `src.nexus.cli.main → src.nexus.scanner.attach → src.nexus.scanner.scan → src.nexus.scanner._scan_impl → src.nexus.scanner._tag_symbol`
@@ -85,6 +87,8 @@ The expensive part for LLM workflows is **not** the local AST pass — it is **r
 **Amortization nuance:** Comparing only **total** tokens with vs without Nexus **does not show what those tokens paid for**. With Nexus, one thing is **structural** for the orientation phase: the model is **not** spending that context on **search-shaped** work (huge grep walls, exploratory full-file churn) — that part runs **locally**. Totals still include reasoning, edits, and targeted reads; see **[`docs/token-efficiency.md`](docs/token-efficiency.md)** §1.1.
 
 **Reproducible numbers** (this repo + reference legacy scans), log-style before/after, and full **amortization** discussion: **[`docs/token-efficiency.md`](docs/token-efficiency.md)**.
+
+**Empirical agent metrics (optional):** Screenshots of Cursor usage dashboards comparing sessions **with** vs **without** Nexus show **large** total-token gaps (often **~7×–15×** in the captured runs), with **Cache Read** as the dominant line — consistent with **less wide context re-injected** each turn. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)** for the write-up and embedded images (**[`docs/assets/usage-metrics/`](docs/assets/usage-metrics/)**), plus **honest limits** (strong evidence for that workflow; not a universal benchmark across all repos/tasks).
 
 ## Mental model
 
@@ -199,6 +203,7 @@ Guided walkthrough: **CLI** (including in your IDE terminal), optional **Inferen
 | **Console** quick steps | [`docs/inference-console-tutorial.md`](docs/inference-console-tutorial.md) |
 | **Architecture** (session, exports) | [`docs/inference-console-deep-dive.md`](docs/inference-console-deep-dive.md) |
 | **Screenshot assets** | [`console tutorial/`](console tutorial/) |
+| **Usage metrics** (agent token dashboards) | [`docs/usage-metrics.md`](docs/usage-metrics.md) · [`docs/assets/usage-metrics/`](docs/assets/usage-metrics/) |
 
 ---
 

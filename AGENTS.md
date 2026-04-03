@@ -36,7 +36,17 @@ nexus-grep . -q "mutation" --max-symbols 25
 nexus . --json > ./exports/graph.json
 ```
 
-**Slice behaviour (plain `-q`, not special modes):** default **`--max-symbols` is 12** if omitted. The textual brief adds **`NEXT_OPEN`** hints and folds **duplicate simple names** in the slice into one primary symbol plus compact **`SAME_NAME`** / `same_name_also` hints — see **`docs/token-efficiency.md`**.
+**Slice behaviour (plain `-q`, not special modes):** default **`--max-symbols` is 12** if omitted. The textual brief adds **`NEXT_OPEN`** hints and folds **duplicate simple names** in the slice into one primary symbol plus compact **`SAME_NAME`** / `same_name_also` hints — see **`docs/token-efficiency.md`**. Real Cursor session screenshots (totals with vs without Nexus): **`docs/usage-metrics.md`**.
+
+### 1.1 Canonical CLI perspectives (same language as UI / library)
+
+Use **`nexus --perspective NAME`** when you want the **explicit contract** (stable enum strings: `heuristic_slice`, `llm_brief`, `query_slice_json`, `agent_names`, `agent_symbol_lines`, `trust_detail`, `focus_graph`, `mutation_trace`). Centered views need **`--center-kind`** (`symbol_id` | `symbol_qualified_name`) and **`--center-ref`**; **`mutation_trace`** needs **`--mutation-key`**. Do **not** mix `--perspective` with **`--names-only`**, **`--query-slice-json`**, **`--trace-mutation`**, **`--focus-graph`**, or **`--json`** in one command.
+
+**Important:** **`heuristic_slice`** (heuristic pick only) and **`llm_brief`** (may activate `impact` / `why` / …) can **disagree** on the same `-q` — by design. For special-mode questions, use **`llm_brief`** or plain **`nexus -q`**.
+
+Optional: **`--debug-perspective`** → one JSON line on **stderr** per render (`payload_kind`, `advice`, `provenance`); stdout unchanged.
+
+Reference table and examples: **`docs/cli-perspective.md`**.
 
 ### Control header (recommended for agents)
 
@@ -62,6 +72,8 @@ $env:PYTHONPATH = "F:\Nexus\src"   # adjust to your Nexus checkout
 python -m nexus.cli_policy . "-q" "state"
 python -m nexus . "-q" "mutation" "--max-symbols" "20"
 python -m nexus . "-q" "mutation" "--names-only" "--annotate" "--max-symbols" "15"
+python -m nexus . "--perspective" "heuristic_slice" "-q" "flow" "--max-symbols" "20"
+python -m nexus . "--perspective" "llm_brief" "-q" "impact MyClass" "--max-symbols" "15"
 python -m nexus.cli_grep . "-q" "mutation" "--max-symbols" "25"
 ```
 

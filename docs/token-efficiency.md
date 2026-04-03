@@ -185,3 +185,9 @@ nexus-grep <path-to-repo> -q "YourConcreteSymbol" --max-symbols 20
 For honest **before/after** metrics in your setup: compare **character counts** (or tokens) of prompts with and without Nexus for the **same** task — and, if possible, **label** chunks by **purpose** (orientation vs read vs answer) so you see **what** moved off the model (see **§1.1**).
 
 **See also:** [Cursor usage metrics and Nexus — why the dashboard looks “broken”](cursor-metrics-nexus.md) — dashboard “0” / Included vs. local scan, what is (not) being measured.
+
+---
+
+## 7. Empirical session totals (screenshots)
+
+For **before/after style** evidence from real Cursor agent sessions (totals and **Cache Read** breakdowns), see **[`usage-metrics.md`](usage-metrics.md)** — PNGs under [`docs/assets/usage-metrics/`](assets/usage-metrics/), methodology and caveats in that page.
