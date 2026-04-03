@@ -48,9 +48,11 @@ The full guide is written as a **story**: first the **CLI output** (what you alr
 ## Install (minimal)
 
 ```bash
-pip install -e .   # from a clone; PyPI when published — see README → Installation
+python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
 nexus-grep . -q "mutation" --max-symbols 10
 ```
+
+*(Also: `pip install nexus-inference` from PyPI when available, or `pip install -e .` from a clone — see **[README → Installation](README.md#installation)**.)*
 
 **Commands** (after install): **`nexus-opc`**, **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`** (GUI). The pip package name is **`nexus-inference`** — that is not a terminal command.
 

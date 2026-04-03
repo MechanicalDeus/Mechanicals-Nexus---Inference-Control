@@ -31,8 +31,11 @@ Overview:
    - nexus-cursor-rules install  at project root
 
 3) CLI everywhere
+   From GitHub (no clone):
+     python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
+     pipx install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
+   From PyPI when published: pip install nexus-inference
    From clone: pip install -e .  or  pipx install -e <path-to-nexus>
-   When published on your index: pip install nexus-inference  /  pipx install nexus-inference
    (pip package name nexus-inference; shell commands include nexus-opc, nexus, nexus-grep, nexus-policy, nexus-cursor-rules, nexus-console)
    Agent-oriented first hop: nexus-opc locate -q "mutation" .
    Then (examples): nexus . -q "mutation" --max-symbols 20

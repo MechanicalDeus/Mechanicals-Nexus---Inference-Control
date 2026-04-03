@@ -2,6 +2,10 @@
 
 Use this as a **short checklist** when you change shipping surfaces so the GitHub-facing story stays aligned.
 
+## Install snippets (GitHub `git+https` URL)
+
+The **pip-from-GitHub** one-liner is duplicated in several docs. If the **canonical repository URL** changes, search the repo for `MechanicalDeus/Mechanicals-Nexus---Inference-Control` and update every copy (start with [`README.md`](../README.md) → Installation).
+
 ## After changing `pyproject.toml`
 
 | Check | Update if needed |

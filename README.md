@@ -29,10 +29,11 @@ Nexus is a **static, heuristic inference layer** for Python. It scans `.py` tree
 ![Agent-mode flow: install → one command → structured slice](docs/assets/readme-agent-mode-flow.svg)
 
 ```bash
-pip install -e .   # from a clone; see Installation for PyPI
+python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
 cd your-python-repo
 nexus . --agent-mode -q "what handles mutations?"
 ```
+*(Other install paths: [Installation](#installation).)*
 
 More one-liners (same mode, different intent):
 
@@ -177,20 +178,52 @@ Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **I
 
 ## Installation
 
-**From a clone** (current default for users and contributors):
+Requires **Python 3.10+**. CI runs **3.10** and **3.12** on **Ubuntu** and **Windows** (see `.github/workflows/ci.yml`).
+
+After install, these entry points are available: **`nexus-opc`**, **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`**. The **pip distribution** name is **`nexus-inference`** — that is **not** a shell command.
+
+### From PyPI
+
+When the package is on the index:
 
 ```bash
+pip install nexus-inference
+```
+
+**Index:** [pypi.org/project/nexus-inference](https://pypi.org/project/nexus-inference/) — if it is not there yet, use **GitHub** or a **clone** below.
+
+### From GitHub (no local clone)
+
+Install from the default branch (`main`) with **pip** or **pipx**:
+
+```bash
+python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
+```
+
+```bash
+pipx install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
+```
+
+Pin a **tag** or **branch** with a suffix on the URL, e.g. `…Inference-Control.git@v0.1.0b1` or `…@main` (see [pip — VCS support](https://pip.pypa.io/en/stable/topics/vcs-support/)).
+
+### From a clone (contributors)
+
+```bash
+git clone https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git
+cd Mechanicals-Nexus---Inference-Control
 pip install -e .
 # or: pipx install -e .
 ```
 
-**PyPI:** The intended distribution name is **`nexus-inference`**. When a release is published there, `pip install nexus-inference` is the one-liner; until then, use an **editable install** from this repository (or your own index).
-
-Python **3.10+**. Continuous integration runs **3.10** and **3.12** on **Ubuntu** and **Windows** (see `.github/workflows/ci.yml`). After install, these entry points are available: **`nexus-opc`** (opcode ISA / fixed pipelines), **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, **`nexus-cursor-rules`**, **`nexus-console`**. There is **no** shell command named `nexus-inference` — that string is the **pip package** name only.
-
 ### Nexus Inference Console (optional GUI)
 
 Same inference engine as the CLI: attach a repo, run a query, inspect a **bounded slice**, **trust metadata**, **mutation trace**, and a **one-hop focus graph**; copy **minimal names**, **balanced brief**, or **slice JSON** for LLMs. The console does **not** run a second analyzer — **Copy Brief** is the same `to_llm_brief` text you would get from `nexus -q` with the same query and caps ([tutorial](docs/inference-console-tutorial.md#same-facts-for-humans-and-for-the-llm)).
+
+```bash
+python -m pip install "nexus-inference[ui] @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
+```
+
+From a clone:
 
 ```bash
 pip install -e ".[ui]"

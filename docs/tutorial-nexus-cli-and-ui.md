@@ -42,12 +42,21 @@ Read it like a **short story**: first the **ending** (what lands in the terminal
 
 ## Install
 
-**CLI & library** (always):
+**CLI & library** (always). Pick one:
 
 ```bash
-pip install -e .
-# PyPI: when `nexus-inference` is on your index — `pip install nexus-inference` (see README → Installation)
+python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
 ```
+
+```bash
+pip install nexus-inference   # PyPI, when available
+```
+
+```bash
+pip install -e .   # from a clone of this repo
+```
+
+See **[README → Installation](../README.md#installation)** for `pipx`, optional extras, and pinning branches/tags.
 
 **Inference Console** (optional, needs PyQt6):
 

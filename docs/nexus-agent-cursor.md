@@ -96,6 +96,7 @@ Many teams add an **`AGENTS.md`** at the project root with **copy-paste commands
 | Situation | What to do |
 |-----------|------------|
 | Nexus on PATH | **`nexus-opc`**, **`nexus`**, **`nexus-grep`**, **`nexus-policy`**, … work as-is (from package **`nexus-inference`**). |
+| Install from GitHub (no clone) | `python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"` (see **README → Installation**). |
 | Editable clone | `pip install -e /path/to/Nexus` or `pipx install -e …`. |
 | No install | Set **`PYTHONPATH`** to `…/Nexus/src`, use **`python -m nexus.cli_opc …`** / **`python -m nexus …`** / **`python -m nexus.cli_grep …`**. |
 

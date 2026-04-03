@@ -22,8 +22,11 @@ When the open project **is** the Nexus source tree, agents should treat **infere
 ## Other repos: one-time setup per project
 
 1. **Install Nexus** (usable everywhere):  
-   `pipx install -e <path-to-nexus-clone>` **or** `pip install -e <path-to-nexus-clone>`. When **`nexus-inference`** is published on your package index, `pip install nexus-inference` applies — see **`README.md` → Installation**.  
-   Without install: `PYTHONPATH=<nexus-clone>/src` and `python -m nexus …` / `python -m nexus.cli_opc …` / `python -m nexus.cli_grep …`.
+   **From GitHub (no clone):** `python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"` (or `pipx install "…"` with the same URL).  
+   **From PyPI:** `pip install nexus-inference` when published.  
+   **From a clone:** `pip install -e <path-to-nexus-clone>` or `pipx install -e …`.  
+   **Without install:** `PYTHONPATH=<nexus-clone>/src` and `python -m nexus …` / `python -m nexus.cli_opc …` / `python -m nexus.cli_grep …`.  
+   Full order of options: **`README.md` → Installation**.
 2. **Install the Cursor rule** (bundled in the **`nexus-inference`** package, import **`nexus.cursor_rules`**):  
    From the **target repo root**: **`nexus-cursor-rules install`** — writes `nexus-over-grep.mdc` to **`<your-repo>/.cursor/rules/`** (Cursor loads `.mdc` from there).  
    Alternatives: **`python -m nexus.cursor_rules install`**, print bundled path with **`nexus-cursor-rules --path`**, overwrite with **`install --force`**.  
@@ -107,8 +110,9 @@ python -m nexus . "-q" "core system flow" "--max-symbols" "20"
 
 1. **Check:** Does `nexus` or `python -m nexus --help` work (with `PYTHONPATH` on Nexus `src`)?
 2. **If not — install once** (recommended):  
-   `pipx install -e F:\Nexus` **or** `pip install -e F:\Nexus`  
-   Replace `F:\Nexus` with your real checkout path.
+   `python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"`  
+   or `pipx install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"`  
+   or from a checkout: `pipx install -e <path-to-Nexus>` / `pip install -e <path-to-Nexus>`.
 3. **Rule in target repo:** run **`nexus-cursor-rules install`** in the target root (see “Other repos” above).
 4. **Large / slow scans:** prefer `-q` + `--max-symbols` or `nexus-grep` over an immediate full-tree `--json`.
 

@@ -20,11 +20,13 @@
 ## 1. Install and run
 
 ```bash
-pip install -e .   # from clone; PyPI path — see README → Installation
-pip install -e ".[ui]"   # console only (PyQt6)
+python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"
+python -m pip install "nexus-inference[ui] @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"   # optional GUI
 nexus-console
 # or: python -m nexus.ui
 ```
+
+From a clone: `pip install -e .` and `pip install -e ".[ui]"` — see **[README → Installation](../README.md#installation)**.
 
 **Commands:** `nexus-opc`, `nexus`, `nexus-grep`, `nexus-policy`, `nexus-cursor-rules`, `nexus-console`. PyPI distribution name: **`nexus-inference`** (not a shell command).
 

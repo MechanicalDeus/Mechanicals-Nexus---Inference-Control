@@ -76,7 +76,7 @@ For **Python / CI support**, **CLI vs. pip package name** (`nexus-inference` vs.
 
 ## Next steps
 
-1. **Install:** from a clone, `pip install -e <nexus-checkout>` or `pipx install -e …`; without install, `PYTHONPATH=<checkout>/src` and `python -m nexus …` / `python -m nexus.cli_opc …`. When **`nexus-inference`** is published on your index, `pip install nexus-inference` applies — see **`README.md` → Installation**.
+1. **Install:** `python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"` from GitHub; or `pip install nexus-inference` from PyPI when available; or `pip install -e <checkout>` from a clone; without install, `PYTHONPATH=<checkout>/src` and `python -m nexus …` / `python -m nexus.cli_opc …`. Details: **`README.md` → Installation**.
 2. **Rule in target repo:** `nexus-cursor-rules install` at project root (package rule → `.cursor/rules/`).
 3. **First use:** `nexus-opc locate -q "<topic or identifiers>" .` (or `nexus . --agent-mode -q "…"`), then **`nexus-grep . -q "<concrete code terms>" --max-symbols 20`** if you need wrapped text search inside the slice — open files selectively.
 
