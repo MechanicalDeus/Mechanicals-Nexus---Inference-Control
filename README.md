@@ -19,6 +19,8 @@ Nexus is an **inference layer** for Python code. It sits between **raw source** 
 
 **What you get:** a **compact, structured map** of the most relevant symbols for your query — mainly **calls** and **writes** — so you can orient fast without a wall of prose.
 
+![Agent-mode flow: install → one command → structured slice](docs/assets/readme-agent-mode-flow.svg)
+
 ```bash
 pip install nexus-inference
 cd your-python-repo
@@ -42,11 +44,13 @@ nexus . --agent-mode -q "request flow"
 
 Developing from a checkout: `pip install -e .` (or `PYTHONPATH=…/src` and `python -m nexus …`). Details, metrics, and patch notes: **[`docs/token-efficiency.md`](docs/token-efficiency.md)** · **[`docs/patchnotes/README.md`](docs/patchnotes/README.md)**.
 
-*Tip: a short terminal recording of one of the commands above shows the value faster than any diagram.*
+*Optional:* record the terminal once — motion helps — but the chart below is the quantitative view.
 
 ### Measured stdout tokens (example: large Python app)
 
 **Controlled local run** on one checkout (**TTRPG Studio** `app/`, ~59 files / 1530 symbols in the graph). **Four queries** (`mutation`, `resolver engine`, `session export`, `transcription`), **tiktoken** `cl100k_base`, summed **`output_tokens_tiktoken`** from **`--metrics-json`** (stderr). Same inference pass per invocation; only **output projection** differs.
+
+![Bar chart: summed output tokens — llm_brief vs agent_compact full vs --agent-mode](docs/assets/readme-benchmark-output-tokens.svg)
 
 | Mode | Σ output tokens (4 queries) | % of `llm_brief` |
 |------|----------------------------:|-----------------:|

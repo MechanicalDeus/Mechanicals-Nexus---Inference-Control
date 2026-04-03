@@ -27,7 +27,7 @@ Bestehende Keys (`output_tokens_tiktoken`, `slice_fill_ratio`, `graph_*`, `conte
 
 Auf einer großen Codebasis (z. B. TTRPG Studio `app/`, 15 Symbole, gleiche Query): **`llm_brief`** oft **~8k–9k** tiktoken (cl100k_base); **`agent_compact`** **full** deutlich darunter; **`minimal`** nochmals **~50 %** unter **full** — rein **Darstellung**, gleicher Slice.
 
-**README (Reproduzierbarkeit):** Im Root-**[`README.md`](../../README.md)** steht unter *Agent quick start* eine **Tabellen-Zusammenfassung** (Σ `output_tokens_tiktoken` über **vier** Queries auf TTRPG Studio `app/`, `llm_brief` vs. `agent_compact` full vs. **`--agent-mode`**) inkl. Methodik- und **N=1**-Hinweis — für die **Value Proposition** nach außen, nicht als statistischer Beweis.
+**README (Reproduzierbarkeit):** Im Root-**[`README.md`](../../README.md)** steht unter *Agent quick start* eine **Tabellen-Zusammenfassung** plus **SVG-Grafiken** (Ablauf **`--agent-mode`**, Balkendiagramm Token-Summen): [`docs/assets/readme-agent-mode-flow.svg`](../assets/readme-agent-mode-flow.svg), [`docs/assets/readme-benchmark-output-tokens.svg`](../assets/readme-benchmark-output-tokens.svg). Zahlen: Σ `output_tokens_tiktoken` über **vier** Queries auf TTRPG Studio `app/`, `llm_brief` vs. `agent_compact` full vs. **`--agent-mode`** — **N=1**, nicht als statistischer Beweis.
 
 ## CLI & Perspektiven
 
