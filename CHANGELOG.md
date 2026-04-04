@@ -8,6 +8,12 @@ The **package version** is defined in **`pyproject.toml`**. For **install paths*
 
 ---
 
+## [Unreleased]
+
+### Documentation
+
+- **Naming:** **Nexus** = inference-control product; **Nexus Code** = Python static map and today’s `nexus` / `nexus-opc` / `nexus-grep` / policy / Console surface. README, `AGENTS.md`, `docs/README.md`, Cursor rules/skills/commands, and bundled `nexus-over-grep.mdc` updated for consistent vocabulary. PyPI package name **`nexus-inference`** and Python module **`nexus`** unchanged.
+
 ## [0.1.1] — 2026-04-04
 
 Patch release: **Inference Console** reachable from the main **`nexus`** CLI for quick starts in **cmd** / PowerShell.

@@ -2,10 +2,12 @@
 
 ![Nexus on GitHub — Inference Control](docs/assets/readme-banner.png)
 
+> **Naming.** **Nexus** is the **inference-control product** (configurable inference paths — not limited to source code over time). **Nexus Code** is today’s **Python map slice** in this repository: AST + heuristics over `.py` trees, the **`nexus` / `nexus-opc` / `nexus-grep`** CLI, **`nexus-policy`**, and the **Inference Console** as a projection of that map.
+
 > **Grep with structural understanding.**  
 > **Stop reading code. Start querying structure.**
 
-Nexus is a **static, heuristic inference layer** for Python. It scans `.py` trees (AST + heuristics) and keeps an in-memory **map**: symbols, call edges, reads/writes, mutation hints, layers, and confidence. You **query** that map with bounded outputs (briefs, compact slices, optional JSON) instead of treating the repo like a flat full-text haystack.
+**Nexus Code** is a **static, heuristic inference layer** for Python. It scans `.py` trees (AST + heuristics) and keeps an in-memory **map**: symbols, call edges, reads/writes, mutation hints, layers, and confidence. You **query** that map with bounded outputs (briefs, compact slices, optional JSON) instead of treating the repo like a flat full-text haystack.
 
 | | |
 |--|--|
@@ -74,7 +76,7 @@ With **`--agent-mode`** but **`--max-symbols` 12** explicitly matched to the bri
 
 Exploratory workflows often burn context when the **model acts like a file browser** (open → read everything → guess). Line tools (`grep`, `rg`) return **text hits**, not **who calls whom** or **where state might change**.
 
-Nexus is meant for **query → bounded structural answer → targeted read** (see the **Workflow** paragraph in the opening summary above). For **limits** (AST, heuristics, no runtime truth), use **[Repo health & known limitations](#repo-health-known-limitations)**.
+**Nexus Code** is meant for **query → bounded structural answer → targeted read** (see the **Workflow** paragraph in the opening summary above). For **limits** (AST, heuristics, no runtime truth), use **[Repo health & known limitations](#repo-health-known-limitations)**.
 
 ## Quick example (PoC)
 
@@ -94,7 +96,7 @@ Deeper, still bounded:
 nexus . -q "mutation" --max-symbols 5
 ```
 
-**Defaults (query mode, `-q`):** If you omit `--max-symbols`, Nexus caps the heuristic slice at **12** symbols. The brief then adds **`NEXT_OPEN`** (up to three suggested `file:line` slices) and collapses **same simple name** duplicates into one primary block plus a compact **`SAME_NAME`** summary / `same_name_also` line — fewer tokens, less repetition. **Full maps** (`--json`) can be **huge** next to the tool or a single prompt; **slicing** is how you keep context human- and model-sized (see **[`docs/token-efficiency.md`](docs/token-efficiency.md)**).
+**Defaults (query mode, `-q`):** If you omit `--max-symbols`, Nexus Code caps the heuristic slice at **12** symbols. The brief then adds **`NEXT_OPEN`** (up to three suggested `file:line` slices) and collapses **same simple name** duplicates into one primary block plus a compact **`SAME_NAME`** summary / `same_name_also` line — fewer tokens, less repetition. **Full maps** (`--json`) can be **huge** next to the tool or a single prompt; **slicing** is how you keep context human- and model-sized (see **[`docs/token-efficiency.md`](docs/token-efficiency.md)**).
 
 **Minimal tokens, still interpretable:**
 
@@ -124,9 +126,9 @@ More narrative walkthrough: [`docs/proof-of-concept.md`](docs/proof-of-concept.m
 
 ## Efficiency: one scan, bounded prompts
 
-The expensive part for LLM workflows is **not** the local AST pass — it is **repeated full-file context** in the prompt. Nexus **amortizes** on the **CPU**: one scan builds the graph; each **follow-up** is a **cheap structural query** (new `-q`, tighter caps) instead of pasting more files. The **model’s loop** becomes *ask Nexus → interpret slice → ask again*, not *open next file → read everything*.
+The expensive part for LLM workflows is **not** the local AST pass — it is **repeated full-file context** in the prompt. Nexus Code **amortizes** on the **CPU**: one scan builds the graph; each **follow-up** is a **cheap structural query** (new `-q`, tighter caps) instead of pasting more files. The **model’s loop** becomes *ask Nexus Code → interpret slice → ask again*, not *open next file → read everything*.
 
-**Amortization nuance:** Comparing only **total** tokens with vs without Nexus **does not show what those tokens paid for**. With Nexus, one thing is **structural** for the orientation phase: the model is **not** spending that context on **search-shaped** work (huge grep walls, exploratory full-file churn) — that part runs **locally**. Totals still include reasoning, edits, and targeted reads; see **[`docs/token-efficiency.md`](docs/token-efficiency.md)** §1.1.
+**Amortization nuance:** Comparing only **total** tokens with vs without Nexus Code **does not show what those tokens paid for**. With Nexus Code, one thing is **structural** for the orientation phase: the model is **not** spending that context on **search-shaped** work (huge grep walls, exploratory full-file churn) — that part runs **locally**. Totals still include reasoning, edits, and targeted reads; see **[`docs/token-efficiency.md`](docs/token-efficiency.md)** §1.1.
 
 **Reproducible numbers** (this repo + reference legacy scans), log-style before/after, and full **amortization** discussion: **[`docs/token-efficiency.md`](docs/token-efficiency.md)**.
 
@@ -138,42 +140,42 @@ The expensive part for LLM workflows is **not** the local AST pass — it is **r
 
 ## Metrics
 
-**Measuring stick (checkout scale):** **Disk** and **`.py`** numbers cited below for **Nexus** / **TTRPG Studio** / cross-repo narrative are **tied** to **[`docs/case-study-cross-repo-orientation.md` § Measuring stick (measured sizes, 2026-04-03)](docs/case-study-cross-repo-orientation.md#measuring-stick-measured-sizes-2026-04-03)** — one canonical table; do not duplicate with ad-hoc estimates.
+**Measuring stick (checkout scale):** **Disk** and **`.py`** numbers cited below for **this Nexus repo** / **TTRPG Studio** / cross-repo narrative are **tied** to **[`docs/case-study-cross-repo-orientation.md` § Measuring stick (measured sizes, 2026-04-03)](docs/case-study-cross-repo-orientation.md#measuring-stick-measured-sizes-2026-04-03)** — one canonical table; do not duplicate with ad-hoc estimates.
 
 Real **Cursor** usage rows (Included / **auto**): **Total**, **Cache Read**, **Input**, **Output** — **not** local AST time. Use this section as a **quick index**; narrative + honesty constraints live in **[`docs/usage-metrics.md`](docs/usage-metrics.md)**.
 
 | Layer | What it shows | Headline |
 |-------|----------------|----------|
-| **Small checkout** (**Nexus** repo, **~13 MB** on disk — measured 2026-04-03) | Build-leaning sessions **with** vs **without** Nexus | Totals differ; **fresh Input** almost flat — **tiny graph**, not a stress test for orientation. |
-| **Large checkout** (**TTRPG Studio**, **~7.1 GB** on disk — measured; **N=1**) | **Same analysis-only prompt**, Nexus on vs off | **Fair** anchor for **analysis**: **~43%** lower **Total**, **~25%** lower **Input**; big **Cache Read** delta — **[details](docs/usage-metrics.md#controlled-benchmark-ttrpg-studio-same-task-with-vs-without-nexus)**. |
-| **Gallery** | **Build without Nexus** (high totals) vs **analysis with Nexus** (lower totals) | Dashboard ratios **~7×–15×** are **real** but **confound task type** with retrieval — **not** a controlled “Nexus multiplier” for analysis. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)**. |
-| **Cross-repo case study** | **Two** local Python trees compared **without opening** their source/docs in the agent — **Nexus-only** orientation | **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** + figure **[`cursor-cross-repo-orientation-110k.svg`](docs/assets/usage-metrics/cursor-cross-repo-orientation-110k.svg)** (placeholder until a PNG is committed) — **N=1**, **representation shift** vs naive ingest; **measuring stick** for disk / `.py`: **[same doc § Measuring stick](docs/case-study-cross-repo-orientation.md#measuring-stick-measured-sizes-2026-04-03)**. |
+| **Small checkout** (**Nexus** repo, **~13 MB** on disk — measured 2026-04-03) | Build-leaning sessions **with** vs **without** Nexus Code | Totals differ; **fresh Input** almost flat — **tiny graph**, not a stress test for orientation. |
+| **Large checkout** (**TTRPG Studio**, **~7.1 GB** on disk — measured; **N=1**) | **Same analysis-only prompt**, Nexus Code on vs off | **Fair** anchor for **analysis**: **~43%** lower **Total**, **~25%** lower **Input**; big **Cache Read** delta — **[details](docs/usage-metrics.md#controlled-benchmark-ttrpg-studio-same-task-with-vs-without-nexus)**. |
+| **Gallery** | **Build without Nexus Code** (high totals) vs **analysis with Nexus Code** (lower totals) | Dashboard ratios **~7×–15×** are **real** but **confound task type** with retrieval — **not** a controlled “Nexus Code multiplier” for analysis. See **[`docs/usage-metrics.md`](docs/usage-metrics.md)**. |
+| **Cross-repo case study** | **Two** local Python trees compared **without opening** their source/docs in the agent — **Nexus Code-only** orientation | **[`docs/case-study-cross-repo-orientation.md`](docs/case-study-cross-repo-orientation.md)** + figure **[`cursor-cross-repo-orientation-110k.svg`](docs/assets/usage-metrics/cursor-cross-repo-orientation-110k.svg)** (placeholder until a PNG is committed) — **N=1**, **representation shift** vs naive ingest; **measuring stick** for disk / `.py`: **[same doc § Measuring stick](docs/case-study-cross-repo-orientation.md#measuring-stick-measured-sizes-2026-04-03)**. |
 
 ### Controlled benchmark — large Python checkout (TTRPG Studio)
 
-**Same analysis-only task** wording, **with Nexus** vs **without** (one captured pair). **~314k** vs **~180k** total tokens; **Cache Read** carries most of the gap. This is the **primary** quantitative anchor in this repo for “Nexus on analysis.”
+**Same analysis-only task** wording, **with Nexus Code** vs **without** (one captured pair). **~314k** vs **~180k** total tokens; **Cache Read** carries most of the gap. This is the **primary** quantitative anchor in this repo for “Nexus Code on analysis.”
 
-| With Nexus | Without Nexus |
+| With Nexus Code | Without Nexus Code |
 |------------|----------------|
 | ![TTRPG Studio — with Nexus](docs/assets/usage-metrics/ttrpg-studio-with-nexus.svg) | ![TTRPG Studio — without Nexus](docs/assets/usage-metrics/ttrpg-studio-without-nexus.svg) |
 
-### Small checkout — Nexus analyzed with Nexus (this repository)
+### Small checkout — this repository analyzed with Nexus Code
 
-**~169k** row (example): **Cache Read** still dominates; totals stay **far below** million-token “exploration” sessions. **Fresh Input** ~**8.7k** — comparable to a **without-Nexus** build row on the same small tree (**~7.7k**), i.e. **marginal** orientation win here.
+**~169k** row (example): **Cache Read** still dominates; totals stay **far below** million-token “exploration” sessions. **Fresh Input** ~**8.7k** — comparable to a **without–Nexus Code** build row on the same small tree (**~7.7k**), i.e. **marginal** orientation win here.
 
 ![Nexus repo — session usage (self-scan example)](docs/assets/usage-metrics/nexus-self-scan.svg)
 
 ### Gallery — build vs analysis (illustrative, not apples-to-apples)
 
-**Without** Nexus: **build / implementation** sessions (high totals). **With** Nexus: **analysis-orientation** sessions (lower totals). Comparing them yields large ratios that **mix task type and tool policy** — see **[`docs/usage-metrics.md`](docs/usage-metrics.md#gallery-numbers-build-without-nexus-vs-analysis-with-nexus)**. Full images: **[`docs/assets/usage-metrics/`](docs/assets/usage-metrics/)** · **[gallery](docs/usage-metrics.md#screenshot-gallery)**.
+**Without** Nexus Code: **build / implementation** sessions (high totals). **With** Nexus Code: **analysis-orientation** sessions (lower totals). Comparing them yields large ratios that **mix task type and tool policy** — see **[`docs/usage-metrics.md`](docs/usage-metrics.md#gallery-numbers-build-without-nexus-vs-analysis-with-nexus)**. Full images: **[`docs/assets/usage-metrics/`](docs/assets/usage-metrics/)** · **[gallery](docs/usage-metrics.md#screenshot-gallery)**.
 
-| Without Nexus (example) | With Nexus (example) |
+| Without Nexus Code (example) | With Nexus Code (example) |
 |-------------------------|----------------------|
 | ![Usage metrics — without Nexus (example run)](docs/assets/usage-metrics/without-nexus-1.svg) | ![Usage metrics — with Nexus (example run)](docs/assets/usage-metrics/with-nexus-1.svg) |
 
 ## Mental model
 
-| Without Nexus        | With Nexus              |
+| Without Nexus Code   | With Nexus Code         |
 |---------------------|-------------------------|
 | Model opens files → reads text → guesses structure | **CPU** scans once → **model queries map** → gets **structural slice** → opens source **only when needed** |
 | Search → read → guess | **Query structure** → narrow region → read targeted code |
@@ -219,7 +221,7 @@ pip install -e .
 # or: pipx install -e .
 ```
 
-### Nexus Inference Console (optional GUI)
+### Nexus Code — Inference Console (optional GUI)
 
 Same inference engine as the CLI: attach a repo, run a query, inspect a **bounded slice**, **trust metadata**, **mutation trace**, and a **one-hop focus graph**; copy **minimal names**, **balanced brief**, or **slice JSON** for LLMs. The console does **not** run a second analyzer — **Copy Brief** is the same `to_llm_brief` text you would get from `nexus -q` with the same query and caps ([tutorial](docs/inference-console-tutorial.md#same-facts-for-humans-and-for-the-llm)).
 
@@ -253,14 +255,14 @@ nexus-cursor-rules install
 
 Bundled source in this repo: [`src/nexus/cursor_rules/nexus-over-grep.mdc`](src/nexus/cursor_rules/nexus-over-grep.mdc). Extra notes: [`extras/cursor-rules/README.txt`](extras/cursor-rules/README.txt).
 
-**Agent + Cursor (explanation anchor):** **[`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md)** — how the agent loop uses Nexus, what appears in the terminal, rules, and limits.
+**Agent + Cursor (explanation anchor):** **[`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md)** — how the agent loop uses **Nexus Code**, what appears in the terminal, rules, and limits.
 
 ## Repo health & known limitations
 
 - **Python:** Requires **3.10+**; tested in CI on **3.10** and **3.12** (Windows + Linux). Other 3.x versions may work but are not part of the matrix.
-- **Static analysis:** Nexus is **AST-based** and **approximate**. Dynamic patterns (`setattr`/`getattr` indirection, runtime imports, decorators, frameworks that register handlers implicitly) may be **missing**, **merged**, or **over-linked**. Treat the graph as a **navigation aid**, not a formal proof of behavior.
+- **Static analysis:** Nexus Code is **AST-based** and **approximate**. Dynamic patterns (`setattr`/`getattr` indirection, runtime imports, decorators, frameworks that register handlers implicitly) may be **missing**, **merged**, or **over-linked**. Treat the graph as a **navigation aid**, not a formal proof of behavior.
 - **Confidence & layers:** Scores and tags (e.g. mutation hints, layers) are **heuristics** to rank and filter slices. They can be **wrong** or **noisy** on edge-heavy code — **verify** on source for correctness-critical or security-sensitive paths.
-- **Query strings (`-q`):** Heuristic keyword / identifier matching, not a full NL interface inside Nexus; the **agent or human** chooses the next query. Prefer **concrete symbols** and **file-local names** over vague buzzwords (see **`AGENTS.md`** and **`docs/token-efficiency.md`**).
+- **Query strings (`-q`):** Heuristic keyword / identifier matching, not a full NL interface inside Nexus Code; the **agent or human** chooses the next query. Prefer **concrete symbols** and **file-local names** over vague buzzwords (see **`AGENTS.md`** and **`docs/token-efficiency.md`**).
 - **Scale:** Very large trees cost **I/O + parse time**; use **subpaths**, **`nexus-grep`**, **`nexus-policy`**, and **caps** before reaching for full **`--json`** exports.
 
 ## Library
@@ -302,7 +304,7 @@ Generated maps (JSON graphs, large briefings) can expose **architecture, paths, 
 
 ## Positioning
 
-Nexus is **not** a linter, type checker, or profiler. It is a **static, heuristic inference layer** optimised for **context-efficient** navigation — a form of **semantic code indexing for LLM workflows** (and for humans who want the same map). The pitch is not “another AST tool”; it is **the LLM querying structure on your machine** instead of **opening files to discover** it — **meaning-shaped slices** before bulk text.
+**Nexus Code** is **not** a linter, type checker, or profiler. It is a **static, heuristic inference layer** optimised for **context-efficient** navigation — a form of **semantic code indexing for LLM workflows** (and for humans who want the same map). The pitch is not “another AST tool”; it is **the LLM querying structure on your machine** instead of **opening files to discover** it — **meaning-shaped slices** before bulk text. The broader **Nexus** product will add **agnostic inference control** (parsers, envelopes, IO, jobs) around slices like Nexus Code.
 
 ## Tutorial
 

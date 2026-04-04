@@ -1,6 +1,6 @@
-# AGENTS.md — Nexus for Cursor agents
+# AGENTS.md — Nexus (Nexus Code for Python)
 
-Use this file as the **reference** when working in **any Python repo** and you need to **use or set up Nexus** (structural map instead of blind grep).
+Use this file as the **reference** when working in **any Python repo** and you need to **use or set up Nexus Code** — the **Python map** CLI (`nexus`, `nexus-opc`, `nexus-grep`, …): structural retrieval instead of blind grep. **Nexus** is the **product**; **Nexus Code** is that **code-oriented slice**.
 
 **Cursor-specific explanation anchor** (agent loop, terminal, rules): **[`docs/nexus-agent-cursor.md`](docs/nexus-agent-cursor.md)** in the Nexus repo.
 
@@ -12,16 +12,16 @@ Use this file as the **reference** when working in **any Python repo** and you n
 
 ## Working in the Nexus checkout (this repository)
 
-When the open project **is** the Nexus source tree, agents should treat **inference as the default retriever** — not a pile of blind `read_file` calls. This matches the enforced Cursor rule **`.cursor/rules/nexus-checkout-cli-default.mdc`**.
+When the open project **is** the Nexus source tree, agents should treat **Nexus Code** (inference map) as the **default retriever** — not a pile of blind `read_file` calls. This matches the enforced Cursor rule **`.cursor/rules/nexus-checkout-cli-default.mdc`**.
 
-1. **Orient on `src/nexus` with Nexus (ISA first):** For *where does X live?* / *how is Y wired?*, prefer **`python -m nexus.cli_opc locate -q "<topic or identifier>" src/nexus`** from the repo root (or **`nexus-opc locate …`** on `PATH`; set `PYTHONPATH=<checkout>/src` if the package is not installed). Use **`python -m nexus.cli_opc --dry-run locate …`** to print the resolved **`argv`**. **Fallback** when you need flags/opcodes the ISA does not wrap, or `cli_opc` is unavailable: **`python -m nexus src/nexus --agent-mode -q "…"`**, **`python -m nexus.cli_grep src/nexus -q "…" --max-symbols 20`**, or **`python -m nexus.cli_policy …`** — see **`.cursor/rules/nexus-checkout-cli-default.mdc`** and **`docs/cli-perspective.md`**. Then **`read_file`** only at paths (and slices) Nexus returns — do not open `pyproject.toml`, `cli.py`, and random modules “just to be sure” first.
-2. **Skip Nexus when already precise:** If the path, symbol, or line is explicit, read or edit directly.
+1. **Orient on `src/nexus` with Nexus Code (ISA first):** For *where does X live?* / *how is Y wired?*, prefer **`python -m nexus.cli_opc locate -q "<topic or identifier>" src/nexus`** from the repo root (or **`nexus-opc locate …`** on `PATH`; set `PYTHONPATH=<checkout>/src` if the package is not installed). Use **`python -m nexus.cli_opc --dry-run locate …`** to print the resolved **`argv`**. **Fallback** when you need flags/opcodes the ISA does not wrap, or `cli_opc` is unavailable: **`python -m nexus src/nexus --agent-mode -q "…"`**, **`python -m nexus.cli_grep src/nexus -q "…" --max-symbols 20`**, or **`python -m nexus.cli_policy …`** — see **`.cursor/rules/nexus-checkout-cli-default.mdc`** and **`docs/cli-perspective.md`**. Then **`read_file`** only at paths (and slices) Nexus Code returns — do not open `pyproject.toml`, `cli.py`, and random modules “just to be sure” first.
+2. **Skip Nexus Code when already precise:** If the path, symbol, or line is explicit, read or edit directly.
 3. **Trivial shell tasks:** e.g. start the Inference Console (**`python -m nexus.ui`** or **`nexus-console`**), run **`extras/nexus_benchmark.py`** — execute immediately; no pre-reading source unless the command fails and you need the error message’s hint.
 4. **Opcode reference (Cursor checkout):** Full walkthrough **[`docs/tutorial-nexus-opc-isa.md`](docs/tutorial-nexus-opc-isa.md)**; skill **`.cursor/skills/nexus-opc-isa/SKILL.md`**; slash helpers **`/nx`** (Retriever-Reminder), **`/nx-map`**, **`/nx-locate`**, … in **`.cursor/commands/`**. Opcodes: `map`, `locate`, `explain`, `focus`, `grep`, `policy`, `bench`, `compare`, `catalog`, **`stats`**. Optional **run log + ROI:** `--opc-log-append` / `NEXUS_OPC_LOG_APPEND`, `--opc-roi-score`, **`--opc-run-id`**; aggregate with **`nexus-opc stats <file.jsonl>`**. Machine-readable list: **`python -m nexus.cli_opc catalog --json`**.
 
 ## Other repos: one-time setup per project
 
-1. **Install Nexus** (usable everywhere):  
+1. **Install Nexus** (package **`nexus-inference`**; Nexus Code CLI on `PATH`):  
    **From GitHub (no clone):** `python -m pip install "nexus-inference @ git+https://github.com/MechanicalDeus/Mechanicals-Nexus---Inference-Control.git"` (or `pipx install "…"` with the same URL).  
    **From PyPI:** `pip install nexus-inference` when published.  
    **From a clone:** `pip install -e <path-to-nexus-clone>` or `pipx install -e …`.  
@@ -36,9 +36,9 @@ When the open project **is** the Nexus source tree, agents should treat **infere
 
 ## Design: token efficiency and grep
 
-**Goal:** Agents should not drag half a repo into context via broad `rg` first. **Nexus** structures search; **`nexus-grep`** is the **default tier** (thin output). **Grep** still makes sense **after** narrowing or for non-Python — see the decision layer and **decision engine** in the `.mdc` (default: tight `nexus-grep` → read slice → STOP). Use **`nexus --json`** and long **`nexus -q`** briefs only when needed (export, chains, impact).
+**Goal:** Agents should not drag half a repo into context via broad `rg` first. **Nexus Code** structures search; **`nexus-grep`** is the **default tier** (thin output). **Grep** still makes sense **after** narrowing or for non-Python — see the decision layer and **decision engine** in the `.mdc` (default: tight `nexus-grep` → read slice → STOP). Use **`nexus --json`** and long **`nexus -q`** briefs only when needed (export, chains, impact).
 
-## 1. Default usage (when Nexus is available)
+## 1. Default usage (when Nexus Code is available)
 
 From the **target repo root** (or `src/<package>`):
 
@@ -56,7 +56,7 @@ nexus-grep . -q "mutation" --max-symbols 25
 nexus . --json > ./exports/graph.json
 ```
 
-**Slice behaviour (plain `-q`, not special modes):** default **`--max-symbols` is 12** if omitted. The textual brief adds **`NEXT_OPEN`** hints and folds **duplicate simple names** in the slice into one primary symbol plus compact **`SAME_NAME`** / `same_name_also` hints — see **`docs/token-efficiency.md`**. Real Cursor session screenshots (totals with vs without Nexus): **`docs/usage-metrics.md`**.
+**Slice behaviour (plain `-q`, not special modes):** default **`--max-symbols` is 12** if omitted. The textual brief adds **`NEXT_OPEN`** hints and folds **duplicate simple names** in the slice into one primary symbol plus compact **`SAME_NAME`** / `same_name_also` hints — see **`docs/token-efficiency.md`**. Real Cursor session screenshots (totals with vs without Nexus Code): **`docs/usage-metrics.md`**.
 
 ### 1.1 Canonical CLI perspectives (same language as UI / library)
 
@@ -72,7 +72,7 @@ Reference table and examples: **`docs/cli-perspective.md`**.
 
 ### Control header (recommended for agents)
 
-To make the agent aware of how Nexus is currently configured, you can ask Nexus to
+To make the agent aware of how Nexus Code is currently configured, you can ask Nexus Code to
 print a small **control header** before the actual answer:
 
 - `--control-header` prints a bounded `[NEXUS_CONFIG] … [/NEXUS_CONFIG]` block to **stderr**
@@ -106,7 +106,7 @@ $env:NEXUS_CONTROL_HEADER = "1"
 python -m nexus . "-q" "core system flow" "--max-symbols" "20"
 ```
 
-## 2. Checklist: Nexus in a **new** repo
+## 2. Checklist: Nexus Code in a **new** repo
 
 1. **Check:** Does `nexus` or `python -m nexus --help` work (with `PYTHONPATH` on Nexus `src`)?
 2. **If not — install once** (recommended):  
@@ -129,7 +129,7 @@ $env:PYTHONPATH = "$env:NEXUS_HOME\src"
 python -m nexus . "-q" "flow" "--names-only" "--max-symbols" "40"
 ```
 
-## 4. When **not** to use Nexus
+## 4. When **not** to use Nexus Code
 
 - Not Python, pure string search in config/logs → `grep` / editor search is fine.
 - Very small file, known location → open the file directly.

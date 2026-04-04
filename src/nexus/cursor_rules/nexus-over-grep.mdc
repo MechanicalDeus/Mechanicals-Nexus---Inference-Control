@@ -1,19 +1,21 @@
 ---
-description: Python with Nexus instead of broad grep; token-efficient agent exploration; rule from nexus-inference (nexus-cursor-rules install)
+description: Python with Nexus Code instead of broad grep; token-efficient agent exploration; rule from nexus-inference (nexus-cursor-rules install)
 alwaysApply: true
 ---
 
-# Nexus instead of broad grep (Python)
+# Nexus Code instead of broad grep (Python)
+
+**Nexus** = inference-control product. **Nexus Code** = this Python map + `nexus` / `nexus-opc` / `nexus-grep` workflow.
 
 ## Design goal (short)
 
-In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) as a first step is **token-expensive** and tends to produce low-signal raw hit lines. **Nexus** builds the map and exposes a **query interface**.
+In **large Python repos**, **blind text search** (`grep`/`rg`/Select-String) as a first step is **token-expensive** and tends to produce low-signal raw hit lines. **Nexus Code** builds the map and exposes a **query interface**.
 
-**Rule:** The agent should **not search by itself**. It should send questions to Nexus and let Nexus return **where to read**.
+**Rule:** The agent should **not search by itself**. It should send questions to Nexus Code and let Nexus Code return **where to read**.
 
 **Security / freshness:** default to **fresh rebuild** per query (no persistent cache). If a cached mode exists, it must be an explicit opt-in and treated as **security-sensitive**.
 
-**Control header (recommended):** enable control headers so the agent always sees the active Nexus policy before the answer:
+**Control header (recommended):** enable control headers so the agent always sees the active Nexus Code policy before the answer:
 - CLI: `--control-header`
 - Env: `NEXUS_CONTROL_HEADER=1`
 
@@ -95,19 +97,19 @@ Note: the implementation may use additional internal helpers, but the agent-faci
 |-----------|----------------|
 | Vague question, unknown location | **`nexus-opc locate -q "…"`** (if available) or **`nexus --agent-mode -q "…"`** or **`nexus-grep`** with a focused query; keep caps small |
 | After first hit list: “where exactly?” | Second **`nexus-grep`** with extracted identifiers **or** **`read_file`** at `file:line` |
-| Function/class/file already known | **`read_file`** (slice), no Nexus needed |
+| Function/class/file already known | **`read_file`** (slice), no Nexus Code needed |
 | Mutation paths, impact, “why does X change …?” | **`nexus -q "…"`** with **`--max-symbols` capped** |
 | Full dependency graph / export | **`nexus --json`** only when necessary |
 
 ### Decision engine (fixed priority)
 
-**From benchmarks / smoke runs:** **Token load** scales mainly with **query quality × pipeline discipline** — not “Nexus vs. grep” alone. **Nexus is not automatic savings;** an **uncontrolled** stack of Nexus calls can cost **more** than **tight grep** with good unique patterns.
+**From benchmarks / smoke runs:** **Token load** scales mainly with **query quality × pipeline discipline** — not “Nexus Code vs. grep” alone. **Nexus Code is not automatic savings;** an **uncontrolled** stack of Nexus Code calls can cost **more** than **tight grep** with good unique patterns.
 
 **Default (sweet spot):**
 
 1. **`nexus-opc locate`** (or **`nexus --agent-mode`**) or **`nexus-opc grep`** / **`nexus-grep`** on a **sensible subtree**, **tight** `-q` with **concrete identifiers**; keep **`--max-symbols`** low when not using **`--agent-mode`** defaults.
 2. **`read_file`** only as a **slice** at locations from step 1.
-3. **STOP** — no further Nexus steps while the question is answered or the next step is clear.
+3. **STOP** — no further Nexus Code steps while the question is answered or the next step is clear.
 
 **Escalation (with brief rationale in head / log):**
 
@@ -122,7 +124,7 @@ Note: the implementation may use additional internal helpers, but the agent-faci
 
 **Explicitly avoid:**
 
-- “Full Nexus” by habit (chain of many `-q` / impact / names-only **without** a new hypothesis).
+- “Full Nexus Code” by habit (chain of many `-q` / impact / names-only **without** a new hypothesis).
 - Pure **keyword soup** (`handler process thing`) **without** refinement using **identifiers**.
 - Question targets **tests** → **`nexus-grep tests/ …`**, not the same broad query over **app + tests**.
 
@@ -164,7 +166,7 @@ Use `nexus-grep` (or `python -m nexus.cli_grep`) for wrapped search; avoid raw `
 
 ---
 
-## New Python repo: set up Nexus for the agent
+## New Python repo: set up Nexus Code for the agent
 
 If `nexus` is **not** found in the terminal:
 

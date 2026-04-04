@@ -1,5 +1,7 @@
 # Nexus — documentation index
 
+**Nexus** = inference-control product. **Nexus Code** = Python map + `nexus` / `nexus-opc` / `nexus-grep` CLI and Console projection (most docs here today).
+
 Short **map** of `docs/`: audience, purpose, link. **Maintainers:** add new topical pages here instead of duplicating the README story. Entry points from the repo root: **[`../README.md`](../README.md)** · **[`../TUTORIAL.md`](../TUTORIAL.md)** · **[`../AGENTS.md`](../AGENTS.md)**.
 
 ## Getting started & learning paths

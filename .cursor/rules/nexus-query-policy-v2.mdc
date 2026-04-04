@@ -5,7 +5,9 @@ alwaysApply: true
 
 ## Nexus Query Policy v2 (kanonisch)
 
-**Produktziel:** Nexus soll **inference-safe retrieval** liefern: nicht nur bessere Treffer, sondern aktiv verhindern, dass man in Trefferlisten-/Output-Hölle gerät.
+**Nexus Code** (`nexus-policy`): sichere Standard-Abfrage über die Python-Map.
+
+**Produktziel:** Nexus Code soll **inference-safe retrieval** liefern: nicht nur bessere Treffer, sondern aktiv verhindern, dass man in Trefferlisten-/Output-Hölle gerät.
 
 ### Default-Verhalten (Stage 1)
 
